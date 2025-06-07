@@ -49,6 +49,7 @@
             min-height: 100vh;
             line-height: 1.6;
             transition: all 0.3s ease;
+            overflow-x: hidden;
         }
         
         .container {
@@ -255,6 +256,70 @@
             min-width: auto;
         }
 
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+        
+        .message {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            font-weight: 500;
+        }
+        
+        .message.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: var(--success-color);
+        }
+        
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error-color);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            backdrop-filter: blur(20px);
+            z-index: 10000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--error-color);
+        }
+
+        /* Styles for main app - only shown when logged in */
         .user-menu {
             position: absolute;
             top: 20px;
@@ -306,327 +371,6 @@
             font-size: 0.8rem;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 24px 0;
-        }
-        
-        .stat-card {
-            background: var(--glass-bg);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-        }
-        
-        .stat-card .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin-bottom: 8px;
-        }
-        
-        .stat-card .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 4px;
-            background: var(--glass-bg);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 24px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px 20px;
-            background: transparent;
-            border: none;
-            border-radius: 8px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .tab.active {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .search-container {
-            position: relative;
-        }
-
-        .search-suggestions {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            backdrop-filter: blur(20px);
-            z-index: 1000;
-            max-height: 200px;
-            overflow-y: auto;
-            display: none;
-        }
-
-        .suggestion-item {
-            padding: 12px 16px;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-        }
-
-        .suggestion-item:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .player-card {
-            background: var(--glass-bg);
-            border-radius: 16px;
-            padding: 24px;
-            margin: 16px 0;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-        }
-        
-        .player-card:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
-        }
-        
-        .player-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        
-        .player-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            background-size: cover;
-            background-position: center;
-        }
-        
-        .player-details h3 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-        
-        .player-id {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .player-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .rating-categories {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin: 24px 0;
-        }
-
-        .rating-category {
-            background: var(--glass-bg);
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .category-label {
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .stars {
-            font-size: 1.5rem;
-            display: flex;
-            gap: 4px;
-            justify-content: center;
-        }
-        
-        .star {
-            color: #374151;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .star.active,
-        .star:hover {
-            color: #fbbf24;
-            transform: scale(1.1);
-        }
-
-        .overall-rating {
-            text-align: center;
-            margin: 24px 0;
-        }
-
-        .overall-rating .stars {
-            font-size: 2.5rem;
-            gap: 8px;
-        }
-
-        .textarea {
-            width: 100%;
-            min-height: 120px;
-            padding: 16px 20px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            background: var(--glass-bg);
-            color: var(--text-primary);
-            font-size: 16px;
-            font-family: inherit;
-            resize: vertical;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-        
-        .textarea:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-
-        .character-count {
-            text-align: right;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .character-count.warning {
-            color: var(--warning-color);
-        }
-
-        .character-count.error {
-            color: var(--error-color);
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .hidden {
-            display: none;
-        }
-        
-        .message {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin: 16px 0;
-            font-weight: 500;
-        }
-        
-        .message.success {
-            background: rgba(34, 197, 94, 0.1);
-            border: 1px solid rgba(34, 197, 94, 0.3);
-            color: var(--success-color);
-        }
-        
-        .message.error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--error-color);
-        }
-
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 16px 20px;
-            backdrop-filter: blur(20px);
-            z-index: 10000;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.success {
-            border-left: 4px solid var(--success-color);
-        }
-
-        .toast.error {
-            border-left: 4px solid var(--error-color);
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 12px;
@@ -646,14 +390,6 @@
                 top: auto;
                 right: auto;
                 margin-bottom: 20px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .rating-categories {
-                grid-template-columns: 1fr;
             }
         }
         
@@ -685,7 +421,7 @@
             <p>Rate other players and share your gaming experiences with the community</p>
         </div>
 
-        <!-- User Menu -->
+        <!-- User Menu (only shown when logged in) -->
         <div id="user-menu" class="user-menu hidden">
             <div class="user-info">
                 <div id="user-avatar" class="user-avatar"></div>
@@ -745,137 +481,9 @@
             <div id="auth-message"></div>
         </div>
 
-        <!-- Main Application -->
+        <!-- Main Application (completely separate, only loaded after login) -->
         <div id="main-app" class="hidden">
-            <!-- Dashboard -->
-            <div class="card">
-                <h2>📊 Community Dashboard</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="total-reviews">0</div>
-                        <div class="stat-label">Total Reviews</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="verified-users">1</div>
-                        <div class="stat-label">Verified Users</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="avg-rating">4.2</div>
-                        <div class="stat-label">Avg Rating</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="top-players">0</div>
-                        <div class="stat-label">Top Players</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Search and Reviews -->
-            <div class="card">
-                <div class="tabs">
-                    <button class="tab active" onclick="switchTab('search')">🔍 Search Players</button>
-                    <button class="tab" onclick="switchTab('recent')">💬 Recent Reviews</button>
-                </div>
-
-                <!-- Search Tab -->
-                <div id="search-tab" class="tab-content active">
-                    <div class="form-group">
-                        <label for="search-player">Steam ID or Player Name</label>
-                        <div class="search-container">
-                            <input type="text" id="search-player" class="form-input" 
-                                   placeholder="Enter player name or Steam ID"
-                                   oninput="handleSearchInput()">
-                            <div id="search-suggestions" class="search-suggestions"></div>
-                        </div>
-                    </div>
-                    <button class="btn" onclick="searchPlayer()">
-                        <span id="search-loading" class="hidden">
-                            <span class="loading-spinner"></span> Searching...
-                        </span>
-                        <span id="search-text">Search Player</span>
-                    </button>
-                    <div id="search-results"></div>
-                </div>
-
-                <!-- Recent Reviews Tab -->
-                <div id="recent-tab" class="tab-content">
-                    <h3>💬 Recent Community Reviews</h3>
-                    <div id="reviews-list">
-                        <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">
-                            No reviews yet. Be the first to rate a player!
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rating Section -->
-            <div id="rating-section" class="card hidden">
-                <h2>⭐ Rate Player</h2>
-                <div id="player-info"></div>
-                
-                <div class="form-group">
-                    <label>Overall Rating</label>
-                    <div class="overall-rating">
-                        <div class="stars" data-category="overall">
-                            <span class="star" data-rating="1">⭐</span>
-                            <span class="star" data-rating="2">⭐</span>
-                            <span class="star" data-rating="3">⭐</span>
-                            <span class="star" data-rating="4">⭐</span>
-                            <span class="star" data-rating="5">⭐</span>
-                        </div>
-                        <p style="color: var(--text-muted); font-size: 0.9rem;">Rate your overall experience</p>
-                    </div>
-                </div>
-
-                <div class="rating-categories">
-                    <div class="rating-category">
-                        <div class="category-label">🤝 Teamwork</div>
-                        <div class="stars" data-category="teamwork">
-                            <span class="star" data-rating="1">⭐</span>
-                            <span class="star" data-rating="2">⭐</span>
-                            <span class="star" data-rating="3">⭐</span>
-                            <span class="star" data-rating="4">⭐</span>
-                            <span class="star" data-rating="5">⭐</span>
-                        </div>
-                    </div>
-                    <div class="rating-category">
-                        <div class="category-label">💬 Communication</div>
-                        <div class="stars" data-category="communication">
-                            <span class="star" data-rating="1">⭐</span>
-                            <span class="star" data-rating="2">⭐</span>
-                            <span class="star" data-rating="3">⭐</span>
-                            <span class="star" data-rating="4">⭐</span>
-                            <span class="star" data-rating="5">⭐</span>
-                        </div>
-                    </div>
-                    <div class="rating-category">
-                        <div class="category-label">😊 Behavior</div>
-                        <div class="stars" data-category="behavior">
-                            <span class="star" data-rating="1">⭐</span>
-                            <span class="star" data-rating="2">⭐</span>
-                            <span class="star" data-rating="3">⭐</span>
-                            <span class="star" data-rating="4">⭐</span>
-                            <span class="star" data-rating="5">⭐</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="comment">Your Experience</label>
-                    <textarea id="comment" class="textarea" maxlength="500" 
-                              placeholder="Share your experience playing with this player. Be constructive and respectful!"
-                              oninput="updateCharacterCount()"></textarea>
-                    <div id="character-count" class="character-count">0 / 500 characters</div>
-                </div>
-                
-                <button class="btn" onclick="submitRating()">
-                    <span id="submit-loading" class="hidden">
-                        <span class="loading-spinner"></span> Submitting...
-                    </span>
-                    <span id="submit-text">Submit Rating</span>
-                </button>
-                <div id="rating-message"></div>
-            </div>
+            <!-- This will be populated dynamically after successful login -->
         </div>
     </div>
 
@@ -906,16 +514,6 @@
 
         // Global Variables
         let currentUser = null;
-        let selectedRatings = {
-            overall: 0,
-            skill: 0,
-            teamwork: 0,
-            communication: 0,
-            behavior: 0
-        };
-        let selectedPlayer = null;
-        let searchTimeout = null;
-        let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
 
         // Auth Providers
         const googleProvider = new GoogleAuthProvider();
@@ -1032,67 +630,59 @@
             }
         };
 
-        // Tab Switching
-        window.switchTab = function(tabName) {
-            // Update tab buttons
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-            
-            // Load content for specific tabs
-            if (tabName === 'recent') {
-                loadAllReviews();
-            }
-        };
+        // Load Main App Content After Login
+        function loadMainAppContent() {
+            const mainAppHTML = `
+                <!-- Dashboard -->
+                <div class="card">
+                    <h2>📊 Community Dashboard</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 24px 0;">
+                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color);">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="total-reviews">0</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Reviews</div>
+                        </div>
+                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color);">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="verified-users">1</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Verified Users</div>
+                        </div>
+                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color);">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="avg-rating">4.2</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Avg Rating</div>
+                        </div>
+                    </div>
+                </div>
 
-        // Enhanced Search with Autocomplete
-        window.handleSearchInput = function() {
-            const query = document.getElementById('search-player').value.trim();
-            
-            if (searchTimeout) {
-                clearTimeout(searchTimeout);
-            }
-            
-            if (query.length > 2) {
-                searchTimeout = setTimeout(() => {
-                    showSearchSuggestions(query);
-                }, 300);
-            } else {
-                hideSearchSuggestions();
-            }
-        };
+                <!-- Search -->
+                <div class="card">
+                    <h2>🔍 Search Players</h2>
+                    <div class="form-group">
+                        <label for="search-player">Steam ID or Player Name</label>
+                        <input type="text" id="search-player" class="form-input" placeholder="Enter player name or Steam ID">
+                    </div>
+                    <button class="btn" onclick="searchPlayer()">
+                        <span id="search-loading" class="hidden">
+                            <span class="loading-spinner"></span> Searching...
+                        </span>
+                        <span id="search-text">Search Player</span>
+                    </button>
+                    <div id="search-results"></div>
+                </div>
 
-        function showSearchSuggestions(query) {
-            const suggestions = recentSearches.filter(search => 
-                search.toLowerCase().includes(query.toLowerCase())
-            ).slice(0, 5);
-            
-            const suggestionsContainer = document.getElementById('search-suggestions');
-            
-            if (suggestions.length > 0) {
-                suggestionsContainer.innerHTML = suggestions.map(suggestion => 
-                    `<div class="suggestion-item" onclick="selectSuggestion('${suggestion}')">${suggestion}</div>`
-                ).join('');
-                suggestionsContainer.style.display = 'block';
-            } else {
-                hideSearchSuggestions();
-            }
+                <!-- Reviews -->
+                <div class="card">
+                    <h2>💬 Recent Community Reviews</h2>
+                    <div id="reviews-list">
+                        <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">
+                            No reviews yet. Be the first to rate a player!
+                        </p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('main-app').innerHTML = mainAppHTML;
         }
 
-        function hideSearchSuggestions() {
-            document.getElementById('search-suggestions').style.display = 'none';
-        }
-
-        window.selectSuggestion = function(suggestion) {
-            document.getElementById('search-player').value = suggestion;
-            hideSearchSuggestions();
-            searchPlayer();
-        };
-
-        // Enhanced Player Search
+        // Simple Player Search
         window.searchPlayer = function() {
             const searchTerm = document.getElementById('search-player').value.trim();
             
@@ -1101,198 +691,108 @@
                 return;
             }
 
-            // Add to recent searches
-            if (!recentSearches.includes(searchTerm)) {
-                recentSearches.unshift(searchTerm);
-                recentSearches = recentSearches.slice(0, 10);
-                localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
-            }
-
             setLoadingState('search', true);
-            hideSearchSuggestions();
 
             setTimeout(() => {
-                const mockPlayer = generateMockPlayer(searchTerm);
-                displayPlayerResults(mockPlayer);
-                setLoadingState('search', false);
-            }, 1500);
-        };
+                const mockPlayer = {
+                    id: 'steam_' + Math.random().toString(36).substr(2, 9),
+                    name: searchTerm,
+                    steamId: Math.floor(Math.random() * 1000000000),
+                    gamesPlayed: Math.floor(Math.random() * 1000) + 100,
+                    winRate: (Math.random() * 30 + 50).toFixed(1)
+                };
 
-        function generateMockPlayer(searchTerm) {
-            const heroes = ['Pudge', 'Invoker', 'Anti-Mage', 'Crystal Maiden', 'Drow Ranger'];
-            const ranks = ['Herald', 'Guardian', 'Crusader', 'Archon', 'Legend', 'Ancient', 'Divine'];
-            
-            return {
-                id: 'steam_' + Math.random().toString(36).substr(2, 9),
-                name: searchTerm,
-                avatar: '🎮',
-                steamId: Math.floor(Math.random() * 1000000000),
-                lastSeen: Math.random() > 0.5 ? 'Online' : `${Math.floor(Math.random() * 24)} hours ago`,
-                gamesPlayed: Math.floor(Math.random() * 1000) + 100,
-                winRate: (Math.random() * 30 + 50).toFixed(1),
-                favoriteHero: heroes[Math.floor(Math.random() * heroes.length)],
-                rank: ranks[Math.floor(Math.random() * ranks.length)],
-                commendations: Math.floor(Math.random() * 500) + 50,
-                avgRating: (Math.random() * 2 + 3).toFixed(1)
-            };
-        }
-
-        function displayPlayerResults(player) {
-            document.getElementById('search-results').innerHTML = `
-                <div class="player-card">
-                    <div class="player-info">
-                        <div class="player-avatar">${player.avatar}</div>
-                        <div class="player-details">
-                            <h3>${player.name}</h3>
-                            <div class="player-id">Steam ID: ${player.steamId}</div>
-                            <div style="color: var(--success-color); font-size: 0.9rem; margin-top: 4px;">
-                                ${player.lastSeen} • ${player.rank} • ⭐ ${player.avgRating}
+                document.getElementById('search-results').innerHTML = `
+                    <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
+                        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                            <div style="width: 60px; height: 60px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🎮</div>
+                            <div>
+                                <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${mockPlayer.name}</h3>
+                                <div style="color: var(--text-secondary); font-size: 0.9rem;">Steam ID: ${mockPlayer.steamId}</div>
+                                <div style="color: var(--success-color); font-size: 0.9rem; margin-top: 4px;">
+                                    ${mockPlayer.gamesPlayed} games • ${mockPlayer.winRate}% win rate
+                                </div>
                             </div>
                         </div>
+                        <button class="btn" onclick="showRatingForm('${mockPlayer.id}', '${mockPlayer.name}')">
+                            Rate This Player
+                        </button>
                     </div>
-                    <div class="player-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">${player.gamesPlayed}</div>
-                            <div class="stat-label">Games</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${player.winRate}%</div>
-                            <div class="stat-label">Win Rate</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${player.commendations}</div>
-                            <div class="stat-label">Commends</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${player.favoriteHero}</div>
-                            <div class="stat-label">Main Hero</div>
-                        </div>
-                    </div>
-                    <button class="btn" onclick="selectPlayer('${player.id}', '${player.name}', '${player.avatar}')">
-                        Rate This Player
-                    </button>
-                </div>
-            `;
-        }
-
-        // Enhanced Player Selection
-        window.selectPlayer = function(playerId, playerName, playerAvatar = '🎮') {
-            selectedPlayer = { id: playerId, name: playerName, avatar: playerAvatar };
-            
-            document.getElementById('player-info').innerHTML = `
-                <div class="player-card" style="margin-bottom: 24px;">
-                    <div class="player-info">
-                        <div class="player-avatar">${playerAvatar}</div>
-                        <div class="player-details">
-                            <h3>Rating: ${playerName}</h3>
-                            <div class="player-id">Share your detailed gaming experience</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Reset all ratings
-            selectedRatings = {
-                overall: 0,
-                skill: 0,
-                teamwork: 0,
-                communication: 0,
-                behavior: 0
-            };
-            updateAllStars();
-            
-            document.getElementById('rating-section').classList.remove('hidden');
-            document.getElementById('rating-section').scrollIntoView({ behavior: 'smooth' });
-            loadPlayerReviews(playerId);
+                `;
+                setLoadingState('search', false);
+            }, 1000);
         };
 
-        // Enhanced Rating System
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.stars').forEach(starsContainer => {
-                const category = starsContainer.dataset.category;
-                const stars = starsContainer.querySelectorAll('.star');
-                
-                stars.forEach(star => {
-                    star.addEventListener('click', function() {
-                        const rating = parseInt(this.dataset.rating);
-                        selectedRatings[category] = rating;
-                        updateStars(starsContainer, rating);
-                        
-                        if (category !== 'overall') {
-                            calculateOverallRating();
-                        }
-                    });
+        // Show Rating Form
+        window.showRatingForm = function(playerId, playerName) {
+            const ratingFormHTML = `
+                <div class="card">
+                    <h2>⭐ Rate Player: ${playerName}</h2>
                     
-                    star.addEventListener('mouseover', function() {
-                        const rating = parseInt(this.dataset.rating);
-                        highlightStars(starsContainer, rating);
-                    });
-                });
-                
-                starsContainer.addEventListener('mouseleave', function() {
-                    updateStars(starsContainer, selectedRatings[category]);
-                });
-            });
-        });
+                    <div class="form-group">
+                        <label>Your Rating</label>
+                        <div style="text-align: center; margin: 20px 0;">
+                            <div style="font-size: 2.5rem; display: flex; gap: 8px; justify-content: center;">
+                                <span style="color: #374151; cursor: pointer; transition: all 0.2s ease;" onclick="setRating(1)" id="star-1">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.2s ease;" onclick="setRating(2)" id="star-2">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.2s ease;" onclick="setRating(3)" id="star-3">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.2s ease;" onclick="setRating(4)" id="star-4">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.2s ease;" onclick="setRating(5)" id="star-5">⭐</span>
+                            </div>
+                            <p style="color: var(--text-muted); font-size: 0.9rem;">Click to rate this player</p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="comment">Your Experience</label>
+                        <textarea id="comment" style="width: 100%; min-height: 120px; padding: 16px 20px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--glass-bg); color: var(--text-primary); font-size: 16px; font-family: inherit; resize: vertical; transition: all 0.3s ease; outline: none;" 
+                                  placeholder="Share your experience playing with this player. Be constructive and respectful!"></textarea>
+                    </div>
+                    
+                    <button class="btn" onclick="submitRating('${playerId}', '${playerName}')">
+                        <span id="submit-loading" class="hidden">
+                            <span class="loading-spinner"></span> Submitting...
+                        </span>
+                        <span id="submit-text">Submit Rating</span>
+                    </button>
+                    <div id="rating-message"></div>
+                </div>
+            `;
 
-        function highlightStars(container, rating) {
-            const stars = container.querySelectorAll('.star');
-            stars.forEach((star, index) => {
-                if (index < rating) {
-                    star.classList.add('active');
+            // Insert rating form after search results
+            const searchCard = document.getElementById('search-results').closest('.card');
+            searchCard.insertAdjacentHTML('afterend', ratingFormHTML);
+            
+            // Scroll to rating form
+            document.querySelector('[data-rating-form]')?.scrollIntoView({ behavior: 'smooth' });
+            
+            // Add data attribute to identify rating form
+            searchCard.nextElementSibling.setAttribute('data-rating-form', 'true');
+        };
+
+        // Rating System
+        let selectedRating = 0;
+
+        window.setRating = function(rating) {
+            selectedRating = rating;
+            
+            // Update star display
+            for (let i = 1; i <= 5; i++) {
+                const star = document.getElementById(`star-${i}`);
+                if (i <= rating) {
+                    star.style.color = '#fbbf24';
+                    star.style.transform = 'scale(1.1)';
                 } else {
-                    star.classList.remove('active');
+                    star.style.color = '#374151';
+                    star.style.transform = 'scale(1)';
                 }
-            });
-        }
-
-        function updateStars(container, rating) {
-            highlightStars(container, rating);
-        }
-
-        function updateAllStars() {
-            document.querySelectorAll('.stars').forEach(container => {
-                const category = container.dataset.category;
-                updateStars(container, selectedRatings[category]);
-            });
-        }
-
-        function calculateOverallRating() {
-            const categories = ['skill', 'teamwork', 'communication', 'behavior'];
-            const ratedCategories = categories.filter(cat => selectedRatings[cat] > 0);
-            
-            if (ratedCategories.length > 0) {
-                const sum = ratedCategories.reduce((total, cat) => total + selectedRatings[cat], 0);
-                const average = Math.round(sum / ratedCategories.length);
-                
-                selectedRatings.overall = average;
-                const overallContainer = document.querySelector('.stars[data-category="overall"]');
-                updateStars(overallContainer, average);
-            }
-        }
-
-        // Character Count
-        window.updateCharacterCount = function() {
-            const textarea = document.getElementById('comment');
-            const countElement = document.getElementById('character-count');
-            const currentLength = textarea.value.length;
-            const maxLength = 500;
-            
-            countElement.textContent = `${currentLength} / ${maxLength} characters`;
-            
-            if (currentLength > maxLength * 0.9) {
-                countElement.className = 'character-count error';
-            } else if (currentLength > maxLength * 0.7) {
-                countElement.className = 'character-count warning';
-            } else {
-                countElement.className = 'character-count';
             }
         };
 
-        // Enhanced Submit Rating
-        window.submitRating = async function() {
-            if (!selectedPlayer || selectedRatings.overall === 0) {
-                showToast('Please select an overall rating!', 'error');
+        // Submit Rating
+        window.submitRating = async function(playerId, playerName) {
+            if (selectedRating === 0) {
+                showToast('Please select a star rating!', 'error');
                 return;
             }
 
@@ -1303,24 +803,17 @@
                 return;
             }
 
-            if (comment.length < 10) {
-                showToast('Please write a more detailed comment (at least 10 characters)', 'error');
-                return;
-            }
-
             setLoadingState('submit', true);
 
             try {
                 const reviewData = {
-                    playerId: selectedPlayer.id,
-                    playerName: selectedPlayer.name,
-                    playerAvatar: selectedPlayer.avatar,
-                    ratings: selectedRatings,
+                    playerId: playerId,
+                    playerName: playerName,
+                    rating: selectedRating,
                     comment: comment,
                     reviewerId: currentUser.uid,
                     reviewerEmail: currentUser.email,
                     reviewerName: currentUser.displayName || currentUser.email.split('@')[0],
-                    reviewerPhoto: currentUser.photoURL,
                     timestamp: new Date(),
                     verified: true
                 };
@@ -1329,20 +822,15 @@
                 showToast('Rating submitted successfully!', 'success');
                 
                 // Reset form
-                selectedRatings = {
-                    overall: 0,
-                    skill: 0,
-                    teamwork: 0,
-                    communication: 0,
-                    behavior: 0
-                };
+                selectedRating = 0;
                 document.getElementById('comment').value = '';
-                updateCharacterCount();
-                updateAllStars();
+                setRating(0);
                 
-                loadPlayerReviews(selectedPlayer.id);
-                loadAllReviews();
-                updateStats();
+                // Remove rating form
+                document.querySelector('[data-rating-form]').remove();
+                
+                // Reload reviews
+                loadReviews();
                 
             } catch (error) {
                 showToast('Failed to submit rating: ' + error.message, 'error');
@@ -1351,62 +839,8 @@
             }
         };
 
-        // Load Player Reviews
-        async function loadPlayerReviews(playerId) {
-            try {
-                const q = query(
-                    collection(db, 'ratings'),
-                    where('playerId', '==', playerId),
-                    orderBy('timestamp', 'desc'),
-                    limit(10)
-                );
-                
-                const querySnapshot = await getDocs(q);
-                let reviewsHtml = '';
-                
-                querySnapshot.forEach((doc) => {
-                    const review = doc.data();
-                    reviewsHtml += generateReviewHTML(review);
-                });
-
-                if (reviewsHtml) {
-                    document.getElementById('reviews-list').innerHTML = 
-                        `<h3 style="margin-bottom: 16px; color: var(--text-primary);">Reviews for ${selectedPlayer.name}</h3>` + reviewsHtml;
-                }
-            } catch (error) {
-                console.error('Error loading player reviews:', error);
-            }
-        }
-
-        function generateReviewHTML(review) {
-            const overallStars = '⭐'.repeat(review.ratings?.overall || review.rating || 0);
-            const date = review.timestamp.toDate().toLocaleDateString();
-            const reviewerInitial = (review.reviewerName || review.reviewerEmail).charAt(0).toUpperCase();
-            const reviewerName = review.reviewerName || review.reviewerEmail.split('@')[0];
-            
-            return `
-                <div class="player-card">
-                    <div class="player-info" style="margin-bottom: 16px;">
-                        <div class="user-avatar" style="${review.reviewerPhoto ? `background-image: url(${review.reviewerPhoto}); background-size: cover;` : ''}">${review.reviewerPhoto ? '' : reviewerInitial}</div>
-                        <div class="player-details">
-                            <h3>${reviewerName}</h3>
-                            <div class="player-id">${date} • ${overallStars}</div>
-                        </div>
-                    </div>
-                    <div style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">
-                        ${review.comment}
-                    </div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted);">
-                        <span style="background: rgba(34, 197, 94, 0.2); color: var(--success-color); padding: 4px 8px; border-radius: 8px; font-size: 0.75rem;">
-                            ✓ Verified
-                        </span>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Load All Reviews
-        async function loadAllReviews() {
+        // Load Reviews
+        async function loadReviews() {
             try {
                 const q = query(
                     collection(db, 'ratings'), 
@@ -1418,48 +852,39 @@
                 
                 querySnapshot.forEach((doc) => {
                     const review = doc.data();
-                    reviewsHtml += generateReviewHTML(review);
+                    const stars = '⭐'.repeat(review.rating || 0);
+                    const date = review.timestamp.toDate().toLocaleDateString();
+                    const reviewerName = review.reviewerName || review.reviewerEmail.split('@')[0];
+                    
+                    reviewsHtml += `
+                        <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 20px 0; border-left: 4px solid var(--primary-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; font-weight: 600; color: white;">${reviewerName.charAt(0).toUpperCase()}</div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-primary);">${reviewerName}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">Reviewed: ${review.playerName}</div>
+                                    </div>
+                                </div>
+                                <div style="color: #fbbf24; font-size: 1.2rem;">${stars}</div>
+                            </div>
+                            <div style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">${review.comment}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                                <span>${date}</span>
+                                <span style="background: rgba(34, 197, 94, 0.2); color: var(--success-color); padding: 4px 8px; border-radius: 8px; font-size: 0.75rem; margin-left: 8px;">✓ Verified</span>
+                            </div>
+                        </div>
+                    `;
                 });
 
-                if (!selectedPlayer) {
-                    document.getElementById('reviews-list').innerHTML = reviewsHtml || 
-                        '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No reviews yet. Be the first to rate a player!</p>';
-                }
+                document.getElementById('reviews-list').innerHTML = reviewsHtml || 
+                    '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No reviews yet. Be the first to rate a player!</p>';
+                    
+                // Update stats
+                document.getElementById('total-reviews').textContent = querySnapshot.size;
+                    
             } catch (error) {
-                console.error('Error loading all reviews:', error);
-            }
-        }
-
-        // Update Statistics
-        async function updateStats() {
-            try {
-                const q = query(collection(db, 'ratings'));
-                const querySnapshot = await getDocs(q);
-                
-                const totalReviews = querySnapshot.size;
-                document.getElementById('total-reviews').textContent = totalReviews;
-                
-                let totalRating = 0;
-                const uniqueUsers = new Set();
-                const uniquePlayers = new Set();
-                
-                querySnapshot.forEach((doc) => {
-                    const review = doc.data();
-                    totalRating += review.ratings?.overall || review.rating || 0;
-                    uniqueUsers.add(review.reviewerId);
-                    uniquePlayers.add(review.playerId);
-                });
-                
-                if (totalReviews > 0) {
-                    const avgRating = (totalRating / totalReviews).toFixed(1);
-                    document.getElementById('avg-rating').textContent = avgRating;
-                }
-                
-                document.getElementById('verified-users').textContent = uniqueUsers.size;
-                document.getElementById('top-players').textContent = uniquePlayers.size;
-                
-            } catch (error) {
-                console.error('Error updating stats:', error);
+                console.error('Error loading reviews:', error);
             }
         }
 
@@ -1469,11 +894,11 @@
             const textElement = document.getElementById(`${type}-text`);
             
             if (loading) {
-                loadingElement.classList.remove('hidden');
-                textElement.classList.add('hidden');
+                loadingElement?.classList.remove('hidden');
+                textElement?.classList.add('hidden');
             } else {
-                loadingElement.classList.add('hidden');
-                textElement.classList.remove('hidden');
+                loadingElement?.classList.add('hidden');
+                textElement?.classList.remove('hidden');
             }
         }
 
@@ -1514,16 +939,20 @@
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('user-menu').classList.remove('hidden');
-            loadAllReviews();
-            updateStats();
+            
+            // Load main app content
+            loadMainAppContent();
+            loadReviews();
         }
 
         function showMessage(elementId, message, type) {
             const element = document.getElementById(elementId);
-            element.innerHTML = `<div class="message ${type}">${message}</div>`;
-            setTimeout(() => {
-                element.innerHTML = '';
-            }, 5000);
+            if (element) {
+                element.innerHTML = `<div class="message ${type}">${message}</div>`;
+                setTimeout(() => {
+                    element.innerHTML = '';
+                }, 5000);
+            }
         }
 
         // Toast Notifications
@@ -1541,9 +970,9 @@
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const activeElement = document.activeElement;
-                if (activeElement.id === 'email' || activeElement.id === 'password') {
+                if (activeElement?.id === 'email' || activeElement?.id === 'password') {
                     login();
-                } else if (activeElement.id === 'search-player') {
+                } else if (activeElement?.id === 'search-player') {
                     searchPlayer();
                 }
             }
@@ -1557,14 +986,4 @@
 
     </script>
 </body>
-</html>🎯 Skill Level</div>
-                        <div class="stars" data-category="skill">
-                            <span class="star" data-rating="1">⭐</span>
-                            <span class="star" data-rating="2">⭐</span>
-                            <span class="star" data-rating="3">⭐</span>
-                            <span class="star" data-rating="4">⭐</span>
-                            <span class="star" data-rating="5">⭐</span>
-                        </div>
-                    </div>
-                    <div class="rating-category">
-                        <div class="category-label">
+</html>
