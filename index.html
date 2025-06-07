@@ -371,6 +371,77 @@
             font-size: 0.8rem;
         }
 
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 24px 0;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .stat-card .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--glass-bg);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-family: inherit;
+        }
+
+        .tab.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 12px;
@@ -390,6 +461,10 @@
                 top: auto;
                 right: auto;
                 margin-bottom: 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
         }
         
@@ -483,7 +558,61 @@
 
         <!-- Main Application (completely separate, only loaded after login) -->
         <div id="main-app" class="hidden">
-            <!-- This will be populated dynamically after successful login -->
+            <!-- Dashboard -->
+            <div class="card">
+                <h2>📊 Community Dashboard</h2>
+                <div class="stats-grid">
+                    <div class="stat-card" onclick="switchTab('recent')">
+                        <div class="stat-value" id="total-reviews">0</div>
+                        <div class="stat-label">Total Reviews</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="verified-users">1</div>
+                        <div class="stat-label">Verified Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avg-rating">4.2</div>
+                        <div class="stat-label">Avg Rating</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="top-players">0</div>
+                        <div class="stat-label">Top Players</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="card">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('search')" id="tab-search">🔍 Search Players</button>
+                    <button class="tab" onclick="switchTab('recent')" id="tab-recent">💬 Recent Reviews</button>
+                </div>
+
+                <!-- Search Tab -->
+                <div id="search-content" class="tab-content active">
+                    <div class="form-group">
+                        <label for="search-player">Player Name or Steam ID</label>
+                        <input type="text" id="search-player" class="form-input" placeholder="Enter player name or Steam ID">
+                    </div>
+                    <button class="btn" onclick="searchPlayer()">
+                        <span id="search-loading" class="hidden">
+                            <span class="loading-spinner"></span> Searching...
+                        </span>
+                        <span id="search-text">Search Player</span>
+                    </button>
+                    <div id="search-results"></div>
+                </div>
+
+                <!-- Recent Reviews Tab -->
+                <div id="recent-content" class="tab-content">
+                    <h3>💬 Recent Community Reviews</h3>
+                    <div id="reviews-list">
+                        <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">
+                            No reviews yet. Be the first to rate a player!
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -634,71 +763,52 @@
             }
         };
 
-        // Load Main App Content After Login
-        function loadMainAppContent() {
-            const mainAppHTML = `
-                <!-- Dashboard -->
-                <div class="card">
-                    <h2>📊 Community Dashboard</h2>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 24px 0;">
-                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease; cursor: pointer;" onclick="switchToTab('recent')">
-                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="total-reviews">0</div>
-                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Reviews</div>
-                        </div>
-                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease; cursor: pointer;">
-                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="verified-users">1</div>
-                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Verified Users</div>
-                        </div>
-                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease;">
-                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="avg-rating">4.2</div>
-                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Avg Rating</div>
-                        </div>
-                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease;">
-                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="top-players">0</div>
-                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Top Players</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tabs -->
-                <div class="card">
-                    <div style="display: flex; gap: 4px; background: var(--glass-bg); border-radius: 12px; padding: 4px; margin-bottom: 24px;">
-                        <button style="flex: 1; padding: 12px 20px; background: var(--primary-color); border: none; border-radius: 8px; color: white; cursor: pointer; transition: all 0.3s ease; font-weight: 500; font-family: inherit;" onclick="switchTab('search')" id="tab-search">🔍 Search Players</button>
-                        <button style="flex: 1; padding: 12px 20px; background: transparent; border: none; border-radius: 8px; color: var(--text-secondary); cursor: pointer; transition: all 0.3s ease; font-weight: 500; font-family: inherit;" onclick="switchTab('recent')" id="tab-recent">💬 Recent Reviews</button>
-                    </div>
-
-                    <!-- Search Tab -->
-                    <div id="search-content" style="display: block;">
-                        <div style="margin-bottom: 24px;">
-                            <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Player Name or Steam ID</label>
-                            <input type="text" id="search-player" style="width: 100%; padding: 16px 20px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--glass-bg); color: var(--text-primary); font-size: 16px; font-family: inherit; transition: all 0.3s ease; outline: none;" placeholder="Enter player name or Steam ID">
-                        </div>
-                        <button style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white; border: none; padding: 16px 32px; border-radius: 12px; cursor: pointer; font-size: 16px; font-weight: 600; font-family: inherit; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-width: 140px;" onclick="searchPlayer()">
-                            <span id="search-loading" class="hidden">
-                                <span class="loading-spinner"></span> Searching...
-                            </span>
-                            <span id="search-text">Search Player</span>
-                        </button>
-                        <div id="search-results"></div>
-                    </div>
-
-                    <!-- Recent Reviews Tab -->
-                    <div id="recent-content" style="display: none;">
-                        <h3>💬 Recent Community Reviews</h3>
-                        <div id="reviews-list">
-                            <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">
-                                No reviews yet. Be the first to rate a player!
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('main-app').innerHTML = mainAppHTML;
-        }
-
         // Tab switching
         window.switchTab = function(tabName) {
             // Update tab buttons
-            document.querySelectorAll('[id^="tab-"]').forEach(tab => {
-                if (tab.id ===
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-content`).classList.add('active');
+            
+            // Load content for specific tabs
+            if (tabName === 'recent') {
+                loadReviews();
+            }
+        };
+
+        // Search Player
+        window.searchPlayer = function() {
+            const searchTerm = document.getElementById('search-player').value.trim();
+            
+            if (!searchTerm) {
+                showToast('Please enter a player name or Steam ID!', 'error');
+                return;
+            }
+
+            setLoadingState('search', true);
+
+            // Simulate search delay
+            setTimeout(() => {
+                const player = generatePlayer(searchTerm);
+                displaySearchResults(player);
+                setLoadingState('search', false);
+            }, 1000);
+        };
+
+        function generatePlayer(searchTerm) {
+            const heroes = ['Pudge', 'Invoker', 'Anti-Mage', 'Crystal Maiden', 'Drow Ranger'];
+            const ranks = ['Herald', 'Guardian', 'Crusader', 'Archon', 'Legend', 'Ancient', 'Divine'];
+            
+            return {
+                id: 'player_' + Math.random().toString(36).substr(2, 9),
+                name: searchTerm,
+                avatar: '🎮',
+                steamId: Math.floor(Math.random() * 1000000000),
+                lastSeen: Math.random() > 0.5 ? 'Online' : `${Math.floor(Math.random() *
