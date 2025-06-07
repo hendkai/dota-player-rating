@@ -663,8 +663,10 @@
             }
         });
 
+        };
+
         // Theme Management
-        window.toggleTheme = function() {
+        function toggleTheme() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
             
@@ -680,8 +682,20 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
         document.getElementById('theme-icon').textContent = savedTheme === 'light' ? '🌙' : '☀️';
 
+        // Make functions globally available
+        window.signInWithGoogle = signInWithGoogle;
+        window.register = register;
+        window.login = login;
+        window.logout = logout;
+        window.toggleTheme = toggleTheme;
+        window.switchTab = switchTab;
+        window.searchPlayer = searchPlayer;
+        window.showRatingForm = showRatingForm;
+        window.setRating = setRating;
+        window.submitRating = submitRating;
+
         // Google Sign In
-        window.signInWithGoogle = async function() {
+        async function signInWithGoogle() {
             try {
                 const result = await signInWithPopup(auth, googleProvider);
                 showToast('Successfully signed in with Google!', 'success');
@@ -697,7 +711,7 @@
         };
 
         // User Registration
-        window.register = async function() {
+        async function register() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
@@ -732,7 +746,7 @@
         };
 
         // User Login
-        window.login = async function() {
+        async function login() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
@@ -763,8 +777,10 @@
             }
         };
 
+        };
+
         // Tab switching
-        window.switchTab = function(tabName) {
+        function switchTab(tabName) {
             // Update tab buttons
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
@@ -783,8 +799,10 @@
             }
         };
 
+        };
+
         // Search Player
-        window.searchPlayer = function() {
+        function searchPlayer() {
             const searchTerm = document.getElementById('search-player').value.trim();
             
             if (!searchTerm) {
@@ -811,4 +829,309 @@
                 name: searchTerm,
                 avatar: '🎮',
                 steamId: Math.floor(Math.random() * 1000000000),
-                lastSeen: Math.random() > 0.5 ? 'Online' : `${Math.floor(Math.random() *
+                lastSeen: Math.random() > 0.5 ? 'Online' : `${Math.floor(Math.random() * 24)} hours ago`,
+                gamesPlayed: Math.floor(Math.random() * 2000) + 500,
+                winRate: (Math.random() * 30 + 50).toFixed(1),
+                favoriteHero: heroes[Math.floor(Math.random() * heroes.length)],
+                rank: ranks[Math.floor(Math.random() * ranks.length)],
+                avgRating: (Math.random() * 2 + 3).toFixed(1),
+                totalReviews: Math.floor(Math.random() * 50) + 5
+            };
+        }
+
+        function displaySearchResults(player) {
+            const resultsHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color); transition: all 0.3s ease;">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                        <div style="width: 60px; height: 60px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">${player.avatar}</div>
+                        <div>
+                            <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${player.name}</h3>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Steam ID: ${player.steamId}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0;">
+                        <div style="text-align: center; padding: 12px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${player.rank}</div>
+                            <div style="color: var(--text-secondary); font-size: 0.8rem;">Rank</div>
+                        </div>
+                        <div style="text-align: center; padding: 12px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${player.winRate}%</div>
+                            <div style="color: var(--text-secondary); font-size: 0.8rem;">Win Rate</div>
+                        </div>
+                        <div style="text-align: center; padding: 12px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${player.avgRating}⭐</div>
+                            <div style="color: var(--text-secondary); font-size: 0.8rem;">Rating</div>
+                        </div>
+                        <div style="text-align: center; padding: 12px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);">${player.totalReviews}</div>
+                            <div style="color: var(--text-secondary); font-size: 0.8rem;">Reviews</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+                        <button class="btn" onclick="showRatingForm('${player.id}', '${player.name}')">Rate Player</button>
+                        <button class="btn btn-secondary" onclick="viewPlayerProfile('${player.id}')">View Profile</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('search-results').innerHTML = resultsHTML;
+        }
+
+        // Show Rating Form
+        function showRatingForm(playerId, playerName) {
+            const ratingFormHTML = `
+                <div class="card">
+                    <h2>⭐ Rate Player: ${playerName}</h2>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <label>Your Rating</label>
+                        <div style="text-align: center; margin: 20px 0;">
+                            <div style="font-size: 2.5rem; display: flex; gap: 8px; justify-content: center;">
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(1)" id="star-1">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(2)" id="star-2">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(3)" id="star-3">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(4)" id="star-4">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(5)" id="star-5">⭐</span>
+                            </div>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">Click to rate this player</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 24px;">
+                        <label for="comment">Your Experience</label>
+                        <textarea id="comment" style="width: 100%; min-height: 120px; padding: 16px 20px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--glass-bg); color: var(--text-primary); font-size: 16px; font-family: inherit; resize: vertical; transition: all 0.3s ease; outline: none;" 
+                                  placeholder="Share your experience playing with this player. Be constructive and respectful!"></textarea>
+                    </div>
+                    
+                    <button class="btn" onclick="submitRating('${playerId}', '${playerName}')">
+                        <span id="submit-loading" class="hidden">
+                            <span class="loading-spinner"></span> Submitting...
+                        </span>
+                        <span id="submit-text">Submit Rating</span>
+                    </button>
+                    <div id="rating-message"></div>
+                </div>
+            `;
+
+            document.getElementById('search-results').insertAdjacentHTML('afterend', ratingFormHTML);
+        };
+
+        // Rating System
+        let selectedRating = 0;
+
+        function setRating(rating) {
+            selectedRating = rating;
+            updateStarDisplay();
+        };
+
+        function updateStarDisplay() {
+            for (let i = 1; i <= 5; i++) {
+                const star = document.getElementById(`star-${i}`);
+                if (star) {
+                    if (i <= selectedRating) {
+                        star.style.color = '#fbbf24';
+                        star.style.transform = 'scale(1.1)';
+                    } else {
+                        star.style.color = '#374151';
+                        star.style.transform = 'scale(1)';
+                    }
+                }
+            }
+        }
+
+        // Submit Rating
+        async function submitRating(playerId, playerName) {
+            if (selectedRating === 0) {
+                showToast('Please select a star rating!', 'error');
+                return;
+            }
+
+            const comment = document.getElementById('comment').value.trim();
+            
+            if (!comment) {
+                showToast('Please write a comment about your experience!', 'error');
+                return;
+            }
+
+            setLoadingState('submit', true);
+
+            try {
+                const reviewData = {
+                    playerId: playerId,
+                    playerName: playerName,
+                    rating: selectedRating,
+                    comment: comment,
+                    reviewerId: currentUser.uid,
+                    reviewerEmail: currentUser.email,
+                    reviewerName: currentUser.displayName || currentUser.email.split('@')[0],
+                    timestamp: new Date(),
+                    verified: true
+                };
+
+                await addDoc(collection(db, 'ratings'), reviewData);
+                showToast('Rating submitted successfully!', 'success');
+                
+                // Reset form
+                selectedRating = 0;
+                document.getElementById('comment').value = '';
+                updateStarDisplay();
+                
+                // Reload reviews
+                loadReviews();
+                
+            } catch (error) {
+                showToast('Failed to submit rating: ' + error.message, 'error');
+            } finally {
+                setLoadingState('submit', false);
+            }
+        };
+
+        // Load Reviews
+        async function loadReviews() {
+            try {
+                const q = query(
+                    collection(db, 'ratings'), 
+                    orderBy('timestamp', 'desc'),
+                    limit(20)
+                );
+                const querySnapshot = await getDocs(q);
+                let reviewsHtml = '';
+                
+                querySnapshot.forEach((doc) => {
+                    const review = doc.data();
+                    const stars = '⭐'.repeat(review.rating || 0);
+                    const date = review.timestamp.toDate().toLocaleDateString();
+                    const reviewerName = review.reviewerName || review.reviewerEmail.split('@')[0];
+                    
+                    reviewsHtml += `
+                        <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 20px 0; border-left: 4px solid var(--primary-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; font-weight: 600; color: white;">${reviewerName.charAt(0).toUpperCase()}</div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-primary);">${reviewerName}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">Reviewed: ${review.playerName}</div>
+                                    </div>
+                                </div>
+                                <div style="color: #fbbf24; font-size: 1.2rem;">${stars}</div>
+                            </div>
+                            <div style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">${review.comment}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                                <span>${date}</span>
+                                <span style="background: rgba(34, 197, 94, 0.2); color: var(--success-color); padding: 4px 8px; border-radius: 8px; font-size: 0.75rem; margin-left: 8px;">✓ Verified</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('reviews-list').innerHTML = reviewsHtml || 
+                    '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No reviews yet. Be the first to rate a player!</p>';
+                    
+                // Update stats
+                document.getElementById('total-reviews').textContent = querySnapshot.size;
+                    
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+            }
+        }
+
+        // Utility Functions
+        function setLoadingState(type, loading) {
+            const loadingElement = document.getElementById(`${type}-loading`);
+            const textElement = document.getElementById(`${type}-text`);
+            
+            if (loading) {
+                loadingElement?.classList.remove('hidden');
+                textElement?.classList.add('hidden');
+            } else {
+                loadingElement?.classList.add('hidden');
+                textElement?.classList.remove('hidden');
+            }
+        }
+
+        function updateUserInfo(user) {
+            const userAvatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
+            const userEmail = document.getElementById('user-email');
+            
+            if (user.photoURL) {
+                userAvatar.style.backgroundImage = `url(${user.photoURL})`;
+                userAvatar.style.backgroundSize = 'cover';
+                userAvatar.innerHTML = '';
+            } else {
+                const initial = (user.displayName || user.email).charAt(0).toUpperCase();
+                userAvatar.innerHTML = initial;
+            }
+            
+            userName.textContent = user.displayName || user.email.split('@')[0];
+            userEmail.textContent = user.email;
+        }
+
+        async function logout() {
+            try {
+                await signOut(auth);
+                showToast('Successfully signed out!', 'success');
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        };
+
+        function showAuthSection() {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('user-menu').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('user-menu').classList.remove('hidden');
+            
+            // Load reviews
+            loadReviews();
+        }
+
+        function showMessage(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.innerHTML = `<div class="message ${type}">${message}</div>`;
+                setTimeout(() => {
+                    element.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        // Toast Notifications
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Keyboard Shortcuts
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement?.id === 'email' || activeElement?.id === 'password') {
+                    login();
+                } else if (activeElement?.id === 'search-player') {
+                    searchPlayer();
+                }
+            }
+        });
+
+        // Initialize app
+        window.addEventListener('load', function() {
+            document.documentElement.style.scrollBehavior = 'smooth';
+            console.log('🎮 Dota Player Rating System loaded successfully!');
+        });
+
+    </script>
+</body>
+</html>
