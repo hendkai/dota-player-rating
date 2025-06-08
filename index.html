@@ -1665,6 +1665,100 @@ Building positive gaming communities together.
                             </div>
                         </div>
 
+                        <!-- Mastodon Bot Section -->
+                        <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin-bottom: 24px; border: 1px solid var(--glass-border);">
+                            <h3 style="color: var(--primary-color); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+                                🤖 Mastodon Community-Bot
+                            </h3>
+                            
+                            <!-- Bot Configuration -->
+                            <div style="margin-bottom: 24px;">
+                                <h4 style="color: var(--text-primary); margin-bottom: 16px;">Bot-Konfiguration</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Mastodon-Instanz:</label>
+                                        <input type="text" id="mastodon-instance" placeholder="mastodon.social" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary);">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Access Token:</label>
+                                        <input type="password" id="mastodon-token" placeholder="Mastodon Access Token" style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary);">
+                                    </div>
+                                </div>
+                                <button onclick="saveMastodonConfig()" style="background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-right: 12px;">
+                                    💾 Konfiguration speichern
+                                </button>
+                                <span id="mastodon-config-status" style="color: var(--text-muted); font-size: 0.9rem;"></span>
+                            </div>
+
+                            <!-- Manual Posting -->
+                            <div style="margin-bottom: 24px;">
+                                <h4 style="color: var(--text-primary); margin-bottom: 16px;">Manuelle Posts</h4>
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                    <button onclick="testMastodonPost()" style="background: var(--secondary-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                                        🧪 Test-Post
+                                    </button>
+                                    <button onclick="postDailyUpdate()" style="background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                                        📊 Täglicher Update
+                                    </button>
+                                    <button onclick="postWeeklyHighlights()" style="background: var(--accent-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                                        🌟 Wöchentliche Highlights
+                                    </button>
+                                    <button onclick="generateContentPreview()" style="background: var(--warning-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                                        👁️ Content-Vorschau
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Bot Status -->
+                            <div style="margin-bottom: 24px;">
+                                <h4 style="color: var(--text-primary); margin-bottom: 16px;">Bot-Status</h4>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px;">
+                                        <div style="color: var(--text-muted); font-size: 0.9rem;">Letzter täglicher Post:</div>
+                                        <div id="last-daily-post" style="color: var(--text-primary); font-weight: 600;">Noch nie</div>
+                                    </div>
+                                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px;">
+                                        <div style="color: var(--text-muted); font-size: 0.9rem;">Letzter wöchentlicher Post:</div>
+                                        <div id="last-weekly-post" style="color: var(--text-primary); font-weight: 600;">Noch nie</div>
+                                    </div>
+                                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px;">
+                                        <div style="color: var(--text-muted); font-size: 0.9rem;">Nächster Meilenstein:</div>
+                                        <div id="next-milestone" style="color: var(--text-primary); font-weight: 600;">-</div>
+                                    </div>
+                                    <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px;">
+                                        <div style="color: var(--text-muted); font-size: 0.9rem;">Automatisierung:</div>
+                                        <div id="bot-automation-status" style="color: var(--success-color); font-weight: 600;">🟢 Aktiv</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Content Preview Area -->
+                            <div id="content-preview-area" style="display: none; margin-top: 24px;">
+                                <h4 style="color: var(--text-primary); margin-bottom: 16px;">Content-Vorschau</h4>
+                                <div style="background: var(--bg-secondary); padding: 20px; border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                                    <pre id="content-preview-text" style="white-space: pre-wrap; font-family: inherit; color: var(--text-secondary); line-height: 1.6; margin: 0;"></pre>
+                                </div>
+                                <div style="margin-top: 16px;">
+                                    <button onclick="postPreviewedContent()" style="background: var(--success-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-right: 12px;">
+                                        📤 Diesen Content posten
+                                    </button>
+                                    <button onclick="closeContentPreview()" style="background: var(--bg-tertiary); color: var(--text-secondary); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                                        ❌ Schließen
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Post History -->
+                            <div style="margin-top: 24px;">
+                                <h4 style="color: var(--text-primary); margin-bottom: 16px;">Post-Historie</h4>
+                                <div id="mastodon-post-history" style="max-height: 300px; overflow-y: auto; background: var(--bg-secondary); border-radius: 8px; padding: 16px;">
+                                    <div style="color: var(--text-muted); text-align: center; padding: 20px;">
+                                        Keine Post-Historie verfügbar
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Admin Content Area -->
                         <div id="admin-results" style="background: var(--glass-bg); border-radius: 12px; padding: 24px; border: 1px solid var(--border-color);">
                             <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">
@@ -5346,6 +5440,10 @@ Building positive gaming communities together.
                     // Load admin stats after a short delay to ensure DOM is ready
                     setTimeout(() => {
                         updateAdminStats();
+                        // Load Mastodon configuration
+                        if (typeof loadMastodonConfig === 'function') {
+                            loadMastodonConfig();
+                        }
                     }, 500);
                 } else {
                     console.log('👤 Regular user, hiding admin features');
@@ -5423,6 +5521,650 @@ Building positive gaming communities together.
                 }
             }
         });
+
+        // === MASTODON COMMUNITY BOT SYSTEM ===
+        
+        // Bot Configuration
+        const MASTODON_BOT_CONFIG = {
+            instance: 'mastodon.social', // Default instance
+            defaultHashtags: '#Dota2 #Gaming #Community #PositiveGaming',
+            postSchedule: {
+                daily: { hour: 20, minute: 0 }, // 20:00 daily
+                weekly: { day: 0, hour: 12, minute: 0 }, // Sunday 12:00
+                monthly: { day: 1, hour: 10, minute: 0 } // 1st of month 10:00
+            }
+        };
+
+        // Mastodon API Integration
+        globalThis.MastodonBot = {
+            // Post to Mastodon
+            async postToMastodon(content, instance = null, accessToken = null) {
+                try {
+                    const targetInstance = instance || localStorage.getItem('mastodon_instance') || MASTODON_BOT_CONFIG.instance;
+                    const token = accessToken || localStorage.getItem('mastodon_token');
+                    
+                    if (!token) {
+                        console.warn('No Mastodon access token configured');
+                        return { success: false, error: 'No access token' };
+                    }
+
+                    const response = await fetch(`https://${targetInstance}/api/v1/statuses`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            status: content,
+                            visibility: 'public',
+                            language: 'de'
+                        })
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        console.log('✅ Mastodon post successful:', result.url);
+                        return { success: true, url: result.url, id: result.id };
+                    } else {
+                        const error = await response.text();
+                        console.error('❌ Mastodon post failed:', error);
+                        return { success: false, error: error };
+                    }
+                } catch (error) {
+                    console.error('❌ Mastodon API error:', error);
+                    return { success: false, error: error.message };
+                }
+            },
+
+            // Generate community statistics
+            async generateCommunityStats() {
+                try {
+                    // Get reviews from last 24 hours
+                    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                    const reviewsSnapshot = await getDocs(query(
+                        collection(db, 'ratings'),
+                        where('timestamp', '>', oneDayAgo)
+                    ));
+
+                    // Get all reviews for overall stats
+                    const allReviewsSnapshot = await getDocs(collection(db, 'ratings'));
+                    
+                    let totalReviews = 0;
+                    let dailyReviews = 0;
+                    let positiveReviews = 0;
+                    let topPlayers = new Map();
+                    let avgRating = 0;
+                    let ratingSum = 0;
+
+                    allReviewsSnapshot.forEach((doc) => {
+                        const review = doc.data();
+                        totalReviews++;
+                        ratingSum += review.overallRating || review.rating || 0;
+                        
+                        if ((review.overallRating || review.rating || 0) >= 4) {
+                            positiveReviews++;
+                        }
+
+                        // Track top players
+                        const playerName = review.playerName;
+                        if (playerName && (review.overallRating || review.rating || 0) >= 4) {
+                            if (!topPlayers.has(playerName)) {
+                                topPlayers.set(playerName, { count: 0, totalRating: 0 });
+                            }
+                            const player = topPlayers.get(playerName);
+                            player.count++;
+                            player.totalRating += (review.overallRating || review.rating || 0);
+                        }
+                    });
+
+                    reviewsSnapshot.forEach(() => dailyReviews++);
+                    
+                    avgRating = totalReviews > 0 ? (ratingSum / totalReviews).toFixed(1) : 0;
+                    
+                    // Find top player
+                    let topPlayer = null;
+                    let highestAvg = 0;
+                    for (const [name, data] of topPlayers) {
+                        if (data.count >= 3) { // Minimum 3 reviews
+                            const avg = data.totalRating / data.count;
+                            if (avg > highestAvg) {
+                                highestAvg = avg;
+                                topPlayer = { name, avgRating: avg.toFixed(1), reviewCount: data.count };
+                            }
+                        }
+                    }
+
+                    return {
+                        totalReviews,
+                        dailyReviews,
+                        positiveReviews,
+                        avgRating,
+                        positiveRate: totalReviews > 0 ? Math.round((positiveReviews / totalReviews) * 100) : 0,
+                        topPlayer
+                    };
+                } catch (error) {
+                    console.error('Error generating community stats:', error);
+                    return null;
+                }
+            },
+
+            // Generate weekly highlights
+            async generateWeeklyHighlights() {
+                try {
+                    const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                    const weeklySnapshot = await getDocs(query(
+                        collection(db, 'ratings'),
+                        where('timestamp', '>', oneWeekAgo)
+                    ));
+
+                    let weeklyReviews = 0;
+                    let exceptional5Stars = 0;
+                    let bestComments = [];
+                    const playerStats = new Map();
+
+                    weeklySnapshot.forEach((doc) => {
+                        const review = doc.data();
+                        weeklyReviews++;
+                        const rating = review.overallRating || review.rating || 0;
+
+                        if (rating === 5) {
+                            exceptional5Stars++;
+                            if (review.comment && review.comment.length > 20) {
+                                bestComments.push({
+                                    comment: review.comment,
+                                    playerName: review.playerName,
+                                    rating: rating
+                                });
+                            }
+                        }
+
+                        // Track weekly top performers
+                        if (review.playerName && rating >= 4) {
+                            if (!playerStats.has(review.playerName)) {
+                                playerStats.set(review.playerName, { reviews: 0, totalRating: 0 });
+                            }
+                            const stats = playerStats.get(review.playerName);
+                            stats.reviews++;
+                            stats.totalRating += rating;
+                        }
+                    });
+
+                    // Find weekly MVP
+                    let weeklyMVP = null;
+                    let highestScore = 0;
+                    for (const [name, stats] of playerStats) {
+                        if (stats.reviews >= 2) { // Minimum 2 reviews this week
+                            const score = (stats.totalRating / stats.reviews) * Math.log(stats.reviews + 1);
+                            if (score > highestScore) {
+                                highestScore = score;
+                                weeklyMVP = {
+                                    name,
+                                    avgRating: (stats.totalRating / stats.reviews).toFixed(1),
+                                    reviewCount: stats.reviews
+                                };
+                            }
+                        }
+                    }
+
+                    // Select best comment
+                    const bestComment = bestComments.length > 0 
+                        ? bestComments[Math.floor(Math.random() * Math.min(bestComments.length, 3))]
+                        : null;
+
+                    return {
+                        weeklyReviews,
+                        exceptional5Stars,
+                        weeklyMVP,
+                        bestComment
+                    };
+                } catch (error) {
+                    console.error('Error generating weekly highlights:', error);
+                    return null;
+                }
+            },
+
+            // Content generation templates
+            generateDailyPost(stats) {
+                if (!stats) return null;
+
+                const templates = [
+                    `🎮 Täglicher Community-Update!
+
+📊 Heute: ${stats.dailyReviews} neue Reviews
+🌟 Gesamt: ${stats.totalReviews} Reviews (⭐${stats.avgRating} Durchschnitt)
+💚 ${stats.positiveRate}% positive Bewertungen
+
+${stats.topPlayer ? `🏆 Top Spieler: ${stats.topPlayer.name} (⭐${stats.topPlayer.avgRating})` : '🎯 Werdet Teil unserer positiven Gaming-Community!'}
+
+${MASTODON_BOT_CONFIG.defaultHashtags}
+🔗 https://hendkai.github.io/dota-player-rating/`,
+
+                    `🚀 Community wächst weiter!
+
+📈 ${stats.dailyReviews} Reviews heute
+🌟 ${stats.positiveReviews} positive Bewertungen gesamt
+⭐ Durchschnittsbewertung: ${stats.avgRating}/5
+
+${stats.topPlayer ? `🥇 Highlight: ${stats.topPlayer.name} mit ${stats.topPlayer.reviewCount} tollen Reviews!` : '💫 Danke an alle, die positive Gaming-Erfahrungen teilen!'}
+
+${MASTODON_BOT_CONFIG.defaultHashtags}`,
+
+                    `🎯 Positive Gaming Community Update!
+
+🔥 ${stats.totalReviews} Spieler bereits bewertet
+📊 ${stats.positiveRate}% positive Erfahrungen
+⭐ Community-Rating: ${stats.avgRating}/5
+
+${stats.dailyReviews > 0 ? `🆕 ${stats.dailyReviews} neue Reviews heute` : '🌟 Teilt eure positiven Gaming-Erfahrungen!'}
+
+🎮 Findet großartige Teammates!
+${MASTODON_BOT_CONFIG.defaultHashtags}`
+                ];
+
+                return templates[Math.floor(Math.random() * templates.length)];
+            },
+
+            generateWeeklyPost(highlights) {
+                if (!highlights) return null;
+
+                const emojis = ['🌟', '🚀', '🎉', '🏆', '💫', '🔥'];
+                const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+                let post = `${randomEmoji} Wöchentliche Community-Highlights!\n\n`;
+                post += `📊 Diese Woche:\n`;
+                post += `• ${highlights.weeklyReviews} neue Reviews\n`;
+                post += `• ${highlights.exceptional5Stars} perfekte 5⭐ Bewertungen\n\n`;
+
+                if (highlights.weeklyMVP) {
+                    post += `🏆 Wochen-MVP: ${highlights.weeklyMVP.name}\n`;
+                    post += `   ⭐ ${highlights.weeklyMVP.avgRating} Durchschnitt (${highlights.weeklyMVP.reviewCount} Reviews)\n\n`;
+                }
+
+                if (highlights.bestComment) {
+                    post += `💬 Review der Woche:\n`;
+                    post += `"${highlights.bestComment.comment.substring(0, 100)}${highlights.bestComment.comment.length > 100 ? '...' : ''}"\n`;
+                    post += `   - über ${highlights.bestComment.playerName}\n\n`;
+                }
+
+                post += `🎮 Macht mit bei der freundlichsten Dota 2 Community!\n`;
+                post += `${MASTODON_BOT_CONFIG.defaultHashtags}\n`;
+                post += `🔗 https://hendkai.github.io/dota-player-rating/`;
+
+                return post;
+            },
+
+            generateMilestonePost(milestone) {
+                const milestones = {
+                    100: "💯 Wow! 100 Reviews erreicht!",
+                    500: "🚀 Unglaublich! 500 Reviews!",
+                    1000: "🎉 MEILENSTEIN! 1000 Reviews!",
+                    2500: "🔥 Wahnsinn! 2500 Reviews!",
+                    5000: "🌟 LEGENDÄR! 5000 Reviews!"
+                };
+
+                const celebration = milestones[milestone] || `🎯 ${milestone} Reviews erreicht!`;
+                
+                return `${celebration}
+
+Unsere Dota 2 Community wächst stetig!
+
+🤝 Zusammen bauen wir eine positivere Gaming-Welt
+⭐ Jeden Tag werden großartige Spieler entdeckt
+🎮 Toxizität war gestern - Teamwork ist heute!
+
+Danke an alle, die mitmachen! 💚
+
+${MASTODON_BOT_CONFIG.defaultHashtags}
+🔗 https://hendkai.github.io/dota-player-rating/`;
+            },
+
+            // Automated posting scheduler
+            async checkAndPost() {
+                if (!checkAdminAccess()) return;
+
+                try {
+                    const now = new Date();
+                    const lastDailyPost = localStorage.getItem('last_daily_post');
+                    const lastWeeklyPost = localStorage.getItem('last_weekly_post');
+                    
+                    // Check if we should post daily update
+                    const shouldPostDaily = !lastDailyPost || 
+                        new Date(lastDailyPost).toDateString() !== now.toDateString();
+                    
+                    // Check if we should post weekly update (Sundays)
+                    const shouldPostWeekly = now.getDay() === 0 && // Sunday
+                        (!lastWeeklyPost || 
+                        new Date(lastWeeklyPost).getTime() < now.getTime() - 6 * 24 * 60 * 60 * 1000);
+
+                    if (shouldPostDaily && now.getHours() >= MASTODON_BOT_CONFIG.postSchedule.daily.hour) {
+                        await this.postDailyUpdate();
+                        localStorage.setItem('last_daily_post', now.toISOString());
+                    }
+
+                    if (shouldPostWeekly && now.getHours() >= MASTODON_BOT_CONFIG.postSchedule.weekly.hour) {
+                        await this.postWeeklyHighlights();
+                        localStorage.setItem('last_weekly_post', now.toISOString());
+                    }
+
+                    // Check for milestones
+                    await this.checkMilestones();
+
+                } catch (error) {
+                    console.error('Error in automated posting:', error);
+                }
+            },
+
+            async postDailyUpdate() {
+                const stats = await this.generateCommunityStats();
+                if (stats) {
+                    const content = this.generateDailyPost(stats);
+                    if (content) {
+                        const result = await this.postToMastodon(content);
+                        if (result.success) {
+                            console.log('✅ Daily Mastodon post successful');
+                            showToast('Täglicher Mastodon-Post erfolgreich gesendet!', 'success');
+                        }
+                        return result;
+                    }
+                }
+                return { success: false, error: 'Could not generate content' };
+            },
+
+            async postWeeklyHighlights() {
+                const highlights = await this.generateWeeklyHighlights();
+                if (highlights) {
+                    const content = this.generateWeeklyPost(highlights);
+                    if (content) {
+                        const result = await this.postToMastodon(content);
+                        if (result.success) {
+                            console.log('✅ Weekly Mastodon post successful');
+                            showToast('Wöchentlicher Mastodon-Post erfolgreich gesendet!', 'success');
+                        }
+                        return result;
+                    }
+                }
+                return { success: false, error: 'Could not generate content' };
+            },
+
+            async checkMilestones() {
+                try {
+                    const allReviews = await getDocs(collection(db, 'ratings'));
+                    const totalReviews = allReviews.size;
+                    const lastMilestone = parseInt(localStorage.getItem('last_milestone') || '0');
+
+                    const milestones = [100, 500, 1000, 2500, 5000, 10000];
+                    for (const milestone of milestones) {
+                        if (totalReviews >= milestone && lastMilestone < milestone) {
+                            const content = this.generateMilestonePost(milestone);
+                            const result = await this.postToMastodon(content);
+                            if (result.success) {
+                                localStorage.setItem('last_milestone', milestone.toString());
+                                console.log(`✅ Milestone post for ${milestone} reviews successful`);
+                                showToast(`Meilenstein-Post für ${milestone} Reviews gesendet!`, 'success');
+                            }
+                            break; // Post only one milestone at a time
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking milestones:', error);
+                }
+            }
+        };
+
+        // Manual posting functions for admin
+        globalThis.postDailyUpdate = async function() {
+            if (!checkAdminAccess()) return;
+            return await MastodonBot.postDailyUpdate();
+        };
+
+        globalThis.postWeeklyHighlights = async function() {
+            if (!checkAdminAccess()) return;
+            return await MastodonBot.postWeeklyHighlights();
+        };
+
+        globalThis.testMastodonPost = async function() {
+            if (!checkAdminAccess()) return;
+            
+            const testContent = `🧪 Test-Post vom Dota Player Rating Bot!
+
+Dieser Post testet die Mastodon-Integration.
+Zeitstempel: ${new Date().toLocaleString('de-DE')}
+
+${MASTODON_BOT_CONFIG.defaultHashtags}`;
+
+            const result = await MastodonBot.postToMastodon(testContent);
+            if (result.success) {
+                showToast('Test-Post erfolgreich gesendet!', 'success');
+            } else {
+                showToast(`Test-Post fehlgeschlagen: ${result.error}`, 'error');
+            }
+            return result;
+        };
+
+        // Start automated scheduler (check every hour)
+        if (typeof globalThis.mastodonScheduler === 'undefined') {
+            globalThis.mastodonScheduler = setInterval(() => {
+                if (currentUser && isAdmin(currentUser.email)) {
+                    MastodonBot.checkAndPost();
+                }
+            }, 60 * 60 * 1000); // Every hour
+        }
+
+        // Admin Interface Functions for Mastodon Bot
+        globalThis.saveMastodonConfig = function() {
+            if (!checkAdminAccess()) return;
+            
+            const instance = document.getElementById('mastodon-instance')?.value || 'mastodon.social';
+            const token = document.getElementById('mastodon-token')?.value;
+            const statusElement = document.getElementById('mastodon-config-status');
+            
+            if (!token) {
+                if (statusElement) statusElement.textContent = 'Bitte Access Token eingeben';
+                if (statusElement) statusElement.style.color = 'var(--error-color)';
+                return;
+            }
+            
+            // Save configuration
+            localStorage.setItem('mastodon_instance', instance);
+            localStorage.setItem('mastodon_token', token);
+            
+            if (statusElement) statusElement.textContent = '✅ Konfiguration gespeichert';
+            if (statusElement) statusElement.style.color = 'var(--success-color)';
+            
+            // Load current configuration into UI
+            loadMastodonConfig();
+            
+            showToast('Mastodon-Konfiguration gespeichert!', 'success');
+        };
+
+        globalThis.loadMastodonConfig = function() {
+            const instanceInput = document.getElementById('mastodon-instance');
+            const tokenInput = document.getElementById('mastodon-token');
+            
+            if (instanceInput) {
+                instanceInput.value = localStorage.getItem('mastodon_instance') || 'mastodon.social';
+            }
+            
+            if (tokenInput) {
+                const token = localStorage.getItem('mastodon_token');
+                if (token) {
+                    tokenInput.value = '••••••••••'; // Show masked token
+                }
+            }
+            
+            updateBotStatus();
+        };
+
+        globalThis.generateContentPreview = async function() {
+            if (!checkAdminAccess()) return;
+            
+            try {
+                // Generate different types of content
+                const stats = await MastodonBot.generateCommunityStats();
+                const highlights = await MastodonBot.generateWeeklyHighlights();
+                
+                let previewContent = '';
+                
+                if (stats) {
+                    previewContent += '=== TÄGLICHER UPDATE ===\n\n';
+                    previewContent += MastodonBot.generateDailyPost(stats);
+                    previewContent += '\n\n';
+                }
+                
+                if (highlights) {
+                    previewContent += '=== WÖCHENTLICHE HIGHLIGHTS ===\n\n';
+                    previewContent += MastodonBot.generateWeeklyPost(highlights);
+                    previewContent += '\n\n';
+                }
+                
+                // Show milestone post example
+                const totalReviews = stats?.totalReviews || 0;
+                const nextMilestone = [100, 500, 1000, 2500, 5000, 10000].find(m => m > totalReviews) || 10000;
+                previewContent += `=== BEISPIEL MEILENSTEIN (${nextMilestone}) ===\n\n`;
+                previewContent += MastodonBot.generateMilestonePost(nextMilestone);
+                
+                // Show preview
+                const previewArea = document.getElementById('content-preview-area');
+                const previewText = document.getElementById('content-preview-text');
+                
+                if (previewArea && previewText) {
+                    previewText.textContent = previewContent;
+                    previewArea.style.display = 'block';
+                    globalThis.previewedContent = MastodonBot.generateDailyPost(stats); // Store daily content for posting
+                }
+                
+            } catch (error) {
+                console.error('Error generating content preview:', error);
+                showToast('Fehler beim Generieren der Vorschau', 'error');
+            }
+        };
+
+        globalThis.postPreviewedContent = async function() {
+            if (!checkAdminAccess()) return;
+            
+            if (globalThis.previewedContent) {
+                const result = await MastodonBot.postToMastodon(globalThis.previewedContent);
+                if (result.success) {
+                    showToast('Content erfolgreich gepostet!', 'success');
+                    addToPostHistory('Manual Preview Post', result.url);
+                    closeContentPreview();
+                } else {
+                    showToast(`Posting fehlgeschlagen: ${result.error}`, 'error');
+                }
+            }
+        };
+
+        globalThis.closeContentPreview = function() {
+            const previewArea = document.getElementById('content-preview-area');
+            if (previewArea) {
+                previewArea.style.display = 'none';
+            }
+            globalThis.previewedContent = null;
+        };
+
+        globalThis.updateBotStatus = function() {
+            // Update last post times
+            const lastDaily = localStorage.getItem('last_daily_post');
+            const lastWeekly = localStorage.getItem('last_weekly_post');
+            const lastMilestone = localStorage.getItem('last_milestone');
+            
+            const lastDailyElement = document.getElementById('last-daily-post');
+            const lastWeeklyElement = document.getElementById('last-weekly-post');
+            const nextMilestoneElement = document.getElementById('next-milestone');
+            
+            if (lastDailyElement) {
+                if (lastDaily) {
+                    lastDailyElement.textContent = new Date(lastDaily).toLocaleString('de-DE');
+                } else {
+                    lastDailyElement.textContent = 'Noch nie';
+                }
+            }
+            
+            if (lastWeeklyElement) {
+                if (lastWeekly) {
+                    lastWeeklyElement.textContent = new Date(lastWeekly).toLocaleString('de-DE');
+                } else {
+                    lastWeeklyElement.textContent = 'Noch nie';
+                }
+            }
+            
+            if (nextMilestoneElement) {
+                // Calculate next milestone
+                const currentMilestone = parseInt(lastMilestone || '0');
+                const milestones = [100, 500, 1000, 2500, 5000, 10000];
+                const nextMs = milestones.find(m => m > currentMilestone) || 'Alle erreicht';
+                nextMilestoneElement.textContent = nextMs;
+            }
+        };
+
+        globalThis.addToPostHistory = function(type, url) {
+            const historyElement = document.getElementById('mastodon-post-history');
+            if (!historyElement) return;
+            
+            const timestamp = new Date().toLocaleString('de-DE');
+            const historyItem = document.createElement('div');
+            historyItem.style.cssText = 'margin-bottom: 12px; padding: 12px; background: var(--glass-bg); border-radius: 8px; border-left: 3px solid var(--primary-color);';
+            
+            historyItem.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${type}</div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">${timestamp}</div>
+                    </div>
+                    <div>
+                        ${url ? `<a href="${url}" target="_blank" style="color: var(--primary-color); text-decoration: none; font-size: 0.9rem;">🔗 Ansehen</a>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Clear placeholder and add to top
+            if (historyElement.querySelector('div[style*="text-align: center"]')) {
+                historyElement.innerHTML = '';
+            }
+            
+            historyElement.insertBefore(historyItem, historyElement.firstChild);
+            
+            // Keep only last 10 entries
+            while (historyElement.children.length > 10) {
+                historyElement.removeChild(historyElement.lastChild);
+            }
+        };
+
+        // Enhanced manual posting functions that update UI
+        const originalPostDaily = globalThis.postDailyUpdate;
+        globalThis.postDailyUpdate = async function() {
+            if (!checkAdminAccess()) return;
+            
+            const result = await originalPostDaily();
+            if (result && result.success) {
+                addToPostHistory('Täglicher Update', result.url);
+                updateBotStatus();
+            }
+            return result;
+        };
+
+        const originalPostWeekly = globalThis.postWeeklyHighlights;
+        globalThis.postWeeklyHighlights = async function() {
+            if (!checkAdminAccess()) return;
+            
+            const result = await originalPostWeekly();
+            if (result && result.success) {
+                addToPostHistory('Wöchentliche Highlights', result.url);
+                updateBotStatus();
+            }
+            return result;
+        };
+
+        const originalTestPost = globalThis.testMastodonPost;
+        globalThis.testMastodonPost = async function() {
+            if (!checkAdminAccess()) return;
+            
+            const result = await originalTestPost();
+            if (result && result.success) {
+                addToPostHistory('Test-Post', result.url);
+            }
+            return result;
+        };
 
         // Initialize app
         window.addEventListener('load', function() {
