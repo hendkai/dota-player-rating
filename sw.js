@@ -1,7 +1,8 @@
-// Service Worker for Dota Player Rating PWA
-const CACHE_NAME = 'dota-rating-v1.0.0';
-const STATIC_CACHE_NAME = 'dota-rating-static-v1.0.0';
-const DYNAMIC_CACHE_NAME = 'dota-rating-dynamic-v1.0.0';
+// Service Worker for Dota Player Rating PWA - Version 1.0.1 (Cache Busting)
+const SCRIPT_VERSION = '1.0.1';
+const CACHE_NAME = `dota-rating-v${SCRIPT_VERSION}`;
+const STATIC_CACHE_NAME = `dota-rating-static-v${SCRIPT_VERSION}`;
+const DYNAMIC_CACHE_NAME = `dota-rating-dynamic-v${SCRIPT_VERSION}`;
 
 // Resources to cache immediately
 const STATIC_RESOURCES = [
