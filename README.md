@@ -6,95 +6,95 @@
 [![PWA Ready](https://img.shields.io/badge/📱-PWA%20Ready-blue?style=for-the-badge)](https://hendkai.github.io/dota-player-rating/)
 [![Community Bot](https://img.shields.io/badge/🤖-Mastodon%20Bot-purple?style=for-the-badge)](https://hendkai.github.io/dota-player-rating/)
 
-## 🌟 **Was ist Dota Player Rating?**
+## 🌟 **What is Dota Player Rating?**
 
-Eine **Progressive Web App (PWA)** zum Bewerten und Entdecken großartiger Dota 2 Spieler. Ziel ist es, **positive Gaming-Erfahrungen** zu fördern und toxisches Verhalten zu reduzieren durch ein **Community-basiertes Rating-System**.
+A **Progressive Web App (PWA)** for rating and discovering amazing Dota 2 players. The goal is to promote **positive gaming experiences** and reduce toxic behavior through a **community-based rating system**.
 
 ### 🎯 **Mission**
-- **🤝 Positive Spieler hervorheben** - Belohne gutes Verhalten
-- **🛡️ Toxizität reduzieren** - Baue eine bessere Gaming-Community
-- **🔍 Bessere Teammates finden** - Entdecke zuverlässige Spieler
-- **📊 Transparente Bewertungen** - Faire und nachvollziehbare Ratings
+- **🤝 Highlight positive players** - Reward good behavior
+- **🛡️ Reduce toxicity** - Build a better gaming community
+- **🔍 Find better teammates** - Discover reliable players
+- **📊 Transparent ratings** - Fair and trackable reviews
 
 ---
 
 ## ✨ **Features**
 
 ### 🏆 **Player Rating System**
-- **⭐ Multi-Kategorie Bewertungen:**
-  - 🎯 **Gesamt-Erfahrung** - Allgemeine Spielererfahrung
-  - ⚔️ **Skill Level** - Spielmechanik und Entscheidungsfindung
-  - 🤝 **Teamwork** - Kooperation und Teamplay
-  - 💬 **Kommunikation** - Voice Chat und Text-Kommunikation
-  - 😊 **Verhalten** - Attitude und Sportsmanship
-  - 👑 **Leadership** - Shot-calling und Führungsqualitäten
+- **⭐ Multi-Category Reviews:**
+  - 🎯 **Overall Experience** - General player experience
+  - ⚔️ **Skill Level** - Game mechanics and decision making
+  - 🤝 **Teamwork** - Cooperation and team play
+  - 💬 **Communication** - Voice chat and text communication
+  - 😊 **Behavior** - Attitude and sportsmanship
+  - 👑 **Leadership** - Shot-calling and leadership qualities
 
 ### 🔍 **Player Discovery**
-- **OpenDota Integration** - Automatische Spielerdaten
-- **Steam ID Support** - Verschiedene ID-Formate
-- **Suchverlauf** - Kürzlich gesuchte Spieler
-- **Detaillierte Profile** - Match-History und Statistiken
+- **OpenDota Integration** - Automatic player data
+- **Steam ID Support** - Various ID formats
+- **Search History** - Recently searched players
+- **Detailed Profiles** - Match history and statistics
 
 ### 📊 **Advanced Analytics**
-- **📈 Rating Distribution** - Visualisierung aller Bewertungen
-- **📅 Activity Timeline** - 7-Tage Aktivitätsübersicht
-- **🎯 Category Analysis** - Durchschnittswerte pro Kategorie
-- **📋 Community Summary** - Gesamtstatistiken und Trends
+- **📈 Rating Distribution** - Visualization of all ratings
+- **📅 Activity Timeline** - 7-day activity overview
+- **🎯 Category Analysis** - Average scores per category
+- **📋 Community Summary** - Overall statistics and trends
 
-### 🤖 **Mastodon Community-Bot**
-> **Automatische Community-Posts im Fediverse!**
+### 🤖 **Mastodon Community Bot**
+> **Automated community posts in the Fediverse!**
 
-- **📊 Tägliche Updates** (20:00) - Community-Statistiken und Top-Spieler
-- **🌟 Wöchentliche Highlights** (Sonntag 12:00) - MVP der Woche, beste Reviews
-- **🎉 Meilenstein-Posts** - Automatische Celebration bei 100, 500, 1000+ Reviews
-- **🛠️ Admin Control Panel** - Manuelle Posts, Content-Vorschau, Konfiguration
+- **📊 Daily Updates** (8:00 PM) - Community statistics and top players
+- **🌟 Weekly Highlights** (Sunday 12:00 PM) - MVP of the week, best reviews
+- **🎉 Milestone Posts** - Automatic celebration at 100, 500, 1000+ reviews
+- **🛠️ Admin Control Panel** - Manual posts, content preview, configuration
 
 ### 🛡️ **Admin & Moderation**
-- **🚩 Reports Management** - Tabular view mit Mass-Actions
-- **📋 Bulk Operations** - Delete, Resolve, Reject multiple reports
-- **🔍 Advanced Filtering** - Nach Status, Source, und Text-Search
-- **👥 User Management** - Statistics, Flagged Users, Search
-- **📊 Admin Dashboard** - Real-time statistics und monitoring
+- **🚩 Reports Management** - Tabular view with mass actions
+- **📋 Bulk Operations** - Delete, resolve, reject multiple reports
+- **🔍 Advanced Filtering** - By status, source, and text search
+- **👥 User Management** - Statistics, flagged users, search
+- **📊 Admin Dashboard** - Real-time statistics and monitoring
 
 ### 📱 **Progressive Web App (PWA)**
-- **🚀 Installierbar** - Native App Experience
-- **⚡ Offline Support** - Cached content verfügbar
-- **📱 Mobile Optimized** - Responsive Design für alle Geräte
-- **🔄 Auto-Updates** - Automatische Updates via Web-Deployment
+- **🚀 Installable** - Native app experience
+- **⚡ Offline Support** - Cached content available
+- **📱 Mobile Optimized** - Responsive design for all devices
+- **🔄 Auto-Updates** - Automatic updates via web deployment
 
 ---
 
 ## 🚀 **Live Demo**
 
-### 🌐 **Web Version (Empfohlen)**
+### 🌐 **Web Version (Recommended)**
 **[➡️ https://hendkai.github.io/dota-player-rating/](https://hendkai.github.io/dota-player-rating/)**
 
-- ✅ **Neueste Features** - Immer up-to-date
-- ✅ **Automatische Updates** - Keine manuellen Downloads
-- ✅ **PWA Installation** - Installiere als App mit einem Klick
-- ✅ **Cross-Platform** - Works auf Desktop, Mobile, Tablet
+- ✅ **Latest Features** - Always up-to-date
+- ✅ **Automatic Updates** - No manual downloads
+- ✅ **PWA Installation** - Install as app with one click
+- ✅ **Cross-Platform** - Works on desktop, mobile, tablet
 
 ### 📱 **Android APK (Legacy)**
 - 📥 [Download APK](https://github.com/hendkai/dota-player-rating/releases) 
-- ⚠️ **Hinweis:** APK ist veraltet - **PWA Web-Version bevorzugt!**
+- ⚠️ **Note:** APK is outdated - **PWA web version preferred!**
 
 ---
 
-## 🛠️ **Technologie-Stack**
+## 🛠️ **Technology Stack**
 
 ### **Frontend**
-- **📱 Vanilla JavaScript** - Pure JS für optimale Performance
+- **📱 Vanilla JavaScript** - Pure JS for optimal performance
 - **🎨 Modern CSS** - CSS Custom Properties, Flexbox, Grid
 - **⚡ Progressive Web App** - Service Worker, Manifest, Caching
 - **📊 Custom Charts** - Native JavaScript data visualization
 
 ### **Backend & Database**
-- **🔥 Firebase Firestore** - NoSQL Datenbank für Reviews
-- **🔐 Firebase Auth** - Sichere Benutzer-Authentifizierung
-- **☁️ Firebase Hosting** - Globales CDN und HTTPS
+- **🔥 Firebase Firestore** - NoSQL database for reviews
+- **🔐 Firebase Auth** - Secure user authentication
+- **☁️ Firebase Hosting** - Global CDN and HTTPS
 
 ### **APIs & Integration**
-- **🎮 OpenDota API** - Dota 2 player data und statistics
+- **🎮 OpenDota API** - Dota 2 player data and statistics
 - **🐘 Mastodon API** - Fediverse community posts
 - **📊 Real-time Analytics** - Live data processing
 
@@ -108,44 +108,44 @@ Eine **Progressive Web App (PWA)** zum Bewerten und Entdecken großartiger Dota 
 
 ## 🎯 **Getting Started**
 
-### **Als User**
-1. **🌐 Besuche:** [https://hendkai.github.io/dota-player-rating/](https://hendkai.github.io/dota-player-rating/)
-2. **🔐 Registriere dich** mit E-Mail oder Google
-3. **🔍 Suche Spieler** per Steam ID oder OpenDota
-4. **⭐ Bewerte deine Erfahrungen** in allen Kategorien
-5. **📊 Entdecke Analytics** und Community-Statistiken
+### **As User**
+1. **🌐 Visit:** [https://hendkai.github.io/dota-player-rating/](https://hendkai.github.io/dota-player-rating/)
+2. **🔐 Register** with email or Google
+3. **🔍 Search players** by Steam ID or OpenDota
+4. **⭐ Rate your experiences** in all categories
+5. **📊 Explore analytics** and community statistics
 
-### **Als Admin**
-1. **🛡️ Admin-Zugang** erhalten (nur autorisierte E-Mails)
-2. **🚩 Reports verwalten** - Bulk actions für Moderation
-3. **🤖 Mastodon-Bot** konfigurieren und aktivieren
-4. **📊 Admin-Dashboard** für Community-Monitoring
+### **As Admin**
+1. **🛡️ Get admin access** (authorized emails only)
+2. **🚩 Manage reports** - Bulk actions for moderation
+3. **🤖 Configure Mastodon bot** and activate
+4. **📊 Admin dashboard** for community monitoring
 
 ---
 
 ## 🤖 **Mastodon Bot Setup**
 
 ### **Quick Start**
-1. **🏷️ Mastodon App erstellen** auf deiner Instanz
-2. **🔑 Access Token** kopieren (`write:statuses` permission)
-3. **⚙️ Admin Panel** → Mastodon Bot → Konfiguration speichern
-4. **🧪 Test-Post** senden zur Überprüfung
-5. **🚀 Automatisierung** läuft ab sofort!
+1. **🏷️ Create Mastodon app** on your instance
+2. **🔑 Copy access token** (`write:statuses` permission)
+3. **⚙️ Admin Panel** → Mastodon Bot → Save configuration
+4. **🧪 Send test post** for verification
+5. **🚀 Automation** runs from now on!
 
-### **Post-Typen**
-- **📅 Täglich (20:00):** Community-Updates mit Statistiken
-- **🗓️ Wöchentlich (So 12:00):** Highlights und MVP der Woche  
-- **🎉 Meilensteine:** Automatic celebration posts
-- **📝 Manual:** Admin-gesteuerte Posts jederzeit
+### **Post Types**
+- **📅 Daily (8:00 PM):** Community updates with statistics
+- **🗓️ Weekly (Sun 12:00 PM):** Highlights and MVP of the week  
+- **🎉 Milestones:** Automatic celebration posts
+- **📝 Manual:** Admin-controlled posts anytime
 
-**📖 Vollständige Anleitung:** [MASTODON_BOT_SETUP.md](./MASTODON_BOT_SETUP.md)
+**📖 Full Guide:** [MASTODON_BOT_SETUP.md](./MASTODON_BOT_SETUP.md)
 
 ---
 
 ## 📊 **Analytics Dashboard**
 
 ### **Live Data Visualization**
-- **📈 Rating Distribution** - Bar charts aller Bewertungen
+- **📈 Rating Distribution** - Bar charts of all ratings
 - **📅 Activity Timeline** - Last 7 days review activity
 - **🎯 Category Breakdown** - Average scores per category
 - **📋 Community Summary** - Total stats and positive rate
@@ -158,19 +158,19 @@ Eine **Progressive Web App (PWA)** zum Bewerten und Entdecken großartiger Dota 
 
 ---
 
-## 🛡️ **Privacy & Sicherheit**
+## 🛡️ **Privacy & Security**
 
-### **Datenschutz**
-- **🔐 Firebase Auth** - Sichere E-Mail-Authentifizierung
-- **🗄️ Firestore Rules** - Granulare Zugriffskontrolle
-- **🍪 Local Storage** - Nur für Settings und Cache
-- **🚫 Keine Tracking** - Keine Third-party Analytics
+### **Data Protection**
+- **🔐 Firebase Auth** - Secure email authentication
+- **🗄️ Firestore Rules** - Granular access control
+- **🍪 Local Storage** - Only for settings and cache
+- **🚫 No Tracking** - No third-party analytics
 
 ### **Community Safety**
 - **🚩 Report System** - Inappropriate content reporting
 - **🛡️ Admin Moderation** - Professional review management
-- **⚖️ Fair Reviews** - Anti-spam und validation
-- **🔄 Transparent Process** - Open source und community-driven
+- **⚖️ Fair Reviews** - Anti-spam and validation
+- **🔄 Transparent Process** - Open source and community-driven
 
 ---
 
@@ -178,8 +178,8 @@ Eine **Progressive Web App (PWA)** zum Bewerten und Entdecken großartiger Dota 
 
 ### **Fediverse Presence**
 - **🐘 Mastodon:** [@dotarating@mastodon.social](https://mastodon.social/@dotarating) (placeholder)
-- **📡 Auto-Posts:** Daily updates und community highlights
-- **🤝 Community-driven:** Open source und transparent
+- **📡 Auto-Posts:** Daily updates and community highlights
+- **🤝 Community-driven:** Open source and transparent
 
 ### **Contributing**
 - **🐛 Bug Reports:** [GitHub Issues](https://github.com/hendkai/dota-player-rating/issues)
@@ -229,9 +229,9 @@ Eine **Progressive Web App (PWA)** zum Bewerten und Entdecken großartiger Dota 
 
 ## 🎉 **Join the Movement!**
 
-**Hilf uns dabei, die Gaming-Community zu verbessern!** 
+**Help us improve the gaming community!** 
 
-🎮 **[➡️ JETZT LOSLEGEN](https://hendkai.github.io/dota-player-rating/)** 🎮
+🎮 **[➡️ GET STARTED NOW](https://hendkai.github.io/dota-player-rating/)** 🎮
 
 ---
 
