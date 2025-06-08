@@ -1050,7 +1050,7 @@ Building positive gaming communities together.
         // Enhanced Session Management - Proactive token refresh
         let sessionRefreshInterval = null;
         
-        function startSessionMonitoring() {
+        globalThis.startSessionMonitoring = function() {
             // Clear any existing interval
             if (sessionRefreshInterval) {
                 clearInterval(sessionRefreshInterval);
@@ -1071,28 +1071,14 @@ Building positive gaming communities together.
             }, 30 * 60 * 1000); // 30 minutes
         }
         
-        function stopSessionMonitoring() {
+        globalThis.stopSessionMonitoring = function() {
             if (sessionRefreshInterval) {
                 clearInterval(sessionRefreshInterval);
                 sessionRefreshInterval = null;
             }
         }
         
-        // Enhanced Auth State Observer
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            
-            if (user) {
-                console.log('User authenticated:', user.email);
-                showMainApp();
-                updateUserInfo(user);
-                startSessionMonitoring();
-            } else {
-                console.log('User signed out');
-                showAuthSection();
-                stopSessionMonitoring();
-            }
-        });
+        // NOTE: Auth State Observer is now defined in Firebase module section after all functions are loaded
         
         // Session validation before critical operations
         async function ensureValidSession() {
@@ -4760,6 +4746,36 @@ Building positive gaming communities together.
                     login();
                 } else if (activeElement?.id === 'search-player') {
                     searchPlayer();
+                }
+            }
+        });
+
+        // Enhanced Auth State Observer - MUST BE AFTER ALL FUNCTIONS ARE DEFINED
+        onAuthStateChanged(auth, (user) => {
+            console.log('🔐 Auth State Changed:', user ? user.email : 'signed out');
+            currentUser = user;
+            
+            if (user) {
+                console.log('✅ User authenticated:', user.email);
+                // Add small delay to ensure DOM is ready
+                setTimeout(() => {
+                    if (typeof globalThis.showMainApp === 'function') {
+                        globalThis.showMainApp();
+                        globalThis.updateUserInfo(user);
+                        if (typeof globalThis.startSessionMonitoring === 'function') {
+                            globalThis.startSessionMonitoring();
+                        }
+                    } else {
+                        console.error('❌ showMainApp function not available!');
+                    }
+                }, 100);
+            } else {
+                console.log('👋 User signed out');
+                if (typeof globalThis.showAuthSection === 'function') {
+                    globalThis.showAuthSection();
+                }
+                if (typeof globalThis.stopSessionMonitoring === 'function') {
+                    globalThis.stopSessionMonitoring();
                 }
             }
         });
