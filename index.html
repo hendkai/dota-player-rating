@@ -1290,7 +1290,14 @@
                     // Continue with basic player data
                 }
 
-                return formatPlayerData(playerData, wlData, recentMatches, accountId);
+                const formattedData = formatPlayerData(playerData, wlData, recentMatches, accountId);
+                
+                // Load real ratings from our database
+                const realRatings = await loadPlayerRatings(formattedData.id);
+                formattedData.avgRating = realRatings.avgRating;
+                formattedData.totalReviews = realRatings.totalReviews;
+                
+                return formattedData;
             } catch (error) {
                 console.error('OpenDota API error:', error);
                 throw error;
@@ -1325,7 +1332,76 @@
                 console.error('Name search error:', error);
                 
                 // Fallback: Create a placeholder profile for rating purposes
-                return createPlaceholderProfile(playerName);
+                const placeholderProfile = createPlaceholderProfile(playerName);
+                
+                // Load real ratings for placeholder profile too
+                const realRatings = await loadPlayerRatings(placeholderProfile.id);
+                placeholderProfile.avgRating = realRatings.avgRating;
+                placeholderProfile.totalReviews = realRatings.totalReviews;
+                
+                return placeholderProfile;
+            }
+        }
+
+        // Format player data from OpenDota API
+        function formatPlayerData(playerData, wlData, recentMatches, accountId) {
+            const totalGames = (wlData.win || 0) + (wlData.lose || 0);
+            const winRate = totalGames > 0 ? ((wlData.win / totalGames) * 100).toFixed(1) : null;
+            
+            return {
+                id: accountId,
+                name: playerData.profile?.personaname || 'Anonymous Player',
+                avatar: playerData.profile?.avatarfull || '🎮',
+                playerId: accountId,
+                steamId: playerData.profile?.steamid || null,
+                profileUrl: playerData.profile?.profileurl || null,
+                lastSeen: recentMatches.length > 0 ? getLastSeenText(recentMatches[0].start_time) : null,
+                gamesPlayed: totalGames > 0 ? totalGames : null,
+                winRate: winRate,
+                favoriteHero: recentMatches.length > 0 ? getHeroName(recentMatches[0].hero_id) : null,
+                rank: getRankTier(playerData.rank_tier),
+                mmr: playerData.mmr_estimate?.estimate || null,
+                leaderboardRank: playerData.leaderboard_rank || null,
+                avgRating: null, // Will be set later
+                totalReviews: null, // Will be set later
+                recentMatches: recentMatches.length > 0 ? `${recentMatches.length} recent` : null,
+                isProfilePublic: !!(playerData.profile?.personaname),
+                joinDate: playerData.profile?.timecreated ? new Date(playerData.profile.timecreated * 1000).getFullYear() : null,
+                isPlaceholder: false
+            };
+        }
+
+        // Load real player ratings from our database
+        async function loadPlayerRatings(playerId) {
+            try {
+                const q = query(
+                    collection(db, 'ratings'), 
+                    where('playerId', '==', playerId)
+                );
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    return { avgRating: null, totalReviews: 0 };
+                }
+                
+                let totalRating = 0;
+                let count = 0;
+                
+                querySnapshot.forEach((doc) => {
+                    const rating = doc.data().rating;
+                    if (rating && rating >= 1 && rating <= 5) {
+                        totalRating += rating;
+                        count++;
+                    }
+                });
+                
+                return {
+                    avgRating: count > 0 ? (totalRating / count).toFixed(1) : null,
+                    totalReviews: count
+                };
+            } catch (error) {
+                console.error('Error loading player ratings:', error);
+                return { avgRating: null, totalReviews: 0 };
             }
         }
 
@@ -1335,21 +1411,21 @@
                 id: 'placeholder_' + playerName.toLowerCase().replace(/[^a-z0-9]/g, ''),
                 name: playerName,
                 avatar: '🎮',
-                playerId: 'Unknown',
-                steamId: 'Unknown',
+                playerId: null,
+                steamId: null,
                 profileUrl: null,
-                lastSeen: 'Unknown',
-                gamesPlayed: 'Unknown',
-                winRate: 'Unknown',
-                favoriteHero: 'Unknown',
-                rank: 'Unranked',
-                mmr: 'Unknown',
+                lastSeen: null,
+                gamesPlayed: null,
+                winRate: null,
+                favoriteHero: null,
+                rank: null,
+                mmr: null,
                 leaderboardRank: null,
-                avgRating: (Math.random() * 2 + 3).toFixed(1), // From our rating system
-                totalReviews: Math.floor(Math.random() * 5) + 1, // From our rating system
-                recentMatches: 'Unknown',
+                avgRating: null, // Will be calculated from real ratings
+                totalReviews: null, // Will be calculated from real ratings
+                recentMatches: null,
                 isProfilePublic: false,
-                joinDate: 'Unknown',
+                joinDate: null,
                 isPlaceholder: true
             };
         }
@@ -1474,11 +1550,97 @@
 
         // Display Player Profile with Real Data
         function displayPlayerProfile(player) {
-            const rankDisplay = player.leaderboardRank ? 
-                `Rank #${player.leaderboardRank}` : player.rank;
+            // Build profile info dynamically, only showing available data
+            let profileInfo = [];
+            if (player.steamId) profileInfo.push(`Steam ID: ${player.steamId}`);
+            if (player.lastSeen) profileInfo.push(player.lastSeen);
             
-            const mmrDisplay = player.mmr === 'Unknown' ? 
-                'Not Calibrated' : `${player.mmr} MMR`;
+            // Add Steam profile and OpenDota links
+            let profileLinks = [];
+            if (player.profileUrl) {
+                profileLinks.push(`<a href="${player.profileUrl}" target="_blank" style="color: var(--primary-color);">Steam Profile</a>`);
+            }
+            if (!player.isPlaceholder && player.playerId) {
+                profileLinks.push(`<a href="https://www.opendota.com/players/${player.playerId}" target="_blank" style="color: var(--accent-color);">OpenDota Profile</a>`);
+            }
+            
+            // Rating display
+            const ratingDisplay = player.avgRating && player.totalReviews > 0 ? 
+                `<div style="text-align: center;">
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--success-color);">${player.avgRating}⭐</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">${player.totalReviews} reviews</div>
+                </div>` :
+                `<div style="text-align: center;">
+                    <div style="font-size: 1.2rem; color: var(--text-muted);">No ratings yet</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted);">Be the first to rate!</div>
+                </div>`;
+            
+            // Build stats grid - only show available data
+            let statsGrid = [];
+            
+            if (player.rank || player.leaderboardRank) {
+                const rankDisplay = player.leaderboardRank ? `Rank #${player.leaderboardRank}` : player.rank;
+                statsGrid.push(`
+                    <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${rankDisplay}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Rank</div>
+                    </div>
+                `);
+            }
+            
+            if (player.mmr) {
+                statsGrid.push(`
+                    <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${player.mmr}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">MMR</div>
+                    </div>
+                `);
+            }
+            
+            if (player.winRate) {
+                statsGrid.push(`
+                    <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${player.winRate}%</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Win Rate</div>
+                    </div>
+                `);
+            }
+            
+            if (player.gamesPlayed) {
+                statsGrid.push(`
+                    <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
+                        <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${player.gamesPlayed}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Games</div>
+                    </div>
+                `);
+            }
+            
+            // Build additional info - only show available data
+            let additionalInfo = [];
+            if (player.favoriteHero) {
+                additionalInfo.push(`
+                    <div>
+                        <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px;">Favorite Hero</div>
+                        <div style="color: var(--text-primary); font-weight: 600;">${player.favoriteHero}</div>
+                    </div>
+                `);
+            }
+            if (player.recentMatches) {
+                additionalInfo.push(`
+                    <div>
+                        <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px;">Recent Matches</div>
+                        <div style="color: var(--text-primary); font-weight: 600;">${player.recentMatches}</div>
+                    </div>
+                `);
+            }
+            if (player.joinDate) {
+                additionalInfo.push(`
+                    <div>
+                        <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px;">Profile Created</div>
+                        <div style="color: var(--text-primary); font-weight: 600;">${player.joinDate}</div>
+                    </div>
+                `);
+            }
             
             const profileHTML = `
                 <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
@@ -1486,55 +1648,35 @@
                         <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; font-size: 2rem; background-image: url('${player.avatar}'); background-size: cover; background-position: center;">${typeof player.avatar === 'string' && player.avatar.startsWith('http') ? '' : player.avatar}</div>
                         <div style="flex: 1;">
                             <h3 style="color: var(--text-primary); margin-bottom: 8px; font-size: 1.5rem;">${player.name}</h3>
-                            <div style="display: flex; gap: 16px; flex-wrap: wrap; color: var(--text-secondary); font-size: 0.9rem;">
-                                <span>Steam ID: ${player.steamId}</span>
-                                <span>•</span>
-                                <span>${player.lastSeen}</span>
-                                ${player.profileUrl ? `<span>•</span><a href="${player.profileUrl}" target="_blank" style="color: var(--primary-color);">Steam Profile</a>` : ''}
-                            </div>
-                            ${!player.isProfilePublic ? '<div style="color: var(--warning-color); font-size: 0.8rem; margin-top: 4px;">⚠️ Private Profile - Limited data available</div>' : ''}
+                            ${profileInfo.length > 0 ? `
+                                <div style="display: flex; gap: 16px; flex-wrap: wrap; color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 8px;">
+                                    ${profileInfo.join('<span>•</span>')}
+                                </div>
+                            ` : ''}
+                            ${profileLinks.length > 0 ? `
+                                <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.9rem;">
+                                    ${profileLinks.join('<span>•</span>')}
+                                </div>
+                            ` : ''}
+                            ${!player.isProfilePublic && !player.isPlaceholder ? '<div style="color: var(--warning-color); font-size: 0.8rem; margin-top: 4px;">⚠️ Private Profile - Limited data available</div>' : ''}
+                            ${player.isPlaceholder ? '<div style="color: var(--primary-color); font-size: 0.8rem; margin-top: 4px;">📝 Community Profile - Rate this player to build their reputation!</div>' : ''}
                         </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--success-color);">${player.avgRating}⭐</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">${player.totalReviews} reviews</div>
-                        </div>
+                        ${ratingDisplay}
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px;">
-                        <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
-                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${rankDisplay}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">Rank</div>
+                    ${statsGrid.length > 0 ? `
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                            ${statsGrid.join('')}
                         </div>
-                        <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
-                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${mmrDisplay}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">MMR</div>
-                        </div>
-                        <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
-                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${player.winRate}%</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">Win Rate</div>
-                        </div>
-                        <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
-                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${player.gamesPlayed}</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">Games</div>
-                        </div>
-                    </div>
+                    ` : ''}
 
-                    <div style="background: var(--bg-secondary); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; text-align: center;">
-                            <div>
-                                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px;">Favorite Hero</div>
-                                <div style="color: var(--text-primary); font-weight: 600;">${player.favoriteHero}</div>
-                            </div>
-                            <div>
-                                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px;">Recent Matches</div>
-                                <div style="color: var(--text-primary); font-weight: 600;">${player.recentMatches}</div>
-                            </div>
-                            <div>
-                                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px;">Profile Created</div>
-                                <div style="color: var(--text-primary); font-weight: 600;">${player.joinDate}</div>
+                    ${additionalInfo.length > 0 ? `
+                        <div style="background: var(--bg-secondary); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; text-align: center;">
+                                ${additionalInfo.join('')}
                             </div>
                         </div>
-                    </div>
+                    ` : ''}
 
                     <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
                         <button class="btn" onclick="showRatingForm('${player.id}', '${player.name}')">⭐ Rate This Player</button>
