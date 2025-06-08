@@ -1443,35 +1443,95 @@
             }
         };
 
-                 async function updateAdminStats() {
-             if (!isAdmin(currentUser?.email)) return;
-             
-             try {
-                 // Total reports
-                 const reportsSnapshot = await getDocs(collection(db, 'reports'));
-                 document.getElementById('admin-total-reports').textContent = reportsSnapshot.size;
-                 
-                 // Pending reports
-                 const pendingQuery = query(collection(db, 'reports'), where('status', '==', 'pending'));
-                 const pendingSnapshot = await getDocs(pendingQuery);
-                 document.getElementById('admin-pending-reports').textContent = pendingSnapshot.size;
-                 
-                 // Total reviews
-                 const reviewsSnapshot = await getDocs(collection(db, 'ratings'));
-                 document.getElementById('admin-total-reviews').textContent = reviewsSnapshot.size;
-                 
-                 // Unique users
-                 const userEmails = new Set();
-                 reviewsSnapshot.forEach((doc) => {
-                     const email = doc.data().reviewerEmail;
-                     if (email) userEmails.add(email);
-                 });
-                 document.getElementById('admin-total-users').textContent = userEmails.size;
-                 
-             } catch (error) {
-                 console.error('Error updating admin stats:', error);
-             }
-         }
+                         async function updateAdminStats() {
+            if (!isAdmin(currentUser?.email)) return;
+            
+            try {
+                console.log('Updating admin stats...');
+                
+                // Initialize counts
+                let totalReports = 0;
+                let pendingReports = 0;
+                let totalReviews = 0;
+                const userEmails = new Set();
+                
+                // Count reports from reports collection
+                try {
+                    const reportsSnapshot = await getDocs(collection(db, 'reports'));
+                    totalReports += reportsSnapshot.size;
+                    
+                    // Count pending reports
+                    reportsSnapshot.forEach((doc) => {
+                        const report = doc.data();
+                        if (report.status === 'pending' || !report.status) {
+                            pendingReports++;
+                        }
+                    });
+                    console.log('Reports collection stats:', totalReports, 'total,', pendingReports, 'pending');
+                } catch (reportsError) {
+                    console.warn('Could not access reports collection:', reportsError);
+                }
+                
+                // Count reports from fallback method and get other stats
+                try {
+                    const reviewsSnapshot = await getDocs(collection(db, 'ratings'));
+                    totalReviews = reviewsSnapshot.size;
+                    
+                    reviewsSnapshot.forEach((doc) => {
+                        const review = doc.data();
+                        
+                        // Count unique users
+                        const email = review.reviewerEmail;
+                        if (email) userEmails.add(email);
+                        
+                        // Count fallback reports
+                        if (review.reportsList && Array.isArray(review.reportsList)) {
+                            totalReports += review.reportsList.length;
+                            
+                            // Count pending fallback reports
+                            review.reportsList.forEach((report) => {
+                                if (report.status === 'pending' || !report.status) {
+                                    pendingReports++;
+                                }
+                            });
+                        }
+                    });
+                    
+                    console.log('Reviews collection stats:', totalReviews, 'reviews,', userEmails.size, 'users');
+                    console.log('Total fallback reports found:', totalReports - (await getDocs(collection(db, 'reports')).catch(() => ({ size: 0 }))).size);
+                } catch (reviewsError) {
+                    console.error('Error accessing reviews collection:', reviewsError);
+                }
+                
+                // Update UI elements
+                const totalReportsEl = document.getElementById('admin-total-reports');
+                const pendingReportsEl = document.getElementById('admin-pending-reports');
+                const totalUsersEl = document.getElementById('admin-total-users');
+                const totalReviewsEl = document.getElementById('admin-total-reviews');
+                
+                if (totalReportsEl) totalReportsEl.textContent = totalReports;
+                if (pendingReportsEl) pendingReportsEl.textContent = pendingReports;
+                if (totalUsersEl) totalUsersEl.textContent = userEmails.size;
+                if (totalReviewsEl) totalReviewsEl.textContent = totalReviews;
+                
+                console.log('Admin stats updated:', {
+                    totalReports,
+                    pendingReports,
+                    totalUsers: userEmails.size,
+                    totalReviews
+                });
+                
+            } catch (error) {
+                console.error('Error updating admin stats:', error);
+                
+                // Show error in UI
+                const elements = ['admin-total-reports', 'admin-pending-reports', 'admin-total-users', 'admin-total-reviews'];
+                elements.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = 'Error';
+                });
+            }
+        }
 
          // Additional Admin Functions
          globalThis.loadRecentReviews = async function() {
@@ -1809,6 +1869,9 @@
                 loadReviews();
             } else if (tabName === 'analytics') {
                 loadAnalytics();
+            } else if (tabName === 'admin' && isAdmin(currentUser?.email)) {
+                console.log('Switching to admin tab, updating stats...');
+                updateAdminStats();
             }
         };
 
@@ -3573,7 +3636,10 @@
             // Show admin tab if user is admin
             if (currentUser && isAdmin(currentUser.email)) {
                 showAdminTab();
-                updateAdminStats();
+                // Load admin stats after a short delay to ensure DOM is ready
+                setTimeout(() => {
+                    updateAdminStats();
+                }, 500);
             } else {
                 hideAdminTab();
             }
