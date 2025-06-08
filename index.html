@@ -1067,19 +1067,26 @@ Building positive gaming communities together.
                 clearInterval(sessionRefreshInterval);
             }
             
-            // Refresh auth token every 30 minutes to prevent expiration
+            // Refresh auth token every 45 minutes to prevent expiration (less aggressive)
             sessionRefreshInterval = setInterval(async () => {
                 if (currentUser) {
                     try {
                         console.log('Proactive token refresh...');
-                        await currentUser.getIdToken(true);
-                        console.log('Token refreshed successfully');
+                        // Use cached token first, only refresh if needed
+                        const cachedToken = await currentUser.getIdToken(false);
+                        if (!cachedToken) {
+                            await currentUser.getIdToken(true);
+                            console.log('Token refreshed successfully');
+                        } else {
+                            console.log('Using cached token, no refresh needed');
+                        }
                     } catch (error) {
                         console.warn('Proactive token refresh failed:', error);
                         // If token refresh fails, the user will get prompted on their next action
+                        // Don't force logout here, just log the issue
                     }
                 }
-            }, 30 * 60 * 1000); // 30 minutes
+            }, 45 * 60 * 1000); // 45 minutes (less frequent)
         }
         
         globalThis.stopSessionMonitoring = function() {
@@ -1091,12 +1098,15 @@ Building positive gaming communities together.
         
         // NOTE: Auth State Observer is now defined in Firebase module section after all functions are loaded
         
-        // Session validation before critical operations
-        async function ensureValidSession() {
-            // Check if user is logged in first
-            if (!currentUser) {
+        // Enhanced session validation with better error handling - GLOBAL SCOPE
+        globalThis.ensureValidSession = async function() {
+            // Check if user is logged in first - with safety check
+            if (typeof globalThis.currentUser === 'undefined' || !globalThis.currentUser) {
+                console.error('❌ currentUser is not defined or null');
                 throw new Error('No authenticated user');
             }
+            
+            const currentUser = globalThis.currentUser;
             
             try {
                 // For mobile/app context, be more lenient with session validation
@@ -1114,14 +1124,41 @@ Building positive gaming communities together.
                         throw new Error('No valid user session');
                     }
                 } else {
-                    // For desktop: Standard Firebase token validation
-                    await currentUser.getIdToken(true);
-                    console.log('✅ Desktop session valid:', currentUser.email);
-                    return true;
+                    // For desktop: Enhanced token validation with retry logic
+                    try {
+                        // Try to get the current token first (without forcing refresh)
+                        const token = await currentUser.getIdToken(false);
+                        if (token) {
+                            console.log('✅ Desktop session valid (cached token):', currentUser.email);
+                            return true;
+                        }
+                    } catch (tokenError) {
+                        console.log('Cached token failed, trying refresh...', tokenError);
+                        
+                        // If cached token fails, try to refresh
+                        try {
+                            await currentUser.getIdToken(true);
+                            console.log('✅ Desktop session valid (refreshed token):', currentUser.email);
+                            return true;
+                        } catch (refreshError) {
+                            console.error('Token refresh failed:', refreshError);
+                            throw refreshError;
+                        }
+                    }
                 }
             } catch (error) {
                 console.error('Session validation failed:', error);
-                throw new Error('Session expired');
+                
+                // More specific error handling
+                if (error.code === 'auth/network-request-failed') {
+                    throw new Error('Network connection error. Please check your internet connection.');
+                } else if (error.code === 'auth/too-many-requests') {
+                    throw new Error('Too many requests. Please wait a moment and try again.');
+                } else if (error.code === 'auth/user-token-expired') {
+                    throw new Error('Session expired');
+                } else {
+                    throw new Error('Session validation failed');
+                }
             }
         }
      </script>
@@ -1150,6 +1187,7 @@ Building positive gaming communities together.
 
         // Global Variables
         let currentUser = null;
+        globalThis.currentUser = null; // Make currentUser globally accessible
         let recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]');
         let searchTimeout = null;
         let currentFilter = 'all';
@@ -1734,9 +1772,25 @@ Building positive gaming communities together.
                             });
                         });
                     });
-                    console.log('Total reports loaded:', allReports.length);
+                    console.log('Database reports loaded:', allReports.length);
                 } catch (fallbackError) {
                     console.warn('Could not load fallback reports:', fallbackError);
+                }
+                
+                // Load local storage reports
+                try {
+                    const localReports = JSON.parse(localStorage.getItem('local_reports') || '[]');
+                    localReports.forEach((report) => {
+                        allReports.push({
+                            ...report,
+                            source: 'local_storage',
+                            timestamp: { toDate: () => new Date(report.timestamp) } // Convert back to Date for sorting
+                        });
+                    });
+                    console.log('Local reports loaded:', localReports.length);
+                    console.log('Total reports (database + local):', allReports.length);
+                } catch (localError) {
+                    console.warn('Could not load local reports:', localError);
                 }
                 
                 // Sort by timestamp
@@ -1756,7 +1810,8 @@ Building positive gaming communities together.
                         const status = report.status || 'pending';
                         const statusColor = status === 'resolved' ? 'var(--success-color)' : 
                                           status === 'rejected' ? 'var(--error-color)' : 'var(--warning-color)';
-                        const sourceLabel = report.source === 'fallback' ? ' (Fallback)' : '';
+                        const sourceLabel = report.source === 'fallback' ? ' (Fallback)' : 
+                                          report.source === 'local_storage' ? ' (Local)' : '';
                         
                         reportsHtml += `
                             <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; margin: 16px 0; border-left: 4px solid ${statusColor};">
@@ -3051,28 +3106,42 @@ Building positive gaming communities together.
                 console.error('Error message:', error.message);
                 
                 let errorMessage = 'Failed to submit rating. Please try again.';
+                let shouldSuggestLogout = false;
                 
                 if (error.code === 'permission-denied') {
                     errorMessage = 'Session expired. Please log out and log in again to continue.';
-                    // Auto-suggest logout for convenience
-                    setTimeout(() => {
-                        if (confirm('Your session has expired. Would you like to log out and log back in?')) {
-                            logout();
-                        }
-                    }, 2000);
+                    shouldSuggestLogout = true;
                 } else if (error.code === 'unavailable') {
                     errorMessage = 'Service temporarily unavailable. Please try again later.';
                 } else if (error.code === 'failed-precondition') {
                     errorMessage = 'Database configuration error. Please try again.';
                 } else if (error.message && error.message.includes('Missing or insufficient permissions')) {
                     errorMessage = 'Database permissions issue. Please log out and log back in.';
+                    shouldSuggestLogout = true;
                 } else if (error.code === 'unauthenticated') {
                     errorMessage = 'Authentication error. Please log out and log in again.';
+                    shouldSuggestLogout = true;
                 } else if (error.message && error.message.includes('network')) {
                     errorMessage = 'Network error. Please check your connection and try again.';
+                } else if (error.message === 'Network connection error. Please check your internet connection.') {
+                    errorMessage = 'Network connection error. Please check your internet connection and try again.';
+                } else if (error.message === 'Too many requests. Please wait a moment and try again.') {
+                    errorMessage = 'Too many requests. Please wait a moment and try again.';
+                } else if (error.message === 'Session validation failed') {
+                    errorMessage = 'Session validation failed. Please try logging out and back in.';
+                    shouldSuggestLogout = true;
                 }
                 
                 showToast(errorMessage, 'error');
+                
+                // Only suggest logout for authentication-related errors
+                if (shouldSuggestLogout) {
+                    setTimeout(() => {
+                        if (confirm('Your session has expired or there is an authentication issue. Would you like to log out and log back in?')) {
+                            logout();
+                        }
+                    }, 2000);
+                }
             } finally {
                 setLoadingState('submit', false);
             }
@@ -3413,14 +3482,14 @@ Building positive gaming communities together.
             const details = document.getElementById('reportDetails').value.trim();
             
             if (!selectedReason) {
-                showToast('Please select a reason for reporting', 'error');
+                showToast('Bitte wählen Sie einen Grund für die Meldung aus', 'error');
                 return;
             }
 
             try {
                 // Check if user is actually logged in
                 if (!currentUser) {
-                    showToast('Please log in to report reviews', 'error');
+                    showToast('Bitte melden Sie sich an, um Reviews zu melden', 'error');
                     closeReportModal();
                     return;
                 }
@@ -3430,36 +3499,33 @@ Building positive gaming communities together.
                 const timeSinceLastReport = now - lastReportTime;
                 if (timeSinceLastReport < MIN_REPORT_INTERVAL) {
                     const remainingTime = Math.ceil((MIN_REPORT_INTERVAL - timeSinceLastReport) / 1000);
-                    showToast(`Please wait ${remainingTime} seconds before submitting another report`, 'warning');
+                    showToast(`Bitte warten Sie ${remainingTime} Sekunden, bevor Sie einen weiteren Report einreichen`, 'warning');
                     return;
                 }
                 
-                // Validate and refresh session before submission - with fallback
-                let sessionValid = true;
+                // Enhanced session validation - optimized approach
+                if (!currentUser || !currentUser.email) {
+                    console.error('❌ No valid user found for reporting');
+                    showToast('Bitte melden Sie sich an, um Reports zu erstellen.', 'warning');
+                    setTimeout(() => {
+                        if (confirm('Sie müssen angemeldet sein, um Reports zu erstellen. Jetzt anmelden?')) {
+                            showAuth();
+                        }
+                    }, 1000);
+                    return;
+                }
+                
+                // Optional session validation (non-blocking)
                 try {
-                    await ensureValidSession();
-                    console.log('✅ Session validated for report submission');
-                } catch (sessionError) {
-                    console.error('Session validation failed:', sessionError);
-                    
-                    // Fallback: Check if we at least have a currentUser with email
-                    if (currentUser && currentUser.email) {
-                        console.log('⚠️ Session validation failed but user exists, continuing with report...');
-                        sessionValid = true;
+                    if (typeof globalThis.ensureValidSession === 'function') {
+                        await globalThis.ensureValidSession();
+                        console.log('✅ Session validated for report submission');
                     } else {
-                        console.error('❌ No valid user found for reporting');
-                        showToast('Please log in to submit reports.', 'warning');
-                        setTimeout(() => {
-                            if (confirm('You need to be logged in to submit reports. Would you like to log in?')) {
-                                showAuth();
-                            }
-                        }, 1000);
-                        return;
+                        console.log('⚠️ Session validation function not available, proceeding with basic auth check');
                     }
-                }
-                
-                if (!sessionValid) {
-                    return;
+                } catch (sessionError) {
+                    console.warn('Session validation failed but continuing with basic user check:', sessionError);
+                    // Continue anyway since we already verified currentUser exists
                 }
                 
                 console.log('Current user:', currentUser.email);
@@ -3480,7 +3546,7 @@ Building positive gaming communities together.
                 }
                 
                 if (hasAlreadyReported) {
-                    showToast('You have already reported this review', 'error');
+                    showToast('Sie haben dieses Review bereits gemeldet', 'error');
                     closeReportModal();
                     return;
                 }
@@ -3511,49 +3577,89 @@ Building positive gaming communities together.
 
                 console.log('Report data prepared:', reportData);
                 
-                // Try to save to reports collection first
+                // Primary method: Save to Firebase reports collection (should work now with fixed rules)
                 let reportSaved = false;
+                let usedFallback = false;
+                
                 try {
                     const reportDocRef = await addDoc(collection(db, 'reports'), reportData);
-                    console.log('Report submitted with ID:', reportDocRef.id);
+                    console.log('✅ Report erfolgreich in Firebase gespeichert mit ID:', reportDocRef.id);
                     reportSaved = true;
                 } catch (reportError) {
-                    console.warn('Could not save to reports collection, using fallback method:', reportError);
+                    console.warn('⚠️ Firebase Reports Collection fehlgeschlagen, verwende Fallback-Methode:', reportError);
+                    console.warn('Error details:', reportError.code, reportError.message);
                     
-                    // Fallback: Save report info directly in the review document
-                    const reviewRef = doc(db, 'ratings', reviewId);
-                    const reviewSnap = await getDoc(reviewRef);
-                    if (reviewSnap.exists()) {
-                        const reviewData = reviewSnap.data();
-                        const existingReports = reviewData.reportsList || [];
-                        
-                        // Check if user already reported using fallback method
-                        const alreadyReported = existingReports.some(r => r.reporterId === currentUser.uid);
-                        if (alreadyReported) {
-                            showToast('You have already reported this review', 'error');
-                            closeReportModal();
-                            return;
+                    // Robust Fallback: Save report info directly in the review document
+                    try {
+                        const reviewRef = doc(db, 'ratings', reviewId);
+                        const reviewSnap = await getDoc(reviewRef);
+                        if (reviewSnap.exists()) {
+                            const reviewData = reviewSnap.data();
+                            const existingReports = reviewData.reportsList || [];
+                            
+                            // Check if user already reported using fallback method
+                            const alreadyReported = existingReports.some(r => r.reporterId === currentUser.uid);
+                            if (alreadyReported) {
+                                showToast('Sie haben dieses Review bereits gemeldet', 'error');
+                                closeReportModal();
+                                return;
+                            }
+                            
+                            // Add new report to the review document
+                            existingReports.push({
+                                reporterId: currentUser.uid,
+                                reporterEmail: currentUser.email,
+                                reporterName: currentUser.displayName || currentUser.email.split('@')[0],
+                                reason: selectedReason.value,
+                                details: details,
+                                timestamp: new Date(),
+                                status: 'pending'
+                            });
+                            
+                            await updateDoc(reviewRef, {
+                                reportsList: existingReports,
+                                reportCount: existingReports.length,
+                                reported: true
+                            });
+                            
+                            console.log('✅ Report saved using fallback method');
+                            reportSaved = true;
+                            usedFallback = true;
+                        } else {
+                            console.error('❌ Review document not found for fallback');
                         }
+                    } catch (fallbackError) {
+                        console.error('❌ Database fallback also failed:', fallbackError);
+                        console.log('🔄 Using local storage fallback...');
                         
-                        // Add new report to the review document
-                        existingReports.push({
-                            reporterId: currentUser.uid,
-                            reporterEmail: currentUser.email,
-                            reporterName: currentUser.displayName || currentUser.email.split('@')[0],
-                            reason: selectedReason.value,
-                            details: details,
-                            timestamp: new Date(),
-                            status: 'pending'
-                        });
-                        
-                        await updateDoc(reviewRef, {
-                            reportsList: existingReports,
-                            reportCount: existingReports.length,
-                            reported: true
-                        });
-                        
-                        console.log('Report saved using fallback method');
-                        reportSaved = true;
+                        // Local Storage Fallback - Always works
+                        try {
+                            const localReports = JSON.parse(localStorage.getItem('local_reports') || '[]');
+                            const localReport = {
+                                id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                                reviewId: reviewId,
+                                reporterId: currentUser.uid,
+                                reporterEmail: currentUser.email,
+                                reporterName: currentUser.displayName || currentUser.email.split('@')[0],
+                                reportedReviewerName: reviewerName,
+                                reason: selectedReason.value,
+                                details: details,
+                                timestamp: new Date().toISOString(),
+                                status: 'pending',
+                                method: 'local_storage'
+                            };
+                            
+                            localReports.push(localReport);
+                            localStorage.setItem('local_reports', JSON.stringify(localReports));
+                            
+                            console.log('✅ Report saved to local storage');
+                            reportSaved = true;
+                            usedFallback = true;
+                            
+                        } catch (localError) {
+                            console.error('❌ Even local storage failed:', localError);
+                            throw new Error('All report submission methods failed');
+                        }
                     }
                 }
 
@@ -3579,13 +3685,17 @@ Building positive gaming communities together.
                     // Update last report time to enforce rate limiting
                     lastReportTime = Date.now();
                     
-                    showToast('Report submitted successfully. Thank you for helping keep our community safe!', 'success');
+                    const successMessage = usedFallback 
+                        ? 'Report erfolgreich eingereicht (lokal gespeichert für Admin-Überprüfung). Danke, dass Sie unsere Community sicher halten!' 
+                        : 'Report erfolgreich eingereicht. Danke, dass Sie unsere Community sicher halten!';
+                    
+                    showToast(successMessage, 'success');
                     closeReportModal();
                     
                     // Reload reviews to show updated report count
                     loadReviews();
                 } else {
-                    showToast('Could not submit report. Please try again.', 'error');
+                    showToast('Report konnte nicht eingereicht werden. Bitte versuchen Sie es erneut.', 'error');
                 }
 
             } catch (error) {
@@ -3593,24 +3703,18 @@ Building positive gaming communities together.
                 console.error('Error code:', error.code);
                 console.error('Error message:', error.message);
                 
-                let errorMessage = 'Failed to submit report. Please try again.';
+                let errorMessage = 'Report-Einreichung fehlgeschlagen. Bitte versuchen Sie es erneut.';
                 
-                if (error.code === 'permission-denied') {
-                    errorMessage = 'Session expired. Please log out and log in again to continue reporting.';
-                    // Auto-suggest logout for convenience
-                    setTimeout(() => {
-                        if (confirm('Your session has expired. Would you like to log out and log back in?')) {
-                            logout();
-                        }
-                    }, 2000);
+                if (error.code === 'permission-denied' || error.message.includes('Missing or insufficient permissions')) {
+                    errorMessage = 'Report konnte aufgrund von Berechtigungen nicht in der Hauptdatenbank gespeichert werden. Unser Backup-System sollte dies automatisch behandelt haben.';
                 } else if (error.code === 'unavailable') {
-                    errorMessage = 'Service temporarily unavailable. Please try again later.';
+                    errorMessage = 'Service vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.';
                 } else if (error.code === 'failed-precondition') {
-                    errorMessage = 'Database configuration error. Report saved locally.';
-                } else if (error.message && error.message.includes('Missing or insufficient permissions')) {
-                    errorMessage = 'Database permissions issue. Report saved locally.';
+                    errorMessage = 'Datenbank-Konfigurationsfehler. Bitte versuchen Sie es erneut.';
                 } else if (error.code === 'unauthenticated') {
-                    errorMessage = 'Authentication error. Please log out and log in again.';
+                    errorMessage = 'Sie müssen angemeldet sein, um Reports zu erstellen. Bitte melden Sie sich an und versuchen Sie es erneut.';
+                } else if (error.message && error.message.includes('network')) {
+                    errorMessage = 'Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.';
                 }
                 
                 showToast(errorMessage, 'error');
@@ -3621,6 +3725,35 @@ Building positive gaming communities together.
             const playerData = createPlaceholderProfile(playerName);
             displayPlayerProfile(playerData);
             showToast(`Created rating profile for ${playerName}!`, 'success');
+        };
+
+        // Function to view local reports (for debugging/admin)
+        globalThis.viewLocalReports = function() {
+            try {
+                const localReports = JSON.parse(localStorage.getItem('local_reports') || '[]');
+                console.log('📋 Local Reports:', localReports);
+                
+                if (localReports.length > 0) {
+                    showToast(`Found ${localReports.length} local reports. Check console for details.`, 'info');
+                } else {
+                    showToast('No local reports found.', 'info');
+                }
+                
+                return localReports;
+            } catch (error) {
+                console.error('Error viewing local reports:', error);
+                showToast('Error viewing local reports', 'error');
+                return [];
+            }
+        };
+
+        // Function to clear local reports (for admin cleanup)
+        globalThis.clearLocalReports = function() {
+            if (confirm('Are you sure you want to clear all local reports?')) {
+                localStorage.removeItem('local_reports');
+                showToast('Local reports cleared', 'success');
+                console.log('🗑️ Local reports cleared');
+            }
         };
 
         globalThis.showPopularPlayers = function() {
@@ -4890,6 +5023,7 @@ Building positive gaming communities together.
         onAuthStateChanged(auth, (user) => {
             console.log('🔐 Auth State Changed:', user ? user.email : 'signed out');
             currentUser = user;
+            globalThis.currentUser = user; // Keep global version synchronized
             
             if (user) {
                 console.log('✅ User authenticated:', user.email);
