@@ -2558,7 +2558,10 @@
                                         <div style="font-size: 0.8rem; color: var(--text-muted);">Reviewed: ${review.playerName}</div>
                                     </div>
                                 </div>
-                                <div style="color: #fbbf24; font-size: 1.2rem;">${stars}</div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="color: #fbbf24; font-size: 1.2rem;">${stars}</div>
+                                    <button onclick="showReportModal('${doc.id}')" style="background: rgba(239, 68, 68, 0.1); color: var(--error-color); border: none; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" title="Report inappropriate content">🚩 Report</button>
+                                </div>
                             </div>
                             <div style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">${review.comment}</div>
                             <div style="font-size: 0.85rem; color: var(--text-muted);">
