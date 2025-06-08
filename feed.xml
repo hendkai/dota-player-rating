@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+    <channel>
+        <title>Dota Player Rating - Latest Reviews</title>
+        <description>Latest player reviews and community updates from Dota Player Rating - Building positive gaming communities together</description>
+        <link>https://dota-player-rating.netlify.app</link>
+        <atom:link href="https://dota-player-rating.netlify.app/feed.xml" rel="self" type="application/rss+xml"/>
+        <language>en-us</language>
+        <managingEditor>bitsofmuschi@gmail.com (Dota Player Rating Team)</managingEditor>
+        <webMaster>bitsofmuschi@gmail.com (Dota Player Rating Team)</webMaster>
+        <lastBuildDate>Mon, 23 Dec 2024 12:00:00 +0000</lastBuildDate>
+        <generator>Dota Player Rating Community Platform</generator>
+        <category>Gaming</category>
+        <category>Dota 2</category>
+        <category>Community</category>
+        <category>Esports</category>
+        <ttl>60</ttl>
+        
+        <image>
+            <url>https://dota-player-rating.netlify.app/icon-192x192.png</url>
+            <title>Dota Player Rating</title>
+            <link>https://dota-player-rating.netlify.app</link>
+            <width>192</width>
+            <height>192</height>
+        </image>
+        
+        <item>
+            <title>🎮 Community Leaderboard Updated - New Top Players!</title>
+            <description>Our community leaderboard has been updated with new top-performing players who exemplify positive gaming behavior and excellent teamwork.</description>
+            <content:encoded><![CDATA[
+                <h2>🏆 Community Leaderboard Update</h2>
+                <p>We're excited to share that our community leaderboard has been updated with amazing players who are making Dota 2 a better place for everyone!</p>
+                
+                <h3>🌟 What Makes Our Top Players Special:</h3>
+                <ul>
+                    <li><strong>🤝 Excellent Teamwork:</strong> Players who communicate effectively and support their team</li>
+                    <li><strong>👑 Leadership:</strong> Those who guide their teams to victory with positive attitude</li>
+                    <li><strong>💬 Constructive Feedback:</strong> Players who help others improve rather than criticize</li>
+                    <li><strong>🎯 Skill Development:</strong> Continuous improvement and learning mindset</li>
+                </ul>
+                
+                <p>Check out the current leaderboard and see how you can contribute to building a more positive gaming community!</p>
+                
+                <p><strong>Join our mission:</strong> We believe that gaming should be fun, inclusive, and supportive for everyone. Rate players based on their positive contributions, not just their skill level.</p>
+                
+                <p><a href="https://dota-player-rating.netlify.app">View Latest Rankings →</a></p>
+            ]]></content:encoded>
+            <link>https://dota-player-rating.netlify.app</link>
+            <guid isPermaLink="false">community-update-2024-12-23</guid>
+            <pubDate>Mon, 23 Dec 2024 12:00:00 +0000</pubDate>
+            <category>Community</category>
+            <category>Leaderboard</category>
+        </item>
+        
+        <item>
+            <title>🌍 Fediverse Integration - Connect with Our Community</title>
+            <description>We've integrated with the Fediverse! Share your achievements and connect with other positive players across decentralized social networks.</description>
+            <content:encoded><![CDATA[
+                <h2>🌐 Welcome to the Fediverse!</h2>
+                <p>We're thrilled to announce our integration with the Fediverse - the decentralized social network that puts communities first!</p>
+                
+                <h3>🚀 New Features:</h3>
+                <ul>
+                    <li><strong>🌍 Share to Fediverse:</strong> Share player achievements directly to Mastodon, Pleroma, and other Fediverse platforms</li>
+                    <li><strong>📡 RSS/Atom Feeds:</strong> Follow our community updates in your favorite feed reader</li>
+                    <li><strong>🤝 Community Connection:</strong> Connect with other positive gaming communities across the decentralized web</li>
+                    <li><strong>💬 Open Standards:</strong> Built on open protocols that respect user privacy and community autonomy</li>
+                </ul>
+                
+                <h3>🎮 Why This Matters for Gaming:</h3>
+                <p>The Fediverse represents the future of online communities - decentralized, community-driven, and focused on positive interactions rather than engagement metrics.</p>
+                
+                <p>This aligns perfectly with our mission to build positive gaming communities where players are recognized for teamwork, leadership, and constructive behavior.</p>
+                
+                <p><strong>Follow us:</strong> @dotarating@mastodon.social</p>
+                
+                <p><a href="https://dota-player-rating.netlify.app">Join the Community →</a></p>
+            ]]></content:encoded>
+            <link>https://dota-player-rating.netlify.app</link>
+            <guid isPermaLink="false">fediverse-integration-2024-12-23</guid>
+            <pubDate>Mon, 23 Dec 2024 10:00:00 +0000</pubDate>
+            <category>Fediverse</category>
+            <category>Community</category>
+            <category>Integration</category>
+        </item>
+        
+        <item>
+            <title>📊 Community Honor Code - Building Better Gaming</title>
+            <description>Our Community Honor Code promotes positive gaming behavior through four core principles: Focus on Growth, Constructive Feedback, Recognize Good Play, and Build Community.</description>
+            <content:encoded><![CDATA[
+                <h2>🏛️ Community Honor Code</h2>
+                <p>At Dota Player Rating, we believe in fostering a gaming environment where everyone can thrive. Our Honor Code guides every interaction and review on our platform.</p>
+                
+                <h3>⚖️ Our Four Principles:</h3>
+                
+                <h4>🌱 1. Focus on Growth</h4>
+                <p>Every player is on a journey of improvement. Rate and review with the intention of helping others grow, not tearing them down.</p>
+                
+                <h4>🔧 2. Constructive Feedback</h4>
+                <p>When providing feedback, be specific, actionable, and kind. Focus on behaviors and decisions, not personal attacks.</p>
+                
+                <h4>🌟 3. Recognize Good Play</h4>
+                <p>Celebrate great teamwork, positive attitude, and skillful play. Recognition encourages more positive behavior in our community.</p>
+                
+                <h4>🤝 4. Build Community</h4>
+                <p>We're all part of the same gaming community. Help create an environment where everyone feels welcome and valued.</p>
+                
+                <h3>🎯 Making a Difference</h3>
+                <p>By following these principles, we're not just rating players - we're building a culture of respect, growth, and positivity that makes gaming better for everyone.</p>
+                
+                <p><a href="https://dota-player-rating.netlify.app">Read Full Honor Code →</a></p>
+            ]]></content:encoded>
+            <link>https://dota-player-rating.netlify.app</link>
+            <guid isPermaLink="false">honor-code-2024-12-23</guid>
+            <pubDate>Sun, 22 Dec 2024 18:00:00 +0000</pubDate>
+            <category>Honor Code</category>
+            <category>Community</category>
+            <category>Guidelines</category>
+        </item>
+        
+    </channel>
+</rss> 

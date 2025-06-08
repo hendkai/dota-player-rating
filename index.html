@@ -44,6 +44,19 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
     
+    <!-- Fediverse Integration -->
+    <link rel="alternate" type="application/rss+xml" title="Dota Player Rating - Latest Reviews" href="/feed.xml">
+    <link rel="alternate" type="application/atom+xml" title="Dota Player Rating - Community Feed" href="/atom.xml">
+    <link rel="webmention" href="/webmention">
+    <link rel="micropub" href="/micropub">
+    
+    <!-- ActivityPub Profile -->
+    <link rel="alternate" type="application/activity+json" href="/actor">
+    
+    <!-- Fediverse Meta -->
+    <meta name="fediverse:creator" content="@dotarating@mastodon.social">
+    <meta name="fediverse:site" content="@dotarating@mastodon.social">
+    
     <!-- Canonical URL -->
     <link rel="canonical" href="https://dota-player-rating.netlify.app/">
     
@@ -880,7 +893,160 @@
                 }
             }
         }
-    </script>
+        
+        // Fediverse Integration Functions
+        globalThis.shareToFediverse = function(playerName, score, rank) {
+            const text = `🎮 Check out ${playerName} - Rank #${rank} on Dota Player Rating with ${score} community score! 
+            
+🏆 Building positive gaming communities together
+🌍 Join the movement: ${window.location.origin}
+
+#Dota2 #Gaming #Fediverse #Community #Esports`;
+            
+            showFediverseShareModal(text);
+        };
+        
+        function showFediverseShareModal(text) {
+            const modalHTML = `
+                <div id="fediverse-modal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px;">
+                    <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; max-width: 500px; width: 100%; border: 1px solid var(--border-color); backdrop-filter: blur(20px);">
+                        <h3 style="color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                            🌍 Share to Fediverse
+                            <button onclick="closeFediverseModal()" style="margin-left: auto; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem;">×</button>
+                        </h3>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.9rem;">Choose your instance:</label>
+                            <input type="text" id="fediverse-instance" placeholder="mastodon.social" 
+                                   style="width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--glass-bg); color: var(--text-primary);">
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary); font-size: 0.9rem;">Post content:</label>
+                            <textarea id="fediverse-text" readonly 
+                                      style="width: 100%; height: 120px; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--glass-bg); color: var(--text-primary); resize: vertical;">${text}</textarea>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin-bottom: 16px;">
+                            <button onclick="shareToInstance('mastodon.social')" class="btn btn-secondary" style="font-size: 0.9rem;">Mastodon.social</button>
+                            <button onclick="shareToInstance('fosstodon.org')" class="btn btn-secondary" style="font-size: 0.9rem;">Fosstodon</button>
+                            <button onclick="shareToInstance('mstdn.social')" class="btn btn-secondary" style="font-size: 0.9rem;">Mstdn.social</button>
+                            <button onclick="shareToInstance('pixelfed.social')" class="btn btn-secondary" style="font-size: 0.9rem;">Pixelfed</button>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="shareToCustomInstance()" class="btn" style="flex: 1;">Share to Instance</button>
+                            <button onclick="copyFediverseText()" class="btn btn-secondary">Copy Text</button>
+                        </div>
+                        
+                        <div style="margin-top: 12px; padding: 8px 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                            <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">
+                                💡 <strong>Tip:</strong> Enter your Fediverse instance (like mastodon.social) and we'll open the share dialog for you!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        }
+        
+        globalThis.closeFediverseModal = function() {
+            const modal = document.getElementById('fediverse-modal');
+            if (modal) modal.remove();
+        };
+        
+        globalThis.shareToInstance = function(instance) {
+            document.getElementById('fediverse-instance').value = instance;
+            shareToCustomInstance();
+        };
+        
+        globalThis.shareToCustomInstance = function() {
+            const instance = document.getElementById('fediverse-instance').value.trim();
+            const text = document.getElementById('fediverse-text').value;
+            
+            if (!instance) {
+                showToast('Please enter a Fediverse instance', 'error');
+                return;
+            }
+            
+            // Clean instance URL
+            const cleanInstance = instance.replace(/^https?:\/\//, '').replace(/\/$/, '');
+            
+            // Create share URL
+            const shareURL = `https://${cleanInstance}/share?text=${encodeURIComponent(text)}`;
+            
+            // Open in new window
+            window.open(shareURL, '_blank', 'width=600,height=700,scrollbars=yes,resizable=yes');
+            
+            // Store instance for future use
+            localStorage.setItem('preferred-fediverse-instance', cleanInstance);
+            
+            closeFediverseModal();
+            showToast('Opening Fediverse share dialog...', 'success');
+        };
+        
+        globalThis.copyFediverseText = function() {
+            const text = document.getElementById('fediverse-text').value;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Text copied to clipboard!', 'success');
+            }).catch(() => {
+                showToast('Could not copy text', 'error');
+            });
+        };
+        
+        // Add Fediverse Follow button to footer
+        function addFediverseToFooter() {
+            const footerStats = document.querySelector('footer div:last-child');
+            if (footerStats) {
+                const fediverseSection = document.createElement('div');
+                fediverseSection.innerHTML = `
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin: 12px 0; padding: 12px; background: var(--glass-bg); border-radius: 8px; border: 1px solid var(--border-color);">
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">🌍 Follow us on the Fediverse:</span>
+                        <button onclick="followOnFediverse()" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">
+                            Follow @dotarating
+                        </button>
+                    </div>
+                `;
+                footerStats.parentNode.insertBefore(fediverseSection, footerStats);
+            }
+        }
+        
+                 globalThis.followOnFediverse = function() {
+             const instance = localStorage.getItem('preferred-fediverse-instance') || 'mastodon.social';
+             const account = '@dotarating@mastodon.social'; // Our theoretical account
+             
+             const followURL = `https://${instance}/@dotarating@mastodon.social`;
+             window.open(followURL, '_blank');
+         };
+         
+         // Share entire leaderboard to Fediverse
+         globalThis.shareLeaderboardToFediverse = function() {
+             const text = `🏆 Check out the latest Dota Player Rating Community Leaderboard!
+             
+🌟 Our top players exemplify:
+🤝 Excellent Teamwork
+👑 Strong Leadership  
+💬 Constructive Feedback
+🌱 Growth Mindset
+
+🏛️ Community Honor Code in action!
+Building positive gaming communities together.
+
+#Dota2 #Gaming #Community #Fediverse #PositiveGaming
+
+🌍 Join us: ${window.location.origin}`;
+             
+             showFediverseShareModal(text);
+         };
+         
+         // Initialize Fediverse features when page loads
+         if (document.readyState === 'loading') {
+             document.addEventListener('DOMContentLoaded', addFediverseToFooter);
+         } else {
+             addFediverseToFooter();
+         }
+     </script>
 
     <!-- Firebase SDK -->
     <script type="module">
@@ -3892,9 +4058,14 @@
                     let leaderboardHtml = `
                         <!-- Community Honor Code -->
                         <div style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.1)); border: 2px solid var(--success-color); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
-                            <h3 style="color: var(--success-color); margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                            <h3 style="color: var(--success-color); margin-bottom: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                                 🛡️ Community Honor Code
                                 <span style="background: var(--success-color); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600;">POSITIVE COMMUNITY</span>
+                                <button onclick="shareLeaderboardToFediverse()" 
+                                        style="background: linear-gradient(135deg, #6364ff, #563acc); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-left: auto;"
+                                        title="Share Leaderboard to Fediverse">
+                                    🌍 Share Leaderboard
+                                </button>
                             </h3>
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 16px;">
                                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -3980,12 +4151,19 @@
                                 </div>
                                 
                                 <!-- Achievement Badges -->
-                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                    ${entry.positiveRatio >= 80 ? '<span style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">🌟 Positive Player</span>' : ''}
-                                    ${entry.constructiveReviews >= 5 ? '<span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">💬 Constructive Reviewer</span>' : ''}
-                                    ${entry.avgTeamwork >= 4.5 ? '<span style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">🤝 Team Player</span>' : ''}
-                                    ${entry.avgLeadership >= 4.0 ? '<span style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">👑 Leader</span>' : ''}
-                                </div>
+                                                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                            ${entry.positiveRatio >= 80 ? '<span style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">🌟 Positive Player</span>' : ''}
+                            ${entry.constructiveReviews >= 5 ? '<span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">💬 Constructive Reviewer</span>' : ''}
+                            ${entry.avgTeamwork >= 4.5 ? '<span style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">🤝 Team Player</span>' : ''}
+                            ${entry.avgLeadership >= 4.0 ? '<span style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">👑 Leader</span>' : ''}
+                            
+                            <!-- Fediverse Share Button -->
+                            <button class="fediverse-share-btn" onclick="shareToFediverse('${entry.playerName}', '${entry.communityScore}', '${rank}')" 
+                                    style="background: linear-gradient(135deg, #6364ff, #563acc); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;"
+                                    title="Share to Fediverse">
+                                🌍 Share
+                            </button>
+                        </div>
                             </div>
                         `;
                     });

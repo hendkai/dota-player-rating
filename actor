@@ -1,0 +1,144 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams",
+    "https://w3id.org/security/v1",
+    {
+      "manuallyApprovesFollowers": "as:manuallyApprovesFollowers",
+      "toot": "http://joinmastodon.org/ns#",
+      "featured": {
+        "@id": "toot:featured",
+        "@type": "@id"
+      },
+      "featuredTags": {
+        "@id": "toot:featuredTags",
+        "@type": "@id"
+      },
+      "alsoKnownAs": {
+        "@id": "as:alsoKnownAs",
+        "@type": "@id"
+      },
+      "movedTo": {
+        "@id": "as:movedTo",
+        "@type": "@id"
+      },
+      "schema": "http://schema.org#",
+      "PropertyValue": "schema:PropertyValue",
+      "value": "schema:value",
+      "discoverable": "toot:discoverable",
+      "Device": "toot:Device",
+      "Ed25519Signature": "toot:Ed25519Signature",
+      "Ed25519Key": "toot:Ed25519Key",
+      "Curve25519Key": "toot:Curve25519Key",
+      "EncryptedMessage": "toot:EncryptedMessage",
+      "publicKeyBase64": "toot:publicKeyBase64",
+      "deviceId": "toot:deviceId",
+      "claim": {
+        "@type": "@id",
+        "@id": "toot:claim"
+      },
+      "fingerprintKey": {
+        "@type": "@id",
+        "@id": "toot:fingerprintKey"
+      },
+      "identityKey": {
+        "@type": "@id",
+        "@id": "toot:identityKey"
+      },
+      "devices": {
+        "@type": "@id",
+        "@id": "toot:devices"
+      },
+      "messageFranking": "toot:messageFranking",
+      "messageType": "toot:messageType",
+      "cipherText": "toot:cipherText",
+      "suspended": "toot:suspended",
+      "focalPoint": {
+        "@container": "@list",
+        "@id": "toot:focalPoint"
+      }
+    }
+  ],
+  "id": "https://dota-player-rating.netlify.app/actor",
+  "type": "Service",
+  "following": "https://dota-player-rating.netlify.app/actor/following",
+  "followers": "https://dota-player-rating.netlify.app/actor/followers",
+  "inbox": "https://dota-player-rating.netlify.app/actor/inbox",
+  "outbox": "https://dota-player-rating.netlify.app/actor/outbox",
+  "featured": "https://dota-player-rating.netlify.app/actor/collections/featured",
+  "featuredTags": "https://dota-player-rating.netlify.app/actor/collections/tags",
+  "preferredUsername": "dotarating",
+  "name": "Dota Player Rating 🎮",
+  "summary": "<p>🏆 Building positive gaming communities together!</p><p>Rate and review Dota 2 players based on:</p><p>🤝 Teamwork<br>👑 Leadership<br>💬 Constructive Behavior<br>🌱 Growth Mindset</p><p>Join our mission to make gaming more positive and inclusive for everyone!</p><p>🌍 #Dota2 #Gaming #Community #Fediverse #PositiveGaming</p>",
+  "url": "https://dota-player-rating.netlify.app",
+  "manuallyApprovesFollowers": false,
+  "discoverable": true,
+  "published": "2024-12-23T00:00:00Z",
+  "memorial": false,
+  "publicKey": {
+    "id": "https://dota-player-rating.netlify.app/actor#main-key",
+    "owner": "https://dota-player-rating.netlify.app/actor",
+    "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1234567890abcdef...\n(This would be a real public key in production)\n-----END PUBLIC KEY-----\n"
+  },
+  "tag": [
+    {
+      "type": "Hashtag",
+      "href": "https://dota-player-rating.netlify.app/tags/dota2",
+      "name": "#Dota2"
+    },
+    {
+      "type": "Hashtag", 
+      "href": "https://dota-player-rating.netlify.app/tags/gaming",
+      "name": "#Gaming"
+    },
+    {
+      "type": "Hashtag",
+      "href": "https://dota-player-rating.netlify.app/tags/community",
+      "name": "#Community"
+    },
+    {
+      "type": "Hashtag",
+      "href": "https://dota-player-rating.netlify.app/tags/positivegaming",
+      "name": "#PositiveGaming"
+    },
+    {
+      "type": "Hashtag",
+      "href": "https://dota-player-rating.netlify.app/tags/fediverse", 
+      "name": "#Fediverse"
+    }
+  ],
+  "attachment": [
+    {
+      "type": "PropertyValue",
+      "name": "Website",
+      "value": "<a href=\"https://dota-player-rating.netlify.app\" target=\"_blank\" rel=\"nofollow noopener noreferrer me\">dota-player-rating.netlify.app</a>"
+    },
+    {
+      "type": "PropertyValue",
+      "name": "Community Focus",
+      "value": "Positive Gaming & Teamwork"
+    },
+    {
+      "type": "PropertyValue",
+      "name": "Game",
+      "value": "Dota 2 / MOBA"
+    },
+    {
+      "type": "PropertyValue",
+      "name": "RSS Feed",
+      "value": "<a href=\"https://dota-player-rating.netlify.app/feed.xml\" target=\"_blank\" rel=\"nofollow noopener noreferrer me\">Community Updates</a>"
+    }
+  ],
+  "endpoints": {
+    "sharedInbox": "https://dota-player-rating.netlify.app/inbox"
+  },
+  "icon": {
+    "type": "Image",
+    "mediaType": "image/png",
+    "url": "https://dota-player-rating.netlify.app/icon-192x192.png"
+  },
+  "image": {
+    "type": "Image", 
+    "mediaType": "image/png",
+    "url": "https://dota-player-rating.netlify.app/icon-512x512.png"
+  }
+} 

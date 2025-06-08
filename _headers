@@ -1,0 +1,49 @@
+# Headers for Fediverse integration
+
+# WebFinger endpoint
+/.well-known/webfinger
+  Content-Type: application/jrd+json; charset=utf-8
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, OPTIONS
+  Access-Control-Allow-Headers: Accept, Content-Type
+
+# ActivityPub actor
+/actor
+  Content-Type: application/activity+json; charset=utf-8
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, OPTIONS
+  Access-Control-Allow-Headers: Accept, Content-Type
+
+# RSS Feed
+/feed.xml
+  Content-Type: application/rss+xml; charset=utf-8
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, OPTIONS
+  Access-Control-Allow-Headers: Accept, Content-Type
+
+# Atom Feed
+/atom.xml
+  Content-Type: application/atom+xml; charset=utf-8
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, OPTIONS
+  Access-Control-Allow-Headers: Accept, Content-Type
+
+# General CORS for all endpoints
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Cache headers for feeds
+/feed.xml
+  Cache-Control: public, max-age=3600, s-maxage=3600
+
+/atom.xml
+  Cache-Control: public, max-age=3600, s-maxage=3600
+
+/.well-known/*
+  Cache-Control: public, max-age=86400, s-maxage=86400
+
+/actor
+  Cache-Control: public, max-age=3600, s-maxage=3600 

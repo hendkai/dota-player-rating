@@ -48,4 +48,19 @@
         <priority>0.6</priority>
     </url>
     
+    <!-- Fediverse Feeds -->
+    <url>
+        <loc>https://dota-player-rating.netlify.app/feed.xml</loc>
+        <lastmod>2024-12-23</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://dota-player-rating.netlify.app/atom.xml</loc>
+        <lastmod>2024-12-23</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
 </urlset> 

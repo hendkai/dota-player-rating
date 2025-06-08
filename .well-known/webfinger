@@ -1,0 +1,51 @@
+{
+  "subject": "acct:dotarating@dota-player-rating.netlify.app",
+  "aliases": [
+    "https://dota-player-rating.netlify.app",
+    "https://dota-player-rating.netlify.app/actor",
+    "acct:dotarating@mastodon.social"
+  ],
+  "links": [
+    {
+      "rel": "self",
+      "type": "application/activity+json",
+      "href": "https://dota-player-rating.netlify.app/actor"
+    },
+    {
+      "rel": "alternate",
+      "type": "text/html",
+      "href": "https://dota-player-rating.netlify.app"
+    },
+    {
+      "rel": "alternate",
+      "type": "application/rss+xml",
+      "href": "https://dota-player-rating.netlify.app/feed.xml"
+    },
+    {
+      "rel": "alternate", 
+      "type": "application/atom+xml",
+      "href": "https://dota-player-rating.netlify.app/atom.xml"
+    },
+    {
+      "rel": "http://webfinger.net/rel/profile-page",
+      "type": "text/html",
+      "href": "https://dota-player-rating.netlify.app"
+    },
+    {
+      "rel": "http://webfinger.net/rel/avatar",
+      "type": "image/png",
+      "href": "https://dota-player-rating.netlify.app/icon-192x192.png"
+    },
+    {
+      "rel": "http://schemas.google.com/g/2010#updates-from",
+      "type": "application/atom+xml",
+      "href": "https://dota-player-rating.netlify.app/atom.xml"
+    }
+  ],
+  "properties": {
+    "https://schema.org/name": "Dota Player Rating",
+    "https://schema.org/description": "Building positive gaming communities together - Rate and review Dota 2 players based on teamwork, leadership, and constructive behavior",
+    "https://schema.org/url": "https://dota-player-rating.netlify.app",
+    "https://schema.org/image": "https://dota-player-rating.netlify.app/icon-512x512.png"
+  }
+} 

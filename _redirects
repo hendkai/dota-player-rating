@@ -26,5 +26,11 @@
 /og-image           /og-image.jpg            301
 /preview            /og-image.jpg            301
 
+# Fediverse endpoints with correct content types
+/.well-known/webfinger   /.well-known/webfinger   200
+/actor                   /actor                   200
+/feed.xml               /feed.xml                200
+/atom.xml               /atom.xml                200
+
 # SPA fallback - must be last
 /*                  /index.html              200 
