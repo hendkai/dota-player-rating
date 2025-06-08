@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Dota Player Rating</string>
-    <string name="title_activity_main">Dota Player Rating</string>
-    <string name="package_name">io.github.hendkai.dota_player_rating</string>
-    <string name="custom_url_scheme">io.github.hendkai.dota_player_rating</string>
-</resources>
