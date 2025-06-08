@@ -902,9 +902,6 @@
                                     <button class="btn btn-secondary" onclick="loadRecentReviews()" style="font-size: 0.9rem;">
                                         📝 Recent Reviews
                                     </button>
-                                    <button class="btn btn-danger" onclick="cleanupDatabase()" style="font-size: 0.9rem;">
-                                        🧹 Database Cleanup
-                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -966,30 +963,78 @@
                 const adminResults = document.getElementById('admin-results');
                 adminResults.innerHTML = '<div style="text-align: center; padding: 20px;"><span class="loading-spinner"></span> Loading reports...</div>';
                 
-                const reportsQuery = query(
-                    collection(db, 'reports'),
-                    orderBy('timestamp', 'desc'),
-                    limit(50)
-                );
+                let allReports = [];
                 
-                const snapshot = await getDocs(reportsQuery);
+                // Try to load from reports collection first
+                try {
+                    const reportsQuery = query(
+                        collection(db, 'reports'),
+                        limit(50)
+                    );
+                    const snapshot = await getDocs(reportsQuery);
+                    snapshot.forEach((doc) => {
+                        allReports.push({
+                            id: doc.id,
+                            source: 'reports',
+                            ...doc.data()
+                        });
+                    });
+                    console.log('Loaded', allReports.length, 'reports from reports collection');
+                } catch (reportsError) {
+                    console.warn('Could not access reports collection:', reportsError);
+                }
+                
+                // Also load from fallback method (reportsList in reviews)
+                try {
+                    const reviewsQuery = query(
+                        collection(db, 'ratings'),
+                        where('reported', '==', true)
+                    );
+                    const reviewsSnapshot = await getDocs(reviewsQuery);
+                    
+                    reviewsSnapshot.forEach((doc) => {
+                        const reviewData = doc.data();
+                        const reportsList = reviewData.reportsList || [];
+                        
+                        reportsList.forEach((report, index) => {
+                            allReports.push({
+                                id: `${doc.id}_${index}`,
+                                source: 'fallback',
+                                reviewId: doc.id,
+                                reportedReviewerName: reviewData.reviewerName || reviewData.reviewerEmail,
+                                ...report
+                            });
+                        });
+                    });
+                    console.log('Total reports loaded:', allReports.length);
+                } catch (fallbackError) {
+                    console.warn('Could not load fallback reports:', fallbackError);
+                }
+                
+                // Sort by timestamp
+                allReports.sort((a, b) => {
+                    const timeA = a.timestamp?.toDate?.() || new Date(0);
+                    const timeB = b.timestamp?.toDate?.() || new Date(0);
+                    return timeB - timeA;
+                });
+                
                 let reportsHtml = '<h3 style="color: var(--text-primary); margin-bottom: 20px;">🚩 All Reports</h3>';
                 
-                if (snapshot.empty) {
+                if (allReports.length === 0) {
                     reportsHtml += '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No reports found.</p>';
                 } else {
-                    snapshot.forEach((doc) => {
-                        const report = doc.data();
+                    allReports.forEach((report) => {
                         const date = report.timestamp?.toDate?.().toLocaleDateString() || 'Unknown';
                         const status = report.status || 'pending';
                         const statusColor = status === 'resolved' ? 'var(--success-color)' : 
                                           status === 'rejected' ? 'var(--error-color)' : 'var(--warning-color)';
+                        const sourceLabel = report.source === 'fallback' ? ' (Fallback)' : '';
                         
                         reportsHtml += `
                             <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; margin: 16px 0; border-left: 4px solid ${statusColor};">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
                                     <div>
-                                        <strong style="color: var(--text-primary);">Report #${doc.id.slice(-6)}</strong>
+                                        <strong style="color: var(--text-primary);">Report #${report.id.slice(-6)}${sourceLabel}</strong>
                                         <span style="background: ${statusColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-left: 8px;">${status.toUpperCase()}</span>
                                     </div>
                                     <div style="color: var(--text-muted); font-size: 0.85rem;">${date}</div>
@@ -1007,7 +1052,7 @@
                                 
                                 <div style="margin-bottom: 12px;">
                                     <strong style="color: var(--text-primary);">Reported reviewer:</strong> 
-                                    <span style="color: var(--text-secondary);">${report.reportedReviewerName}</span>
+                                    <span style="color: var(--text-secondary);">${report.reportedReviewerName || 'Unknown'}</span>
                                 </div>
                                 
                                 ${report.details ? `
@@ -1022,14 +1067,11 @@
                                         👁️ View Review
                                     </button>
                                     ${status === 'pending' ? `
-                                        <button class="btn btn-small btn-success" onclick="resolveReport('${doc.id}', 'resolved')" style="font-size: 0.8rem;">
-                                            ✅ Resolve
-                                        </button>
-                                        <button class="btn btn-small btn-danger" onclick="resolveReport('${doc.id}', 'rejected')" style="font-size: 0.8rem;">
-                                            ❌ Reject
-                                        </button>
-                                        <button class="btn btn-small btn-danger" onclick="deleteReportedReview('${report.reviewId}', '${doc.id}')" style="font-size: 0.8rem;">
+                                        <button class="btn btn-small btn-danger" onclick="deleteReportedReview('${report.reviewId}', '${report.id}', '${report.source}')" style="font-size: 0.8rem;">
                                             🗑️ Delete Review
+                                        </button>
+                                        <button class="btn btn-small" onclick="clearReportFlag('${report.reviewId}')" style="font-size: 0.8rem;">
+                                            ✅ Clear Flag
                                         </button>
                                     ` : ''}
                                 </div>
@@ -1182,13 +1224,35 @@
                 const adminResults = document.getElementById('admin-results');
                 adminResults.innerHTML = '<div style="text-align: center; padding: 20px;"><span class="loading-spinner"></span> Loading flagged reviews...</div>';
                 
+                // Load flagged reviews without orderBy to avoid index issues
                 const flaggedQuery = query(
                     collection(db, 'ratings'),
-                    where('reported', '==', true),
-                    orderBy('timestamp', 'desc')
+                    where('reported', '==', true)
                 );
                 
-                const snapshot = await getDocs(flaggedQuery);
+                let snapshot;
+                try {
+                    snapshot = await getDocs(flaggedQuery);
+                } catch (indexError) {
+                    console.warn('OrderBy index not available, using simple query:', indexError);
+                    // Fallback: simple query without orderBy
+                    const simpleQuery = query(collection(db, 'ratings'));
+                    const allSnapshot = await getDocs(simpleQuery);
+                    
+                    // Filter manually for reported reviews
+                    const docs = [];
+                    allSnapshot.forEach((doc) => {
+                        if (doc.data().reported === true) {
+                            docs.push({ id: doc.id, data: () => doc.data() });
+                        }
+                    });
+                    
+                    snapshot = {
+                        empty: docs.length === 0,
+                        forEach: (callback) => docs.forEach(callback)
+                    };
+                }
+                
                 let flaggedHtml = '<h3 style="color: var(--text-primary); margin-bottom: 20px;">🚩 Flagged Reviews</h3>';
                 
                 if (snapshot.empty) {
@@ -1197,7 +1261,7 @@
                     snapshot.forEach((doc) => {
                         const review = doc.data();
                         const date = review.timestamp?.toDate?.().toLocaleDateString() || 'Unknown';
-                        const reportCount = review.reportCount || 0;
+                        const reportCount = review.reportCount || (review.reportsList ? review.reportsList.length : 0);
                         const stars = '⭐'.repeat(review.rating || 0);
                         
                         flaggedHtml += `
@@ -1217,13 +1281,24 @@
                                     "${review.comment}"
                                 </div>
                                 
+                                ${review.reportsList && review.reportsList.length > 0 ? `
+                                    <div style="margin-bottom: 12px;">
+                                        <strong style="color: var(--text-primary);">Recent Reports:</strong>
+                                        ${review.reportsList.slice(-2).map(report => `
+                                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-left: 16px;">
+                                                • ${report.reason} by ${report.reporterName || report.reporterEmail}
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
+                                
                                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                                     <div style="font-size: 0.85rem; color: var(--text-muted);">${date}</div>
                                     <div style="display: flex; gap: 8px;">
                                         <button class="btn btn-small btn-danger" onclick="deleteReview('${doc.id}')" style="font-size: 0.8rem;">
                                             🗑️ Delete
                                         </button>
-                                        <button class="btn btn-small" onclick="unflagReview('${doc.id}')" style="font-size: 0.8rem;">
+                                        <button class="btn btn-small" onclick="clearReportFlag('${doc.id}')" style="font-size: 0.8rem;">
                                             ✅ Clear Flag
                                         </button>
                                     </div>
@@ -1260,13 +1335,14 @@
             }
         };
 
-        globalThis.unflagReview = async function(reviewId) {
+        globalThis.clearReportFlag = async function(reviewId) {
             if (!checkAdminAccess()) return;
             
             try {
                 await updateDoc(doc(db, 'ratings', reviewId), {
                     reported: false,
-                    reportCount: 0
+                    reportCount: 0,
+                    reportsList: [] // Clear fallback reports too
                 });
                 
                 showToast('Review flag cleared!', 'success');
@@ -1275,6 +1351,95 @@
             } catch (error) {
                 console.error('Error clearing flag:', error);
                 showToast('Failed to clear flag', 'error');
+            }
+        };
+
+        globalThis.deleteReportedReview = async function(reviewId, reportId, source) {
+            if (!checkAdminAccess()) return;
+            
+            if (!confirm('⚠️ Are you sure you want to permanently delete this review? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                // Delete the review
+                await deleteDoc(doc(db, 'ratings', reviewId));
+                
+                // Try to delete from reports collection if that's the source
+                if (source === 'reports') {
+                    try {
+                        await updateDoc(doc(db, 'reports', reportId), {
+                            status: 'resolved',
+                            action: 'review_deleted',
+                            resolvedBy: currentUser.email,
+                            resolvedAt: new Date()
+                        });
+                    } catch (reportError) {
+                        console.warn('Could not update report status:', reportError);
+                    }
+                }
+                
+                showToast('Review deleted successfully!', 'success');
+                loadReports(); // Reload reports
+                
+            } catch (error) {
+                console.error('Error deleting review:', error);
+                showToast('Failed to delete review', 'error');
+            }
+        };
+
+        globalThis.viewReportedReview = async function(reviewId) {
+            if (!checkAdminAccess()) return;
+            
+            try {
+                const reviewRef = doc(db, 'ratings', reviewId);
+                const reviewSnap = await getDoc(reviewRef);
+                
+                if (reviewSnap.exists()) {
+                    const review = reviewSnap.data();
+                    const date = review.timestamp?.toDate?.().toLocaleDateString() || 'Unknown';
+                    const stars = '⭐'.repeat(review.rating || 0);
+                    
+                    const reviewHtml = `
+                        <h3 style="color: var(--text-primary); margin-bottom: 20px;">👁️ Review Details</h3>
+                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; border-left: 4px solid var(--primary-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div>
+                                    <strong style="color: var(--text-primary);">${review.reviewerName || review.reviewerEmail}</strong>
+                                    <div style="color: var(--text-muted); font-size: 0.8rem;">For: ${review.playerName}</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="color: #fbbf24; font-size: 1.1rem;">${stars}</div>
+                                    <div style="color: var(--text-muted); font-size: 0.8rem;">${date}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 8px;">
+                                "${review.comment}"
+                            </div>
+                            
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-small btn-danger" onclick="deleteReview('${reviewId}')" style="font-size: 0.8rem;">
+                                    🗑️ Delete Review
+                                </button>
+                                <button class="btn btn-small" onclick="clearReportFlag('${reviewId}')" style="font-size: 0.8rem;">
+                                    ✅ Clear Flags
+                                </button>
+                                <button class="btn btn-small btn-secondary" onclick="loadReports()" style="font-size: 0.8rem;">
+                                    ← Back to Reports
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('admin-results').innerHTML = reviewHtml;
+                } else {
+                    showToast('Review not found', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error viewing review:', error);
+                showToast('Failed to load review', 'error');
             }
         };
 
@@ -1492,40 +1657,7 @@
              }
          };
 
-         globalThis.cleanupDatabase = async function() {
-             if (!checkAdminAccess()) return;
-             
-             if (!confirm('⚠️ This will permanently delete all resolved reports and old data. Are you sure?')) {
-                 return;
-             }
-             
-             try {
-                 // Delete resolved reports older than 30 days
-                 const thirtyDaysAgo = new Date();
-                 thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                 
-                 const oldReportsQuery = query(
-                     collection(db, 'reports'),
-                     where('status', '==', 'resolved'),
-                     where('resolvedAt', '<', thirtyDaysAgo)
-                 );
-                 
-                 const snapshot = await getDocs(oldReportsQuery);
-                 let deletedCount = 0;
-                 
-                 for (const docSnap of snapshot.docs) {
-                     await deleteDoc(doc(db, 'reports', docSnap.id));
-                     deletedCount++;
-                 }
-                 
-                 showToast(`Database cleanup completed. Deleted ${deletedCount} old reports.`, 'success');
-                 updateAdminStats();
-                 
-             } catch (error) {
-                 console.error('Error cleaning database:', error);
-                 showToast('Failed to cleanup database', 'error');
-             }
-         };
+         
 
         // Make ALL search and app functions global
         globalThis.handleSearchInput = function() {
