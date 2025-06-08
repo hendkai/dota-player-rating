@@ -1317,6 +1317,32 @@
 
         globalThis.viewPlayerReviews = async function(playerId) {
             try {
+                // Remove any existing player reviews first
+                const existingReviews = document.querySelector('[data-player-reviews]');
+                if (existingReviews) {
+                    existingReviews.remove();
+                }
+                
+                // Show loading state
+                const loadingHtml = `
+                    <div data-player-reviews="true" style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
+                        <h3 style="margin-bottom: 16px; color: var(--text-primary);">💬 Player Reviews</h3>
+                        <div style="text-align: center; padding: 20px 0;">
+                            <div class="loading-spinner" style="margin: 0 auto 16px;"></div>
+                            <p style="color: var(--text-secondary);">Loading reviews...</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Insert loading state after search results
+                const searchResults = document.getElementById('search-results');
+                searchResults.insertAdjacentHTML('afterend', loadingHtml);
+                
+                // Scroll to reviews section
+                setTimeout(() => {
+                    document.querySelector('[data-player-reviews]').scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+                
                 const q = query(
                     collection(db, 'ratings'), 
                     where('playerId', '==', playerId),
@@ -1325,12 +1351,26 @@
                 const querySnapshot = await getDocs(q);
                 
                 let reviewsHtml = `
-                    <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0;">
-                        <h3 style="margin-bottom: 16px; color: var(--text-primary);">Player Reviews</h3>
+                    <div data-player-reviews="true" style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="color: var(--text-primary); margin: 0;">💬 Player Reviews (${querySnapshot.size})</h3>
+                            <button style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-secondary); cursor: pointer; transition: all 0.3s ease;" 
+                                    onclick="closePlayerReviews()"
+                                    onmouseover="this.style.background='var(--bg-secondary)'"
+                                    onmouseout="this.style.background='none'">
+                                ✖️ Close
+                            </button>
+                        </div>
                 `;
                 
                 if (querySnapshot.empty) {
-                    reviewsHtml += '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No reviews yet for this player.</p>';
+                    reviewsHtml += `
+                        <div style="text-align: center; padding: 40px 0;">
+                            <div style="font-size: 3rem; margin-bottom: 16px;">📝</div>
+                            <h4 style="color: var(--text-primary); margin-bottom: 8px;">No Reviews Yet</h4>
+                            <p style="color: var(--text-muted);">Be the first to review this player!</p>
+                        </div>
+                    `;
                 } else {
                     querySnapshot.forEach((doc) => {
                         const review = doc.data();
@@ -1344,7 +1384,7 @@
                         let categoryDisplay = '';
                         if (review.skillRating || review.teamworkRating || review.communicationRating || review.behaviorRating || review.leadershipRating) {
                             categoryDisplay = `
-                                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0; font-size: 0.8rem;">
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0; font-size: 0.8rem; color: var(--text-muted);">
                                     ${review.skillRating ? `<span>🎯 ${review.skillRating}⭐</span>` : ''}
                                     ${review.teamworkRating ? `<span>🤝 ${review.teamworkRating}⭐</span>` : ''}
                                     ${review.communicationRating ? `<span>💬 ${review.communicationRating}⭐</span>` : ''}
@@ -1364,14 +1404,17 @@
                         }
                         
                         reviewsHtml += `
-                            <div style="border-bottom: 1px solid var(--border-color); padding: 16px 0; position: relative;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <div style="border-bottom: 1px solid var(--border-color); padding: 20px 0; position: relative;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                     <div style="display: flex; align-items: center;">
-                                        <span style="font-weight: 600; color: var(--text-primary);">${reviewerName}</span>
-                                        ${badges}
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; font-weight: 600; color: white; font-size: 0.8rem; margin-right: 12px;">${reviewerName.charAt(0).toUpperCase()}</div>
+                                        <div>
+                                            <span style="font-weight: 600; color: var(--text-primary);">${reviewerName}</span>
+                                            ${badges}
+                                        </div>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <div style="color: #fbbf24;">${stars}</div>
+                                        <div style="color: #fbbf24; font-size: 1.1rem;">${stars}</div>
                                         ${currentUser && currentUser.uid !== review.reviewerId ? `
                                             <button style="background: none; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; font-size: 0.7rem; color: var(--text-muted); cursor: pointer; transition: all 0.3s ease;" 
                                                     onclick="reportReview('${reviewId}', '${reviewerName}')"
@@ -1383,7 +1426,7 @@
                                     </div>
                                 </div>
                                 ${categoryDisplay}
-                                <div style="color: var(--text-secondary); margin-bottom: 8px;">${review.comment}</div>
+                                <div style="color: var(--text-secondary); margin-bottom: 12px; line-height: 1.6;">${review.comment}</div>
                                 <div style="font-size: 0.8rem; color: var(--text-muted);">
                                     <span>${date}</span>
                                     ${review.trustScore ? `<span style="margin-left: 12px;">Trust Score: ${review.trustScore}/100</span>` : ''}
@@ -1396,12 +1439,41 @@
                 
                 reviewsHtml += '</div>';
                 
-                // Insert after search results
-                const searchResults = document.getElementById('search-results');
-                searchResults.insertAdjacentHTML('afterend', reviewsHtml);
+                // Replace loading state with actual reviews
+                const loadingDiv = document.querySelector('[data-player-reviews]');
+                if (loadingDiv) {
+                    loadingDiv.outerHTML = reviewsHtml;
+                } else {
+                    // Fallback: insert after search results
+                    const searchResults = document.getElementById('search-results');
+                    searchResults.insertAdjacentHTML('afterend', reviewsHtml);
+                }
                 
             } catch (error) {
-                showToast('Failed to load reviews', 'error');
+                console.error('Error loading player reviews:', error);
+                showToast('Failed to load reviews: ' + error.message, 'error');
+                
+                // Remove loading state and show error
+                const loadingDiv = document.querySelector('[data-player-reviews]');
+                if (loadingDiv) {
+                    loadingDiv.outerHTML = `
+                        <div data-player-reviews="true" style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
+                            <h3 style="color: var(--text-primary); margin-bottom: 16px;">💬 Player Reviews</h3>
+                            <div style="text-align: center; padding: 40px 0;">
+                                <div style="font-size: 2rem; margin-bottom: 16px; color: var(--error-color);">⚠️</div>
+                                <p style="color: var(--error-color);">Failed to load reviews. Please try again.</p>
+                                <button class="btn btn-secondary" onclick="closePlayerReviews()" style="margin-top: 16px;">Close</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        };
+
+        globalThis.closePlayerReviews = function() {
+            const reviewsDiv = document.querySelector('[data-player-reviews]');
+            if (reviewsDiv) {
+                reviewsDiv.remove();
             }
         };
 
