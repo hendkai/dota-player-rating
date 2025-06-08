@@ -1,0 +1,30 @@
+# Netlify redirects for SEO and clean URLs
+
+# Main redirects for clean URLs
+/search              /?tab=search             301
+/leaderboard        /?tab=leaderboard        301
+/rankings           /?tab=leaderboard        301
+/reviews            /?tab=recent             301
+/recent             /?tab=recent             301
+/analytics          /?tab=analytics          301
+/stats              /?tab=analytics          301
+
+# Legacy URL support
+/players/*          /?tab=search             301
+/player/*           /?tab=search             301
+
+# SEO friendly redirects
+/dota-2-player-rating  /                     301
+/dota2-players         /?tab=search          301
+/top-players           /?tab=leaderboard     301
+/community             /?tab=recent          301
+
+# Admin redirects (if needed)
+/admin              /?tab=admin              301
+
+# Social media preview redirects
+/og-image           /og-image.jpg            301
+/preview            /og-image.jpg            301
+
+# SPA fallback - must be last
+/*                  /index.html              200 

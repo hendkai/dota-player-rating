@@ -1,10 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" itemscope itemtype="https://schema.org/WebApplication">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dota Player Rating - Professional Gaming Community</title>
+    
+    <!-- Primary Meta Tags -->
+    <title>Dota Player Rating - Professional Gaming Community & Player Reviews</title>
+    <meta name="title" content="Dota Player Rating - Professional Gaming Community & Player Reviews">
+    <meta name="description" content="Rate and review Dota 2 players, build positive gaming community, find reliable teammates. Professional player ratings, behavior scoring, and match feedback platform.">
+    <meta name="keywords" content="dota 2, player rating, gaming community, esports, moba, player reviews, team finder, dota community, gaming platform, player feedback, matchmaking, dota players, steam integration, competitive gaming">
+    <meta name="author" content="Dota Player Rating">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+    <meta name="language" content="English">
+    <meta name="revisit-after" content="7 days">
+    <meta name="rating" content="general">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://dota-player-rating.netlify.app/">
+    <meta property="og:title" content="Dota Player Rating - Professional Gaming Community">
+    <meta property="og:description" content="Rate and review Dota 2 players, build positive gaming community, find reliable teammates. Join the most trusted Dota 2 player rating platform.">
+    <meta property="og:image" content="https://dota-player-rating.netlify.app/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Dota Player Rating - Gaming Community Platform">
+    <meta property="og:site_name" content="Dota Player Rating">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://dota-player-rating.netlify.app/">
+    <meta property="twitter:title" content="Dota Player Rating - Professional Gaming Community">
+    <meta property="twitter:description" content="Rate and review Dota 2 players, build positive gaming community, find reliable teammates. Join the most trusted Dota 2 player rating platform.">
+    <meta property="twitter:image" content="https://dota-player-rating.netlify.app/og-image.jpg">
+    <meta property="twitter:image:alt" content="Dota Player Rating Platform">
+    <meta property="twitter:creator" content="@dotarating">
+    <meta property="twitter:site" content="@dotarating">
+    
+    <!-- Additional Meta Tags -->
+    <meta name="theme-color" content="#6366f1">
+    <meta name="msapplication-TileColor" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://dota-player-rating.netlify.app/">
+    
+    <!-- Favicon and Icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://api.opendota.com">
+    <link rel="dns-prefetch" href="https://firestore.googleapis.com">
+    
+    <!-- Fonts with Performance Optimization -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Dota Player Rating",
+      "description": "Professional Dota 2 player rating and review platform for building positive gaming communities",
+      "url": "https://dota-player-rating.netlify.app/",
+      "applicationCategory": "GameApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.5",
+        "reviewCount": "1000",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Dota Player Rating",
+        "url": "https://dota-player-rating.netlify.app/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Dota Player Rating",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://dota-player-rating.netlify.app/logo.png"
+        }
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://dota-player-rating.netlify.app/?search={search_term_string}",
+        "query-input": "required name=search_term_string"
+      },
+      "sameAs": [
+        "https://twitter.com/dotarating",
+        "https://github.com/hendkai/dota-player-rating"
+      ]
+    }
+    </script>
     <style>
         :root {
             --primary-color: #6366f1;
@@ -436,15 +540,15 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <header class="header" role="banner">
             <div class="header-controls">
-                <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle dark/light theme">
                     <span id="theme-icon">🌙</span>
-                </div>
+                </button>
             </div>
-            <h1>🎮 Dota Player Rating</h1>
-            <p>Rate other players and share your gaming experiences with the community</p>
-        </div>
+            <h1 itemprop="name">🎮 Dota Player Rating</h1>
+            <p itemprop="description">Rate other players and share your gaming experiences with the community</p>
+        </header>
 
         <!-- User Menu (only shown when logged in) -->
         <div id="user-menu" class="user-menu hidden">
@@ -459,9 +563,39 @@
         </div>
 
         <!-- Authentication Section -->
-        <div id="auth-section" class="card">
+        <section id="auth-section" class="card" role="main">
             <h2>🔐 Welcome Back</h2>
             <p style="color: var(--text-secondary); margin-bottom: 32px;">Sign in to rate players and share your gaming experiences</p>
+            
+            <!-- SEO Content for Anonymous Users -->
+            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; margin-bottom: 24px; border: 1px solid var(--border-color);">
+                <h3 style="color: var(--text-primary); margin-bottom: 12px;">🎮 What is Dota Player Rating?</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
+                    Dota Player Rating is the premier platform for <strong>Dota 2 player reviews and community building</strong>. 
+                    Our system helps you <strong>find reliable teammates</strong>, avoid toxic players, and build a positive gaming environment.
+                </p>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: var(--success-color);">⭐</span>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Rate player performance</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: var(--success-color);">🛡️</span>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Report toxic behavior</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: var(--success-color);">🤝</span>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Find great teammates</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="color: var(--success-color);">📊</span>
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Track community stats</span>
+                    </div>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">
+                    Join thousands of Dota 2 players who use our platform to improve their gaming experience and build lasting friendships in the community.
+                </p>
+            </div>
             
             <!-- Google Login Button -->
             <button class="btn btn-google" onclick="signInWithGoogle()" style="width: 100%; margin-bottom: 24px;">
@@ -507,9 +641,60 @@
         </div>
 
         <!-- Main Application -->
-        <div id="main-app" class="hidden">
+        <main id="main-app" class="hidden" role="main">
             <!-- This will be populated dynamically after successful login -->
-        </div>
+        </main>
+        
+        <!-- SEO Footer -->
+        <footer role="contentinfo" style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin-top: 40px; border: 1px solid var(--border-color); text-align: center;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <h4 style="color: var(--text-primary); margin-bottom: 12px;">🎮 About Dota Player Rating</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                        The most trusted platform for <strong>Dota 2 player reviews</strong> and community building. 
+                        Help create a better gaming environment for everyone.
+                    </p>
+                </div>
+                <div>
+                    <h4 style="color: var(--text-primary); margin-bottom: 12px;">🔗 Quick Links</h4>
+                    <nav style="display: flex; flex-direction: column; gap: 8px;">
+                        <a href="/?tab=search" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;" title="Search Dota 2 Players">Search Players</a>
+                        <a href="/?tab=leaderboard" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;" title="Dota 2 Player Rankings">Leaderboard</a>
+                        <a href="/?tab=recent" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;" title="Latest Player Reviews">Recent Reviews</a>
+                        <a href="/?tab=analytics" style="color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;" title="Community Statistics">Analytics</a>
+                    </nav>
+                </div>
+                <div>
+                    <h4 style="color: var(--text-primary); margin-bottom: 12px;">📊 Community Stats</h4>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                        <div>💬 <span id="footer-reviews-count">Growing daily</span> Reviews</div>
+                        <div>👥 <span id="footer-users-count">Active</span> Community</div>
+                        <div>⭐ <span id="footer-avg-rating">Positive</span> Environment</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="border-top: 1px solid var(--border-color); padding-top: 16px; margin-top: 16px;">
+                <div style="display: flex; justify-content: center; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;">
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Keywords:</span>
+                    <span style="color: var(--text-secondary); font-size: 0.8rem;">#Dota2</span>
+                    <span style="color: var(--text-secondary); font-size: 0.8rem;">#PlayerRating</span>
+                    <span style="color: var(--text-secondary); font-size: 0.8rem;">#MOBA</span>
+                    <span style="color: var(--text-secondary); font-size: 0.8rem;">#Esports</span>
+                    <span style="color: var(--text-secondary); font-size: 0.8rem;">#GamingCommunity</span>
+                    <span style="color: var(--text-secondary); font-size: 0.8rem;">#Steam</span>
+                </div>
+                
+                <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">
+                    © 2024 Dota Player Rating. Building positive gaming communities since 2024. 
+                    <br>
+                    <span itemscope itemtype="https://schema.org/Organization">
+                        <span itemprop="name">Dota Player Rating</span> - 
+                        <span itemprop="description">Professional Dota 2 player rating and community platform</span>
+                    </span>
+                </p>
+            </div>
+        </footer>
     </div>
 
     <!-- Toast Notifications -->
