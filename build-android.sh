@@ -15,8 +15,8 @@ NC='\033[0m' # No Color
 
 # Configuration
 APP_NAME="Dota Player Rating"
-PACKAGE_NAME="app.netlify.dota_player_rating.twa"
-WEBSITE_URL="https://dota-player-rating.netlify.app/"
+PACKAGE_NAME="io.github.hendkai.dota_player_rating.twa"
+WEBSITE_URL="https://hendkai.github.io/dota-player-rating/"
 OUTPUT_DIR="./android-build"
 
 # Check prerequisites
