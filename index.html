@@ -345,7 +345,6 @@
             display: block;
         }
 
-        /* Styles for main app - only shown when logged in */
         .user-menu {
             position: absolute;
             top: 20px;
@@ -507,7 +506,7 @@
             <div id="auth-message"></div>
         </div>
 
-        <!-- Main Application (completely separate, only loaded after login) -->
+        <!-- Main Application -->
         <div id="main-app" class="hidden">
             <!-- This will be populated dynamically after successful login -->
         </div>
@@ -544,9 +543,15 @@
         let searchTimeout = null;
         let currentFilter = 'all';
         let currentDateFilter = null;
+        let selectedRating = 0;
 
         // Auth Providers
         const googleProvider = new GoogleAuthProvider();
+
+        // OpenDota API Configuration for Free Tier
+        const OPENDOTA_BASE_URL = 'https://api.opendota.com/api';
+        let lastRequestTime = 0;
+        const MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
 
         // Auth State Observer
         onAuthStateChanged(auth, (user) => {
@@ -560,8 +565,8 @@
             }
         });
 
-        // Theme Management
-        window.toggleTheme = function() {
+        // Theme Management - GLOBAL SCOPE
+        globalThis.toggleTheme = function() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
             
@@ -577,24 +582,32 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
         document.getElementById('theme-icon').textContent = savedTheme === 'light' ? '🌙' : '☀️';
 
-        // Google Sign In
-        window.signInWithGoogle = async function() {
+        // Google Sign In - GLOBAL SCOPE
+        globalThis.signInWithGoogle = async function() {
             try {
+                console.log('Attempting Google sign in...');
                 const result = await signInWithPopup(auth, googleProvider);
+                console.log('Google sign in successful:', result.user);
                 showToast('Successfully signed in with Google!', 'success');
             } catch (error) {
+                console.error('Google sign in error:', error);
                 let errorMessage = 'Google sign-in failed!';
                 if (error.code === 'auth/popup-closed-by-user') {
                     errorMessage = 'Sign-in was cancelled.';
                 } else if (error.code === 'auth/popup-blocked') {
                     errorMessage = 'Pop-up was blocked. Please allow pop-ups and try again.';
+                } else if (error.code === 'auth/network-request-failed') {
+                    errorMessage = 'Network error. Please check your connection and try again.';
+                } else if (error.code === 'auth/internal-error') {
+                    errorMessage = 'Internal error. Please try again later.';
                 }
                 showMessage('auth-message', errorMessage, 'error');
+                console.log('Full error details:', error);
             }
         };
 
-        // User Registration
-        window.register = async function() {
+        // User Registration - GLOBAL SCOPE
+        globalThis.register = async function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
@@ -628,8 +641,8 @@
             }
         };
 
-        // User Login
-        window.login = async function() {
+        // User Login - GLOBAL SCOPE
+        globalThis.login = async function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
@@ -653,10 +666,22 @@
                     errorMessage = 'Please enter a valid email address!';
                 } else if (error.code === 'auth/too-many-requests') {
                     errorMessage = 'Too many failed attempts. Please try again later.';
+                } else if (error.code === 'auth/invalid-credential') {
+                    errorMessage = 'Invalid email or password!';
                 }
                 showMessage('auth-message', errorMessage, 'error');
             } finally {
                 setLoadingState('login', false);
+            }
+        };
+
+        // Logout - GLOBAL SCOPE
+        globalThis.logout = async function() {
+            try {
+                await signOut(auth);
+                showToast('Successfully signed out!', 'success');
+            } catch (error) {
+                console.error('Logout error:', error);
             }
         };
 
@@ -802,8 +827,8 @@
             loadRecentSearches();
         }
 
-        // Enhanced Search with Autocomplete
-        window.handleSearchInput = function() {
+        // Make ALL search and app functions global
+        globalThis.handleSearchInput = function() {
             const query = document.getElementById('search-player').value.trim();
             
             if (searchTimeout) {
@@ -819,47 +844,19 @@
             }
         };
 
-        window.handleSearchKeydown = function(event) {
+        globalThis.handleSearchKeydown = function(event) {
             if (event.key === 'Enter') {
                 searchPlayer();
             }
         };
 
-        function showSearchSuggestions(query) {
-            const suggestions = recentSearches.filter(search => 
-                search.toLowerCase().includes(query.toLowerCase())
-            ).slice(0, 5);
-            
-            const suggestionsContainer = document.getElementById('search-suggestions');
-            
-            if (suggestions.length > 0) {
-                suggestionsContainer.innerHTML = suggestions.map(suggestion => 
-                    `<div style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: all 0.3s ease;" 
-                          onmouseover="this.style.background='var(--primary-color)'; this.style.color='white'"
-                          onmouseout="this.style.background='transparent'; this.style.color='var(--text-primary)'"
-                          onclick="selectSuggestion('${suggestion}')">${suggestion}</div>`
-                ).join('');
-                suggestionsContainer.style.display = 'block';
-            } else {
-                hideSearchSuggestions();
-            }
-        }
-
-        function hideSearchSuggestions() {
-            const suggestionsContainer = document.getElementById('search-suggestions');
-            if (suggestionsContainer) {
-                suggestionsContainer.style.display = 'none';
-            }
-        }
-
-        window.selectSuggestion = function(suggestion) {
+        globalThis.selectSuggestion = function(suggestion) {
             document.getElementById('search-player').value = suggestion;
             hideSearchSuggestions();
             searchPlayer();
         };
 
-        // Smart search function that handles names, URLs, and IDs
-        window.searchPlayer = async function() {
+        globalThis.searchPlayer = async function() {
             const searchTerm = document.getElementById('search-player').value.trim();
             
             if (!searchTerm) {
@@ -926,6 +923,291 @@
             }
         };
 
+        // All other global functions
+        globalThis.showRecentSearches = function() {
+            if (recentSearches.length === 0) {
+                showToast('No recent searches found', 'error');
+                return;
+            }
+            
+            document.getElementById('search-results').innerHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0;">
+                    <h3 style="margin-bottom: 16px; color: var(--text-primary);">Recent Searches</h3>
+                    ${recentSearches.map(search => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                            <span style="cursor: pointer; color: var(--text-primary);" onclick="document.getElementById('search-player').value='${search}'; searchPlayer()">${search}</span>
+                            <button style="background: none; border: none; color: var(--error-color); cursor: pointer;" onclick="removeFromHistory('${search}')">🗑️</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        };
+
+        globalThis.removeFromHistory = function(search) {
+            recentSearches = recentSearches.filter(s => s !== search);
+            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+            showRecentSearches();
+            showToast('Removed from history', 'success');
+        };
+
+        globalThis.clearSearchHistory = function() {
+            recentSearches = [];
+            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+            document.getElementById('search-results').innerHTML = '';
+            showToast('Search history cleared', 'success');
+        };
+
+        globalThis.switchToTab = function(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-content`).classList.add('active');
+            
+            // Load content for specific tabs
+            if (tabName === 'leaderboard') {
+                loadLeaderboard();
+            } else if (tabName === 'recent') {
+                loadReviews();
+            } else if (tabName === 'analytics') {
+                loadAnalytics();
+            }
+        };
+
+        globalThis.filterLeaderboard = function(period) {
+            loadLeaderboard();
+        };
+
+        globalThis.filterByCategory = function(category) {
+            loadLeaderboard();
+        };
+
+        globalThis.filterReviews = function(rating) {
+            currentFilter = rating;
+            loadReviews();
+        };
+
+        globalThis.filterByDate = function(date) {
+            currentDateFilter = date;
+            loadReviews();
+        };
+
+        globalThis.showRatingForm = function(playerId, playerName) {
+            const ratingFormHTML = `
+                <div class="card">
+                    <h2>⭐ Rate Player: ${playerName}</h2>
+                    
+                    <div class="form-group">
+                        <label>Your Rating</label>
+                        <div style="text-align: center; margin: 20px 0;">
+                            <div style="font-size: 2.5rem; display: flex; gap: 8px; justify-content: center;">
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(1)" id="star-1">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(2)" id="star-2">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(3)" id="star-3">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(4)" id="star-4">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(5)" id="star-5">⭐</span>
+                            </div>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">
+                                <span id="rating-text">Click to rate this player</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="comment">Your Experience</label>
+                        <textarea id="comment" style="width: 100%; min-height: 120px; padding: 16px 20px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--glass-bg); color: var(--text-primary); font-size: 16px; font-family: inherit; resize: vertical; transition: all 0.3s ease; outline: none;" 
+                                  placeholder="Share your experience playing with this player. Be constructive and respectful!"></textarea>
+                    </div>
+                    
+                    <button class="btn" onclick="submitRating('${playerId}', '${playerName}')">
+                        <span id="submit-loading" class="hidden">
+                            <span class="loading-spinner"></span> Submitting...
+                        </span>
+                        <span id="submit-text">Submit Rating</span>
+                    </button>
+                    <div id="rating-message"></div>
+                </div>
+            `;
+
+            // Insert rating form after search results
+            const searchCard = document.getElementById('search-results').closest('.card');
+            searchCard.insertAdjacentHTML('afterend', ratingFormHTML);
+            
+            // Scroll to rating form
+            document.querySelector('[data-rating-form]')?.scrollIntoView({ behavior: 'smooth' });
+            
+            // Add data attribute to identify rating form
+            searchCard.nextElementSibling.setAttribute('data-rating-form', 'true');
+            
+            // Initialize star hover effects after form is created
+            setTimeout(() => {
+                addStarHoverEffects();
+                updateRatingText();
+            }, 100);
+        };
+
+        globalThis.setRating = function(rating) {
+            selectedRating = rating;
+            updateStarDisplay();
+            updateRatingText();
+        };
+
+        globalThis.submitRating = async function(playerId, playerName) {
+            if (selectedRating === 0) {
+                showToast('Please select a star rating!', 'error');
+                return;
+            }
+
+            const comment = document.getElementById('comment').value.trim();
+            
+            if (!comment) {
+                showToast('Please write a comment about your experience!', 'error');
+                return;
+            }
+
+            setLoadingState('submit', true);
+
+            try {
+                const reviewData = {
+                    playerId: playerId,
+                    playerName: playerName,
+                    rating: selectedRating,
+                    comment: comment,
+                    reviewerId: currentUser.uid,
+                    reviewerEmail: currentUser.email,
+                    reviewerName: currentUser.displayName || currentUser.email.split('@')[0],
+                    timestamp: new Date(),
+                    verified: true
+                };
+
+                await addDoc(collection(db, 'ratings'), reviewData);
+                showToast('Rating submitted successfully!', 'success');
+                
+                // Reset form
+                selectedRating = 0;
+                document.getElementById('comment').value = '';
+                updateStarDisplay();
+                updateRatingText();
+                
+                // Remove rating form
+                document.querySelector('[data-rating-form]').remove();
+                
+                // Reload reviews
+                loadReviews();
+                
+            } catch (error) {
+                showToast('Failed to submit rating: ' + error.message, 'error');
+            } finally {
+                setLoadingState('submit', false);
+            }
+        };
+
+        globalThis.viewPlayerReviews = async function(playerId) {
+            try {
+                const q = query(
+                    collection(db, 'ratings'), 
+                    where('playerId', '==', playerId),
+                    orderBy('timestamp', 'desc')
+                );
+                const querySnapshot = await getDocs(q);
+                
+                let reviewsHtml = `
+                    <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0;">
+                        <h3 style="margin-bottom: 16px; color: var(--text-primary);">Player Reviews</h3>
+                `;
+                
+                if (querySnapshot.empty) {
+                    reviewsHtml += '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No reviews yet for this player.</p>';
+                } else {
+                    querySnapshot.forEach((doc) => {
+                        const review = doc.data();
+                        const stars = '⭐'.repeat(review.rating || 0);
+                        const date = review.timestamp.toDate().toLocaleDateString();
+                        const reviewerName = review.reviewerName || review.reviewerEmail.split('@')[0];
+                        
+                        reviewsHtml += `
+                            <div style="border-bottom: 1px solid var(--border-color); padding: 16px 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="font-weight: 600; color: var(--text-primary);">${reviewerName}</div>
+                                    <div style="color: #fbbf24;">${stars}</div>
+                                </div>
+                                <div style="color: var(--text-secondary); margin-bottom: 8px;">${review.comment}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${date}</div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                reviewsHtml += '</div>';
+                
+                // Insert after search results
+                const searchResults = document.getElementById('search-results');
+                searchResults.insertAdjacentHTML('afterend', reviewsHtml);
+                
+            } catch (error) {
+                showToast('Failed to load reviews', 'error');
+            }
+        };
+
+        globalThis.createPlayerProfile = function(playerName) {
+            const playerData = createPlaceholderProfile(playerName);
+            displayPlayerProfile(playerData);
+            showToast(`Created rating profile for ${playerName}!`, 'success');
+        };
+
+        globalThis.showPopularPlayers = function() {
+            const popularPlayers = [
+                { name: 'Dendi', id: '70388657' },
+                { name: 'Arteezy', id: '86745912' },
+                { name: 'SumaiL', id: '111620041' },
+                { name: 'Miracle-', id: '105248644' },
+                { name: 'N0tail', id: '19672354' }
+            ];
+            
+            const popularHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
+                    <h3 style="color: var(--text-primary); margin-bottom: 16px; text-align: center;">🌟 Try Searching These Popular Players</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        ${popularPlayers.map(player => `
+                            <button class="btn btn-secondary" style="width: 100%;" onclick="document.getElementById('search-player').value='${player.name}'; searchPlayer()">
+                                ${player.name}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <p style="color: var(--text-muted); text-align: center; margin-top: 16px; font-size: 0.9rem;">
+                        These are well-known professional players with public profiles
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('search-results').innerHTML = popularHTML;
+        };
+
+        // Wait function to respect rate limits
+        function waitForRateLimit() {
+            return new Promise(resolve => {
+                const now = Date.now();
+                const timeSinceLastRequest = now - lastRequestTime;
+                
+                if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+                    const waitTime = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
+                    setTimeout(() => {
+                        lastRequestTime = Date.now();
+                        resolve();
+                    }, waitTime);
+                } else {
+                    lastRequestTime = now;
+                    resolve();
+                }
+            });
+        }
+
         // Helper functions for different search types
         function isNumericSteamId(input) {
             return /^\d{8,17}$/.test(input);
@@ -950,89 +1232,6 @@
             }
             
             return null;
-        }
-
-        // Search by player name using OpenDota search
-        async function searchByPlayerName(playerName) {
-            try {
-                await waitForRateLimit();
-                
-                // Use OpenDota's search endpoint
-                const searchResponse = await fetch(`${OPENDOTA_BASE_URL}/search?q=${encodeURIComponent(playerName)}`);
-                
-                if (!searchResponse.ok) {
-                    throw new Error('Search failed');
-                }
-                
-                const searchResults = await searchResponse.json();
-                
-                if (!searchResults || searchResults.length === 0) {
-                    return null;
-                }
-                
-                // Take the first/best match
-                const bestMatch = searchResults[0];
-                
-                // Now get full player data using the account_id
-                return await searchBySteamId(bestMatch.account_id.toString());
-                
-            } catch (error) {
-                console.error('Name search error:', error);
-                
-                // Fallback: Create a placeholder profile for rating purposes
-                return createPlaceholderProfile(playerName);
-            }
-        }
-
-        // Create placeholder profile when OpenDota doesn't have the player
-        function createPlaceholderProfile(playerName) {
-            return {
-                id: 'placeholder_' + playerName.toLowerCase().replace(/[^a-z0-9]/g, ''),
-                name: playerName,
-                avatar: '🎮',
-                playerId: 'Unknown',
-                steamId: 'Unknown',
-                profileUrl: null,
-                lastSeen: 'Unknown',
-                gamesPlayed: 'Unknown',
-                winRate: 'Unknown',
-                favoriteHero: 'Unknown',
-                rank: 'Unranked',
-                mmr: 'Unknown',
-                leaderboardRank: null,
-                avgRating: (Math.random() * 2 + 3).toFixed(1), // From our rating system
-                totalReviews: Math.floor(Math.random() * 5) + 1, // From our rating system
-                recentMatches: 'Unknown',
-                isProfilePublic: false,
-                joinDate: 'Unknown',
-                isPlaceholder: true
-            };
-        }
-
-        // OpenDota API Configuration for Free Tier
-        const OPENDOTA_BASE_URL = 'https://api.opendota.com/api';
-        
-        // Rate limiting for free tier (60 requests per minute)
-        let lastRequestTime = 0;
-        const MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
-
-        // Wait function to respect rate limits
-        function waitForRateLimit() {
-            return new Promise(resolve => {
-                const now = Date.now();
-                const timeSinceLastRequest = now - lastRequestTime;
-                
-                if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
-                    const waitTime = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
-                    setTimeout(() => {
-                        lastRequestTime = Date.now();
-                        resolve();
-                    }, waitTime);
-                } else {
-                    lastRequestTime = now;
-                    resolve();
-                }
-            });
         }
 
         // Search by Steam ID using OpenDota API (Free Tier Optimized)
@@ -1098,46 +1297,60 @@
             }
         }
 
-        // Search by player name (simplified - shows search form)
+        // Search by player name using OpenDota search
         async function searchByPlayerName(playerName) {
-            // For player name search, we'll show a message that they need to provide Steam ID
-            return null;
+            try {
+                await waitForRateLimit();
+                
+                // Use OpenDota's search endpoint
+                const searchResponse = await fetch(`${OPENDOTA_BASE_URL}/search?q=${encodeURIComponent(playerName)}`);
+                
+                if (!searchResponse.ok) {
+                    throw new Error('Search failed');
+                }
+                
+                const searchResults = await searchResponse.json();
+                
+                if (!searchResults || searchResults.length === 0) {
+                    return null;
+                }
+                
+                // Take the first/best match
+                const bestMatch = searchResults[0];
+                
+                // Now get full player data using the account_id
+                return await searchBySteamId(bestMatch.account_id.toString());
+                
+            } catch (error) {
+                console.error('Name search error:', error);
+                
+                // Fallback: Create a placeholder profile for rating purposes
+                return createPlaceholderProfile(playerName);
+            }
         }
 
-        // Format player data from OpenDota API
-        function formatPlayerData(playerData, wlData, recentMatches, accountId) {
-            const totalGames = (wlData.win || 0) + (wlData.lose || 0);
-            const winRate = totalGames > 0 ? ((wlData.win / totalGames) * 100).toFixed(1) : '0.0';
-            
-            // Get most played hero from recent matches
-            const heroCount = {};
-            recentMatches.forEach(match => {
-                heroCount[match.hero_id] = (heroCount[match.hero_id] || 0) + 1;
-            });
-            const mostPlayedHeroId = Object.keys(heroCount).reduce((a, b) => 
-                heroCount[a] > heroCount[b] ? a : b, Object.keys(heroCount)[0]
-            );
-
+        // Create placeholder profile when OpenDota doesn't have the player
+        function createPlaceholderProfile(playerName) {
             return {
-                id: accountId,
-                name: playerData.profile?.personaname || `Player ${accountId}`,
-                avatar: playerData.profile?.avatar || '🎮',
-                playerId: accountId,
-                steamId: playerData.profile?.steamid || accountId,
-                profileUrl: playerData.profile?.profileurl || '',
-                lastSeen: getLastSeenText(playerData.last_match_time),
-                gamesPlayed: totalGames,
-                winRate: winRate,
-                favoriteHero: getHeroName(mostPlayedHeroId),
-                rank: getRankTier(playerData.rank_tier),
-                mmr: playerData.mmr_estimate?.estimate || 'Unknown',
-                leaderboardRank: playerData.leaderboard_rank || null,
-                avgRating: (Math.random() * 2 + 3).toFixed(1), // This comes from our rating system
-                totalReviews: Math.floor(Math.random() * 20) + 1, // This comes from our rating system
-                recentMatches: recentMatches.length,
-                isProfilePublic: !playerData.profile?.profileurl?.includes('private'),
-                joinDate: playerData.profile?.timecreated ? 
-                    new Date(playerData.profile.timecreated * 1000).toLocaleDateString() : 'Unknown'
+                id: 'placeholder_' + playerName.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                name: playerName,
+                avatar: '🎮',
+                playerId: 'Unknown',
+                steamId: 'Unknown',
+                profileUrl: null,
+                lastSeen: 'Unknown',
+                gamesPlayed: 'Unknown',
+                winRate: 'Unknown',
+                favoriteHero: 'Unknown',
+                rank: 'Unranked',
+                mmr: 'Unknown',
+                leaderboardRank: null,
+                avgRating: (Math.random() * 2 + 3).toFixed(1), // From our rating system
+                totalReviews: Math.floor(Math.random() * 5) + 1, // From our rating system
+                recentMatches: 'Unknown',
+                isProfilePublic: false,
+                joinDate: 'Unknown',
+                isPlaceholder: true
             };
         }
 
@@ -1239,42 +1452,6 @@
             document.getElementById('search-results').innerHTML = notFoundHTML;
         }
 
-        // Create a player profile even if not in OpenDota
-        window.createPlayerProfile = function(playerName) {
-            const playerData = createPlaceholderProfile(playerName);
-            displayPlayerProfile(playerData);
-            showToast(`Created rating profile for ${playerName}!`, 'success');
-        };
-
-        // Show some popular players for demo purposes
-        window.showPopularPlayers = function() {
-            const popularPlayers = [
-                { name: 'Dendi', id: '70388657' },
-                { name: 'Arteezy', id: '86745912' },
-                { name: 'SumaiL', id: '111620041' },
-                { name: 'Miracle-', id: '105248644' },
-                { name: 'N0tail', id: '19672354' }
-            ];
-            
-            const popularHTML = `
-                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
-                    <h3 style="color: var(--text-primary); margin-bottom: 16px; text-align: center;">🌟 Try Searching These Popular Players</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
-                        ${popularPlayers.map(player => `
-                            <button class="btn btn-secondary" style="width: 100%;" onclick="document.getElementById('search-player').value='${player.name}'; searchPlayer()">
-                                ${player.name}
-                            </button>
-                        `).join('')}
-                    </div>
-                    <p style="color: var(--text-muted); text-align: center; margin-top: 16px; font-size: 0.9rem;">
-                        These are well-known professional players with public profiles
-                    </p>
-                </div>
-            `;
-            
-            document.getElementById('search-results').innerHTML = popularHTML;
-        };
-
         // Rate limit error with user-friendly message
         function showRateLimitError() {
             document.getElementById('search-results').innerHTML = `
@@ -1369,86 +1546,32 @@
             document.getElementById('search-results').innerHTML = profileHTML;
         }
 
-        window.showRecentSearches = function() {
-            if (recentSearches.length === 0) {
-                showToast('No recent searches found', 'error');
-                return;
-            }
+        function showSearchSuggestions(query) {
+            const suggestions = recentSearches.filter(search => 
+                search.toLowerCase().includes(query.toLowerCase())
+            ).slice(0, 5);
             
-            document.getElementById('search-results').innerHTML = `
-                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0;">
-                    <h3 style="margin-bottom: 16px; color: var(--text-primary);">Recent Searches</h3>
-                    ${recentSearches.map(search => `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
-                            <span style="cursor: pointer; color: var(--text-primary);" onclick="document.getElementById('search-player').value='${search}'; searchPlayer()">${search}</span>
-                            <button style="background: none; border: none; color: var(--error-color); cursor: pointer;" onclick="removeFromHistory('${search}')">🗑️</button>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-        };
-
-        window.removeFromHistory = function(search) {
-            recentSearches = recentSearches.filter(s => s !== search);
-            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
-            showRecentSearches();
-            showToast('Removed from history', 'success');
-        };
-
-        window.clearSearchHistory = function() {
-            recentSearches = [];
-            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
-            document.getElementById('search-results').innerHTML = '';
-            showToast('Search history cleared', 'success');
-        };
-
-        // View Player Reviews
-        window.viewPlayerReviews = async function(playerId) {
-            try {
-                const q = query(
-                    collection(db, 'ratings'), 
-                    where('playerId', '==', playerId),
-                    orderBy('timestamp', 'desc')
-                );
-                const querySnapshot = await getDocs(q);
-                
-                let reviewsHtml = `
-                    <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0;">
-                        <h3 style="margin-bottom: 16px; color: var(--text-primary);">Player Reviews</h3>
-                `;
-                
-                if (querySnapshot.empty) {
-                    reviewsHtml += '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No reviews yet for this player.</p>';
-                } else {
-                    querySnapshot.forEach((doc) => {
-                        const review = doc.data();
-                        const stars = '⭐'.repeat(review.rating || 0);
-                        const date = review.timestamp.toDate().toLocaleDateString();
-                        const reviewerName = review.reviewerName || review.reviewerEmail.split('@')[0];
-                        
-                        reviewsHtml += `
-                            <div style="border-bottom: 1px solid var(--border-color); padding: 16px 0;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <div style="font-weight: 600; color: var(--text-primary);">${reviewerName}</div>
-                                    <div style="color: #fbbf24;">${stars}</div>
-                                </div>
-                                <div style="color: var(--text-secondary); margin-bottom: 8px;">${review.comment}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-muted);">${date}</div>
-                            </div>
-                        `;
-                    });
-                }
-                
-                reviewsHtml += '</div>';
-                
-                // Insert after search results
-                const searchResults = document.getElementById('search-results');
-                searchResults.insertAdjacentHTML('afterend', reviewsHtml);
-                
-            } catch (error) {
-                showToast('Failed to load reviews', 'error');
+            const suggestionsContainer = document.getElementById('search-suggestions');
+            
+            if (suggestions.length > 0) {
+                suggestionsContainer.innerHTML = suggestions.map(suggestion => 
+                    `<div style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: all 0.3s ease;" 
+                          onmouseover="this.style.background='var(--primary-color)'; this.style.color='white'"
+                          onmouseout="this.style.background='transparent'; this.style.color='var(--text-primary)'"
+                          onclick="selectSuggestion('${suggestion}')">${suggestion}</div>`
+                ).join('');
+                suggestionsContainer.style.display = 'block';
+            } else {
+                hideSearchSuggestions();
             }
-        };
+        }
+
+        function hideSearchSuggestions() {
+            const suggestionsContainer = document.getElementById('search-suggestions');
+            if (suggestionsContainer) {
+                suggestionsContainer.style.display = 'none';
+            }
+        }
 
         // Tab System
         function initializeTabs() {
@@ -1460,29 +1583,6 @@
                 });
             });
         }
-
-        window.switchToTab = function(tabName) {
-            // Update tab buttons
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.getElementById(`tab-${tabName}`).classList.add('active');
-            
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(`${tabName}-content`).classList.add('active');
-            
-            // Load content for specific tabs
-            if (tabName === 'leaderboard') {
-                loadLeaderboard();
-            } else if (tabName === 'recent') {
-                loadReviews();
-            } else if (tabName === 'analytics') {
-                loadAnalytics();
-            }
-        };
 
         // Load Leaderboard
         async function loadLeaderboard() {
@@ -1518,80 +1618,6 @@
             }
         }
 
-        // Filter functions (placeholders)
-        window.filterLeaderboard = function(period) {
-            loadLeaderboard();
-        };
-
-        window.filterByCategory = function(category) {
-            loadLeaderboard();
-        };
-
-        window.filterReviews = function(rating) {
-            currentFilter = rating;
-            loadReviews();
-        };
-
-        window.filterByDate = function(date) {
-            currentDateFilter = date;
-            loadReviews();
-        };
-
-        // Show Rating Form
-        window.showRatingForm = function(playerId, playerName) {
-            const ratingFormHTML = `
-                <div class="card">
-                    <h2>⭐ Rate Player: ${playerName}</h2>
-                    
-                    <div class="form-group">
-                        <label>Your Rating</label>
-                        <div style="text-align: center; margin: 20px 0;">
-                            <div style="font-size: 2.5rem; display: flex; gap: 8px; justify-content: center;">
-                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(1)" id="star-1">⭐</span>
-                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(2)" id="star-2">⭐</span>
-                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(3)" id="star-3">⭐</span>
-                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(4)" id="star-4">⭐</span>
-                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(5)" id="star-5">⭐</span>
-                            </div>
-                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">
-                                <span id="rating-text">Click to rate this player</span>
-                            </p>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="comment">Your Experience</label>
-                        <textarea id="comment" style="width: 100%; min-height: 120px; padding: 16px 20px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--glass-bg); color: var(--text-primary); font-size: 16px; font-family: inherit; resize: vertical; transition: all 0.3s ease; outline: none;" 
-                                  placeholder="Share your experience playing with this player. Be constructive and respectful!"></textarea>
-                    </div>
-                    
-                    <button class="btn" onclick="submitRating('${playerId}', '${playerName}')">
-                        <span id="submit-loading" class="hidden">
-                            <span class="loading-spinner"></span> Submitting...
-                        </span>
-                        <span id="submit-text">Submit Rating</span>
-                    </button>
-                    <div id="rating-message"></div>
-                </div>
-            `;
-
-            // Insert rating form after search results
-            const searchCard = document.getElementById('search-results').closest('.card');
-            searchCard.insertAdjacentHTML('afterend', ratingFormHTML);
-            
-            // Scroll to rating form
-            document.querySelector('[data-rating-form]')?.scrollIntoView({ behavior: 'smooth' });
-            
-            // Add data attribute to identify rating form
-            searchCard.nextElementSibling.setAttribute('data-rating-form', 'true');
-            
-            // Initialize star hover effects after form is created
-            setTimeout(() => {
-                addStarHoverEffects();
-                updateRatingText();
-            }, 100);
-        };
-
         function updateRatingText() {
             const ratingText = document.getElementById('rating-text');
             if (ratingText) {
@@ -1611,15 +1637,6 @@
                 }
             }
         }
-
-        // Rating System
-        let selectedRating = 0;
-
-        window.setRating = function(rating) {
-            selectedRating = rating;
-            updateStarDisplay();
-            updateRatingText();
-        };
 
         function updateStarDisplay() {
             // Update star display based on selected rating
@@ -1674,57 +1691,6 @@
                 }
             }
         }
-
-        // Submit Rating
-        window.submitRating = async function(playerId, playerName) {
-            if (selectedRating === 0) {
-                showToast('Please select a star rating!', 'error');
-                return;
-            }
-
-            const comment = document.getElementById('comment').value.trim();
-            
-            if (!comment) {
-                showToast('Please write a comment about your experience!', 'error');
-                return;
-            }
-
-            setLoadingState('submit', true);
-
-            try {
-                const reviewData = {
-                    playerId: playerId,
-                    playerName: playerName,
-                    rating: selectedRating,
-                    comment: comment,
-                    reviewerId: currentUser.uid,
-                    reviewerEmail: currentUser.email,
-                    reviewerName: currentUser.displayName || currentUser.email.split('@')[0],
-                    timestamp: new Date(),
-                    verified: true
-                };
-
-                await addDoc(collection(db, 'ratings'), reviewData);
-                showToast('Rating submitted successfully!', 'success');
-                
-                // Reset form
-                selectedRating = 0;
-                document.getElementById('comment').value = '';
-                updateStarDisplay();
-                updateRatingText();
-                
-                // Remove rating form
-                document.querySelector('[data-rating-form]').remove();
-                
-                // Reload reviews
-                loadReviews();
-                
-            } catch (error) {
-                showToast('Failed to submit rating: ' + error.message, 'error');
-            } finally {
-                setLoadingState('submit', false);
-            }
-        };
 
         // Load Reviews
         async function loadReviews() {
@@ -1827,15 +1793,6 @@
             userName.textContent = user.displayName || user.email.split('@')[0];
             userEmail.textContent = user.email;
         }
-
-        window.logout = async function() {
-            try {
-                await signOut(auth);
-                showToast('Successfully signed out!', 'success');
-            } catch (error) {
-                console.error('Logout error:', error);
-            }
-        };
 
         function showAuthSection() {
             document.getElementById('auth-section').classList.remove('hidden');
