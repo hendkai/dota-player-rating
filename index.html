@@ -1276,7 +1276,7 @@ Building positive gaming communities together.
         };
 
         // Load Main App Content After Login
-        function loadMainAppContent() {
+        globalThis.loadMainAppContent = function() {
             const mainAppHTML = `
                 <!-- Dashboard -->
                 <div class="card">
@@ -1541,7 +1541,7 @@ Building positive gaming communities together.
             // Initialize components
             initializeTabs();
             loadRecentSearches();
-        }
+        };
 
         // Admin Security - Only authorized email addresses
         const ADMIN_EMAILS = [
@@ -1549,31 +1549,31 @@ Building positive gaming communities together.
             'admin@dota-rating.com' // Add more admin emails here if needed
         ];
 
-        function isAdmin(userEmail) {
+        globalThis.isAdmin = function(userEmail) {
             return ADMIN_EMAILS.includes(userEmail?.toLowerCase());
-        }
+        };
 
-        function checkAdminAccess() {
+        globalThis.checkAdminAccess = function() {
             if (!currentUser || !isAdmin(currentUser.email)) {
                 showToast('Access denied. Admin privileges required.', 'error');
                 return false;
             }
             return true;
-        }
+        };
 
-        function showAdminTab() {
+        globalThis.showAdminTab = function() {
             const adminTab = document.getElementById('tab-admin');
             if (adminTab && isAdmin(currentUser?.email)) {
                 adminTab.classList.remove('hidden');
             }
-        }
+        };
 
-        function hideAdminTab() {
+        globalThis.hideAdminTab = function() {
             const adminTab = document.getElementById('tab-admin');
             if (adminTab) {
                 adminTab.classList.add('hidden');
             }
-        }
+        };
 
         // Admin Functions
         globalThis.loadReports = async function() {
@@ -2115,7 +2115,7 @@ Building positive gaming communities together.
             }
         };
 
-                         async function updateAdminStats() {
+                         globalThis.updateAdminStats = async function() {
             if (!isAdmin(currentUser?.email)) return;
             
             try {
@@ -2203,7 +2203,7 @@ Building positive gaming communities together.
                     if (el) el.textContent = 'Error';
                 });
             }
-        }
+        };
 
          // Additional Admin Functions
          globalThis.loadRecentReviews = async function() {
@@ -4512,7 +4512,7 @@ Building positive gaming communities together.
         }
 
         // Load Reviews
-        async function loadReviews() {
+        globalThis.loadReviews = async function() {
             try {
                 let querySnapshot;
                 
@@ -4625,7 +4625,7 @@ Building positive gaming communities together.
                 document.getElementById('reviews-list').innerHTML = 
                     '<p style="color: var(--error-color); text-align: center; padding: 40px 0;">Failed to load reviews</p>';
             }
-        }
+        };
 
         // Load Recent Searches
         function loadRecentSearches() {
@@ -4649,7 +4649,7 @@ Building positive gaming communities together.
             }
         }
 
-        function updateUserInfo(user) {
+        globalThis.updateUserInfo = function(user) {
             const userAvatar = document.getElementById('user-avatar');
             const userName = document.getElementById('user-name');
             const userEmail = document.getElementById('user-email');
@@ -4665,15 +4665,15 @@ Building positive gaming communities together.
             
             userName.textContent = user.displayName || user.email.split('@')[0];
             userEmail.textContent = user.email;
-        }
+        };
 
-        function showAuthSection() {
+        globalThis.showAuthSection = function() {
             document.getElementById('auth-section').classList.remove('hidden');
             document.getElementById('main-app').classList.add('hidden');
             document.getElementById('user-menu').classList.add('hidden');
-        }
+        };
 
-        function showMainApp() {
+        globalThis.showMainApp = function() {
             document.getElementById('auth-section').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('user-menu').classList.remove('hidden');
@@ -4692,7 +4692,7 @@ Building positive gaming communities together.
             } else {
                 hideAdminTab();
             }
-        }
+        };
 
         function showMessage(elementId, message, type) {
             const element = document.getElementById(elementId);
