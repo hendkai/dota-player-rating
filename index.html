@@ -520,7 +520,7 @@
         // Import Firebase modules
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, where, limit } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, where, limit, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -999,23 +999,115 @@
         };
 
         globalThis.showRatingForm = function(playerId, playerName) {
+            // Reset category ratings
+            categoryRatings = {
+                overall: 0,
+                skill: 0,
+                teamwork: 0,
+                communication: 0,
+                behavior: 0,
+                leadership: 0
+            };
+            
             const ratingFormHTML = `
                 <div class="card">
                     <h2>⭐ Rate Player: ${playerName}</h2>
                     
-                    <div class="form-group">
-                        <label>Your Rating</label>
-                        <div style="text-align: center; margin: 20px 0;">
-                            <div style="font-size: 2.5rem; display: flex; gap: 8px; justify-content: center;">
-                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(1)" id="star-1">⭐</span>
-                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(2)" id="star-2">⭐</span>
-                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(3)" id="star-3">⭐</span>
-                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(4)" id="star-4">⭐</span>
-                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(5)" id="star-5">⭐</span>
+                    <!-- Rating Categories -->
+                    <div style="display: grid; gap: 24px; margin-bottom: 24px;">
+                        <!-- Overall Rating -->
+                        <div class="form-group">
+                            <label>Overall Rating</label>
+                            <div style="text-align: center; margin: 16px 0;">
+                                <div style="font-size: 2rem; display: flex; gap: 8px; justify-content: center;" data-category="overall">
+                                    <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('overall', 1)" id="overall-star-1">⭐</span>
+                                    <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('overall', 2)" id="overall-star-2">⭐</span>
+                                    <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('overall', 3)" id="overall-star-3">⭐</span>
+                                    <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('overall', 4)" id="overall-star-4">⭐</span>
+                                    <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('overall', 5)" id="overall-star-5">⭐</span>
+                                </div>
+                                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">
+                                    <span id="overall-rating-text">General experience with this player</span>
+                                </p>
                             </div>
-                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">
-                                <span id="rating-text">Click to rate this player</span>
-                            </p>
+                        </div>
+                        
+                        <!-- Category Ratings Grid -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                            <!-- Skill Level -->
+                            <div style="background: var(--bg-secondary); border-radius: 12px; padding: 20px;">
+                                <label style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: block;">🎯 Skill Level</label>
+                                <div style="text-align: center; margin: 12px 0;">
+                                    <div style="font-size: 1.5rem; display: flex; gap: 4px; justify-content: center;" data-category="skill">
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('skill', 1)" id="skill-star-1">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('skill', 2)" id="skill-star-2">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('skill', 3)" id="skill-star-3">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('skill', 4)" id="skill-star-4">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('skill', 5)" id="skill-star-5">⭐</span>
+                                    </div>
+                                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;"><span id="skill-rating-text">Game mechanics & decision making</span></p>
+                                </div>
+                            </div>
+                            
+                            <!-- Teamwork -->
+                            <div style="background: var(--bg-secondary); border-radius: 12px; padding: 20px;">
+                                <label style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: block;">🤝 Teamwork</label>
+                                <div style="text-align: center; margin: 12px 0;">
+                                    <div style="font-size: 1.5rem; display: flex; gap: 4px; justify-content: center;" data-category="teamwork">
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('teamwork', 1)" id="teamwork-star-1">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('teamwork', 2)" id="teamwork-star-2">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('teamwork', 3)" id="teamwork-star-3">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('teamwork', 4)" id="teamwork-star-4">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('teamwork', 5)" id="teamwork-star-5">⭐</span>
+                                    </div>
+                                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;"><span id="teamwork-rating-text">Cooperation & team play</span></p>
+                                </div>
+                            </div>
+                            
+                            <!-- Communication -->
+                            <div style="background: var(--bg-secondary); border-radius: 12px; padding: 20px;">
+                                <label style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: block;">💬 Communication</label>
+                                <div style="text-align: center; margin: 12px 0;">
+                                    <div style="font-size: 1.5rem; display: flex; gap: 4px; justify-content: center;" data-category="communication">
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('communication', 1)" id="communication-star-1">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('communication', 2)" id="communication-star-2">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('communication', 3)" id="communication-star-3">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('communication', 4)" id="communication-star-4">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('communication', 5)" id="communication-star-5">⭐</span>
+                                    </div>
+                                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;"><span id="communication-rating-text">Voice chat & text communication</span></p>
+                                </div>
+                            </div>
+                            
+                            <!-- Behavior -->
+                            <div style="background: var(--bg-secondary); border-radius: 12px; padding: 20px;">
+                                <label style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: block;">😊 Behavior</label>
+                                <div style="text-align: center; margin: 12px 0;">
+                                    <div style="font-size: 1.5rem; display: flex; gap: 4px; justify-content: center;" data-category="behavior">
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('behavior', 1)" id="behavior-star-1">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('behavior', 2)" id="behavior-star-2">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('behavior', 3)" id="behavior-star-3">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('behavior', 4)" id="behavior-star-4">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('behavior', 5)" id="behavior-star-5">⭐</span>
+                                    </div>
+                                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;"><span id="behavior-rating-text">Attitude & sportsmanship</span></p>
+                                </div>
+                            </div>
+                            
+                            <!-- Leadership -->
+                            <div style="background: var(--bg-secondary); border-radius: 12px; padding: 20px;">
+                                <label style="font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: block;">👑 Leadership</label>
+                                <div style="text-align: center; margin: 12px 0;">
+                                    <div style="font-size: 1.5rem; display: flex; gap: 4px; justify-content: center;" data-category="leadership">
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('leadership', 1)" id="leadership-star-1">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('leadership', 2)" id="leadership-star-2">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('leadership', 3)" id="leadership-star-3">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('leadership', 4)" id="leadership-star-4">⭐</span>
+                                        <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setCategoryRating('leadership', 5)" id="leadership-star-5">⭐</span>
+                                    </div>
+                                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px;"><span id="leadership-rating-text">Shot-calling & guidance</span></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
@@ -1047,9 +1139,19 @@
             
             // Initialize star hover effects after form is created
             setTimeout(() => {
-                addStarHoverEffects();
-                updateRatingText();
+                addCategoryStarHoverEffects();
+                updateAllRatingTexts();
             }, 100);
+        };
+
+        // Category ratings object
+        let categoryRatings = {
+            overall: 0,
+            skill: 0,
+            teamwork: 0,
+            communication: 0,
+            behavior: 0,
+            leadership: 0
         };
 
         globalThis.setRating = function(rating) {
@@ -1058,9 +1160,28 @@
             updateRatingText();
         };
 
+        globalThis.setCategoryRating = function(category, rating) {
+            categoryRatings[category] = rating;
+            updateCategoryStarDisplay(category);
+            updateCategoryRatingText(category);
+            
+            // Auto-calculate overall rating based on categories (except overall itself)
+            if (category !== 'overall') {
+                const categories = ['skill', 'teamwork', 'communication', 'behavior', 'leadership'];
+                const ratedCategories = categories.filter(cat => categoryRatings[cat] > 0);
+                if (ratedCategories.length > 0) {
+                    const avgRating = ratedCategories.reduce((sum, cat) => sum + categoryRatings[cat], 0) / ratedCategories.length;
+                    categoryRatings.overall = Math.round(avgRating);
+                    updateCategoryStarDisplay('overall');
+                    updateCategoryRatingText('overall');
+                }
+            }
+        };
+
         globalThis.submitRating = async function(playerId, playerName) {
-            if (selectedRating === 0) {
-                showToast('Please select a star rating!', 'error');
+            // Validate that at least overall rating is provided
+            if (categoryRatings.overall === 0) {
+                showToast('Please provide at least an overall rating!', 'error');
                 return;
             }
 
@@ -1071,29 +1192,63 @@
                 return;
             }
 
+            // Rate limiting check - prevent spam
+            const lastReviewTime = localStorage.getItem(`lastReview_${currentUser.uid}`);
+            const now = Date.now();
+            const MIN_REVIEW_INTERVAL = 30000; // 30 seconds between reviews
+            
+            if (lastReviewTime && (now - parseInt(lastReviewTime)) < MIN_REVIEW_INTERVAL) {
+                const remainingTime = Math.ceil((MIN_REVIEW_INTERVAL - (now - parseInt(lastReviewTime))) / 1000);
+                showToast(`Please wait ${remainingTime} seconds before submitting another review.`, 'error');
+                return;
+            }
+
             setLoadingState('submit', true);
 
             try {
+                // Calculate trust score based on user activity
+                const trustScore = await calculateTrustScore(currentUser.uid);
+                
                 const reviewData = {
                     playerId: playerId,
                     playerName: playerName,
-                    rating: selectedRating,
+                    // Category ratings
+                    overallRating: categoryRatings.overall,
+                    skillRating: categoryRatings.skill || null,
+                    teamworkRating: categoryRatings.teamwork || null,
+                    communicationRating: categoryRatings.communication || null,
+                    behaviorRating: categoryRatings.behavior || null,
+                    leadershipRating: categoryRatings.leadership || null,
+                    // Legacy field for compatibility
+                    rating: categoryRatings.overall,
                     comment: comment,
                     reviewerId: currentUser.uid,
                     reviewerEmail: currentUser.email,
                     reviewerName: currentUser.displayName || currentUser.email.split('@')[0],
                     timestamp: new Date(),
-                    verified: true
+                    verified: !!currentUser.emailVerified, // Steam verification status
+                    trustScore: trustScore,
+                    reported: false,
+                    reportCount: 0
                 };
 
                 await addDoc(collection(db, 'ratings'), reviewData);
+                
+                // Update rate limiting
+                localStorage.setItem(`lastReview_${currentUser.uid}`, now.toString());
+                
                 showToast('Rating submitted successfully!', 'success');
                 
                 // Reset form
-                selectedRating = 0;
+                categoryRatings = {
+                    overall: 0,
+                    skill: 0,
+                    teamwork: 0,
+                    communication: 0,
+                    behavior: 0,
+                    leadership: 0
+                };
                 document.getElementById('comment').value = '';
-                updateStarDisplay();
-                updateRatingText();
                 
                 // Remove rating form
                 document.querySelector('[data-rating-form]').remove();
@@ -1107,6 +1262,58 @@
                 setLoadingState('submit', false);
             }
         };
+
+        // Calculate trust score for user
+        async function calculateTrustScore(userId) {
+            try {
+                // Base trust score
+                let trustScore = 50;
+                
+                // Bonus for email verification
+                if (currentUser.emailVerified) {
+                    trustScore += 20;
+                }
+                
+                // Bonus for Google sign-in (harder to fake)
+                if (currentUser.providerData?.some(provider => provider.providerId === 'google.com')) {
+                    trustScore += 15;
+                }
+                
+                // Get user's review history
+                const userReviewsQuery = query(
+                    collection(db, 'ratings'),
+                    where('reviewerId', '==', userId),
+                    orderBy('timestamp', 'desc'),
+                    limit(10)
+                );
+                const userReviews = await getDocs(userReviewsQuery);
+                
+                // Bonus for consistent reviewing (not spam)
+                if (userReviews.size > 3) {
+                    trustScore += 10;
+                }
+                
+                // Penalty for reported reviews
+                let reportedCount = 0;
+                userReviews.forEach(doc => {
+                    const review = doc.data();
+                    if (review.reported || review.reportCount > 0) {
+                        reportedCount++;
+                    }
+                });
+                
+                if (reportedCount > 0) {
+                    trustScore -= reportedCount * 15;
+                }
+                
+                // Ensure trust score is within bounds
+                return Math.max(0, Math.min(100, trustScore));
+                
+            } catch (error) {
+                console.error('Error calculating trust score:', error);
+                return 50; // Default trust score
+            }
+        }
 
         globalThis.viewPlayerReviews = async function(playerId) {
             try {
@@ -1127,18 +1334,61 @@
                 } else {
                     querySnapshot.forEach((doc) => {
                         const review = doc.data();
-                        const stars = '⭐'.repeat(review.rating || 0);
+                        const reviewId = doc.id;
+                        const overallRating = review.overallRating || review.rating || 0;
+                        const stars = '⭐'.repeat(overallRating);
                         const date = review.timestamp.toDate().toLocaleDateString();
                         const reviewerName = review.reviewerName || review.reviewerEmail.split('@')[0];
                         
-                        reviewsHtml += `
-                            <div style="border-bottom: 1px solid var(--border-color); padding: 16px 0;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                    <div style="font-weight: 600; color: var(--text-primary);">${reviewerName}</div>
-                                    <div style="color: #fbbf24;">${stars}</div>
+                        // Build category ratings display
+                        let categoryDisplay = '';
+                        if (review.skillRating || review.teamworkRating || review.communicationRating || review.behaviorRating || review.leadershipRating) {
+                            categoryDisplay = `
+                                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0; font-size: 0.8rem;">
+                                    ${review.skillRating ? `<span>🎯 ${review.skillRating}⭐</span>` : ''}
+                                    ${review.teamworkRating ? `<span>🤝 ${review.teamworkRating}⭐</span>` : ''}
+                                    ${review.communicationRating ? `<span>💬 ${review.communicationRating}⭐</span>` : ''}
+                                    ${review.behaviorRating ? `<span>😊 ${review.behaviorRating}⭐</span>` : ''}
+                                    ${review.leadershipRating ? `<span>👑 ${review.leadershipRating}⭐</span>` : ''}
                                 </div>
+                            `;
+                        }
+                        
+                        // Trust score and verification badges
+                        let badges = '';
+                        if (review.verified) {
+                            badges += '<span style="background: rgba(34, 197, 94, 0.2); color: var(--success-color); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 8px;">✓ Verified</span>';
+                        }
+                        if (review.trustScore >= 80) {
+                            badges += '<span style="background: rgba(99, 102, 241, 0.2); color: var(--primary-color); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 4px;">🛡️ Trusted</span>';
+                        }
+                        
+                        reviewsHtml += `
+                            <div style="border-bottom: 1px solid var(--border-color); padding: 16px 0; position: relative;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center;">
+                                        <span style="font-weight: 600; color: var(--text-primary);">${reviewerName}</span>
+                                        ${badges}
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="color: #fbbf24;">${stars}</div>
+                                        ${currentUser && currentUser.uid !== review.reviewerId ? `
+                                            <button style="background: none; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 8px; font-size: 0.7rem; color: var(--text-muted); cursor: pointer; transition: all 0.3s ease;" 
+                                                    onclick="reportReview('${reviewId}', '${reviewerName}')"
+                                                    onmouseover="this.style.color='var(--error-color)'; this.style.borderColor='var(--error-color)'"
+                                                    onmouseout="this.style.color='var(--text-muted)'; this.style.borderColor='var(--border-color)'">
+                                                🚩 Report
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                ${categoryDisplay}
                                 <div style="color: var(--text-secondary); margin-bottom: 8px;">${review.comment}</div>
-                                <div style="font-size: 0.8rem; color: var(--text-muted);">${date}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                    <span>${date}</span>
+                                    ${review.trustScore ? `<span style="margin-left: 12px;">Trust Score: ${review.trustScore}/100</span>` : ''}
+                                    ${review.reportCount > 0 ? `<span style="margin-left: 12px; color: var(--warning-color);">⚠️ ${review.reportCount} reports</span>` : ''}
+                                </div>
                             </div>
                         `;
                     });
@@ -1152,6 +1402,119 @@
                 
             } catch (error) {
                 showToast('Failed to load reviews', 'error');
+            }
+        };
+
+        // Report Review System
+        globalThis.reportReview = function(reviewId, reviewerName) {
+            const reportReasons = [
+                'Spam or irrelevant content',
+                'Toxic or abusive language',
+                'False information',
+                'Personal attack',
+                'Off-topic comment',
+                'Other (please specify)'
+            ];
+            
+            const modalHTML = `
+                <div id="report-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                    <div style="background: var(--glass-bg); border-radius: 16px; padding: 32px; max-width: 500px; width: 90%; backdrop-filter: blur(20px); border: 1px solid var(--glass-border);">
+                        <h3 style="color: var(--text-primary); margin-bottom: 16px;">🚩 Report Review</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                            You are reporting a review by <strong>${reviewerName}</strong>. Please select a reason:
+                        </p>
+                        
+                        <div style="margin-bottom: 20px;">
+                            ${reportReasons.map((reason, index) => `
+                                <label style="display: block; margin-bottom: 8px; cursor: pointer; color: var(--text-primary);">
+                                    <input type="radio" name="reportReason" value="${reason}" style="margin-right: 8px;">
+                                    ${reason}
+                                </label>
+                            `).join('')}
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Additional Details (optional):</label>
+                            <textarea id="reportDetails" style="width: 100%; min-height: 80px; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; background: var(--glass-bg); color: var(--text-primary); font-size: 14px; resize: vertical;" 
+                                      placeholder="Provide additional context for your report..."></textarea>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button class="btn btn-secondary" onclick="closeReportModal()">Cancel</button>
+                            <button class="btn btn-danger" onclick="submitReport('${reviewId}', '${reviewerName}')">Submit Report</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        };
+
+        globalThis.closeReportModal = function() {
+            const modal = document.getElementById('report-modal');
+            if (modal) modal.remove();
+        };
+
+        globalThis.submitReport = async function(reviewId, reviewerName) {
+            const selectedReason = document.querySelector('input[name="reportReason"]:checked');
+            const details = document.getElementById('reportDetails').value.trim();
+            
+            if (!selectedReason) {
+                showToast('Please select a reason for reporting', 'error');
+                return;
+            }
+
+            try {
+                // Check if user already reported this review
+                const existingReportQuery = query(
+                    collection(db, 'reports'),
+                    where('reviewId', '==', reviewId),
+                    where('reporterId', '==', currentUser.uid)
+                );
+                const existingReports = await getDocs(existingReportQuery);
+                
+                if (!existingReports.empty) {
+                    showToast('You have already reported this review', 'error');
+                    closeReportModal();
+                    return;
+                }
+
+                // Submit report
+                const reportData = {
+                    reviewId: reviewId,
+                    reporterId: currentUser.uid,
+                    reporterEmail: currentUser.email,
+                    reporterName: currentUser.displayName || currentUser.email.split('@')[0],
+                    reportedReviewerName: reviewerName,
+                    reason: selectedReason.value,
+                    details: details,
+                    timestamp: new Date(),
+                    status: 'pending',
+                    reviewerTrustScore: await calculateTrustScore(currentUser.uid)
+                };
+
+                await addDoc(collection(db, 'reports'), reportData);
+
+                // Update the review's report count
+                const reviewRef = doc(db, 'ratings', reviewId);
+                const reviewSnap = await getDoc(reviewRef);
+                if (reviewSnap.exists()) {
+                    const currentReportCount = reviewSnap.data().reportCount || 0;
+                    await updateDoc(reviewRef, {
+                        reportCount: currentReportCount + 1,
+                        reported: true
+                    });
+                }
+
+                showToast('Report submitted successfully. Thank you for helping keep our community safe!', 'success');
+                closeReportModal();
+                
+                // Reload reviews to show updated report count
+                loadReviews();
+
+            } catch (error) {
+                console.error('Error submitting report:', error);
+                showToast('Failed to submit report. Please try again.', 'error');
             }
         };
 
@@ -1776,6 +2139,131 @@
                     };
                     ratingText.textContent = ratingLabels[selectedRating];
                     ratingText.style.color = 'var(--success-color)';
+                }
+            }
+        }
+
+        function updateCategoryStarDisplay(category) {
+            const rating = categoryRatings[category];
+            for (let i = 1; i <= 5; i++) {
+                const star = document.getElementById(`${category}-star-${i}`);
+                if (star) {
+                    if (i <= rating) {
+                        star.style.color = '#fbbf24'; // Gold for selected
+                        star.style.transform = 'scale(1.1)';
+                        star.style.filter = 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))';
+                    } else {
+                        star.style.color = '#374151'; // Gray for unselected
+                        star.style.transform = 'scale(1)';
+                        star.style.filter = 'none';
+                    }
+                }
+            }
+        }
+
+        function updateCategoryRatingText(category) {
+            const ratingText = document.getElementById(`${category}-rating-text`);
+            if (ratingText) {
+                const rating = categoryRatings[category];
+                const categoryLabels = {
+                    overall: {
+                        0: 'General experience with this player',
+                        1: '⭐ Poor overall experience',
+                        2: '⭐⭐ Below average teammate',
+                        3: '⭐⭐⭐ Average experience',
+                        4: '⭐⭐⭐⭐ Good teammate',
+                        5: '⭐⭐⭐⭐⭐ Excellent player!'
+                    },
+                    skill: {
+                        0: 'Game mechanics & decision making',
+                        1: '⭐ Needs improvement',
+                        2: '⭐⭐ Below average skill',
+                        3: '⭐⭐⭐ Average skill level',
+                        4: '⭐⭐⭐⭐ Skilled player',
+                        5: '⭐⭐⭐⭐⭐ Highly skilled!'
+                    },
+                    teamwork: {
+                        0: 'Cooperation & team play',
+                        1: '⭐ Poor team player',
+                        2: '⭐⭐ Needs teamwork improvement',
+                        3: '⭐⭐⭐ Average teamwork',
+                        4: '⭐⭐⭐⭐ Great team player',
+                        5: '⭐⭐⭐⭐⭐ Excellent teamwork!'
+                    },
+                    communication: {
+                        0: 'Voice chat & text communication',
+                        1: '⭐ Poor communication',
+                        2: '⭐⭐ Limited communication',
+                        3: '⭐⭐⭐ Good communication',
+                        4: '⭐⭐⭐⭐ Great communicator',
+                        5: '⭐⭐⭐⭐⭐ Excellent communication!'
+                    },
+                    behavior: {
+                        0: 'Attitude & sportsmanship',
+                        1: '⭐ Toxic behavior',
+                        2: '⭐⭐ Sometimes negative',
+                        3: '⭐⭐⭐ Neutral behavior',
+                        4: '⭐⭐⭐⭐ Positive attitude',
+                        5: '⭐⭐⭐⭐⭐ Excellent behavior!'
+                    },
+                    leadership: {
+                        0: 'Shot-calling & guidance',
+                        1: '⭐ Poor leadership',
+                        2: '⭐⭐ Limited leadership',
+                        3: '⭐⭐⭐ Good leadership',
+                        4: '⭐⭐⭐⭐ Strong leader',
+                        5: '⭐⭐⭐⭐⭐ Excellent leader!'
+                    }
+                };
+
+                if (categoryLabels[category]) {
+                    ratingText.textContent = categoryLabels[category][rating] || categoryLabels[category][0];
+                    ratingText.style.color = rating > 0 ? 'var(--success-color)' : 'var(--text-muted)';
+                }
+            }
+        }
+
+        function updateAllRatingTexts() {
+            Object.keys(categoryRatings).forEach(category => {
+                updateCategoryRatingText(category);
+            });
+        }
+
+        function addCategoryStarHoverEffects() {
+            const categories = ['overall', 'skill', 'teamwork', 'communication', 'behavior', 'leadership'];
+            
+            categories.forEach(category => {
+                const starContainer = document.querySelector(`[data-category="${category}"]`);
+                if (!starContainer) return;
+                
+                for (let i = 1; i <= 5; i++) {
+                    const star = document.getElementById(`${category}-star-${i}`);
+                    if (star) {
+                        star.addEventListener('mouseenter', function() {
+                            showCategoryStarPreview(category, i);
+                        });
+                    }
+                }
+                
+                starContainer.addEventListener('mouseleave', function() {
+                    updateCategoryStarDisplay(category);
+                });
+            });
+        }
+
+        function showCategoryStarPreview(category, hoverRating) {
+            for (let i = 1; i <= 5; i++) {
+                const star = document.getElementById(`${category}-star-${i}`);
+                if (star) {
+                    if (i <= hoverRating) {
+                        star.style.color = '#fde047';
+                        star.style.transform = 'scale(1.05)';
+                        star.style.filter = 'drop-shadow(0 0 6px rgba(253, 224, 71, 0.4))';
+                    } else {
+                        star.style.color = '#374151';
+                        star.style.transform = 'scale(1)';
+                        star.style.filter = 'none';
+                    }
                 }
             }
         }
