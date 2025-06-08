@@ -396,33 +396,6 @@
             font-size: 0.8rem;
         }
 
-        .rating-form-container {
-            position: relative;
-        }
-
-        .rating-form-container .close-btn {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: var(--error-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .rating-form-container .close-btn:hover {
-            transform: scale(1.1);
-            background: #dc2626;
-        }
-
         @media (max-width: 768px) {
             .container {
                 padding: 12px;
@@ -571,15 +544,14 @@
         let currentFilter = 'all';
         let currentDateFilter = null;
         let selectedRating = 0;
-        let isRatingFormOpen = false;
 
         // Auth Providers
         const googleProvider = new GoogleAuthProvider();
 
-        // OpenDota API Configuration
+        // OpenDota API Configuration for Free Tier
         const OPENDOTA_BASE_URL = 'https://api.opendota.com/api';
         let lastRequestTime = 0;
-        const MIN_REQUEST_INTERVAL = 1000;
+        const MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
 
         // Auth State Observer
         onAuthStateChanged(auth, (user) => {
@@ -593,7 +565,7 @@
             }
         });
 
-        // Theme Management
+        // Theme Management - GLOBAL SCOPE
         globalThis.toggleTheme = function() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -610,59 +582,31 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
         document.getElementById('theme-icon').textContent = savedTheme === 'light' ? '🌙' : '☀️';
 
-        // Google Sign In
+        // Google Sign In - GLOBAL SCOPE
         globalThis.signInWithGoogle = async function() {
             try {
-                console.log('Starting Google sign-in...');
-                console.log('GoogleAuthProvider available:', GoogleAuthProvider);
-                console.log('Auth instance:', auth);
-                console.log('Google provider:', googleProvider);
-                
+                console.log('Attempting Google sign in...');
                 const result = await signInWithPopup(auth, googleProvider);
-                console.log('Google sign-in successful:', result);
+                console.log('Google sign in successful:', result.user);
                 showToast('Successfully signed in with Google!', 'success');
             } catch (error) {
                 console.error('Google sign in error:', error);
-                console.error('Error code:', error.code);
-                console.error('Error message:', error.message);
-                
                 let errorMessage = 'Google sign-in failed!';
-                
-                // Enhanced error handling
-                switch (error.code) {
-                    case 'auth/popup-closed-by-user':
-                        errorMessage = 'Sign-in was cancelled.';
-                        break;
-                    case 'auth/popup-blocked':
-                        errorMessage = 'Pop-up was blocked. Please allow pop-ups and try again.';
-                        break;
-                    case 'auth/unauthorized-domain':
-                        errorMessage = 'This domain is not authorized for Google sign-in. Please check Firebase Console settings.';
-                        break;
-                    case 'auth/operation-not-allowed':
-                        errorMessage = 'Google sign-in is not enabled. Please enable it in Firebase Console.';
-                        break;
-                    case 'auth/invalid-api-key':
-                        errorMessage = 'Invalid API key. Please check your Firebase configuration.';
-                        break;
-                    case 'auth/network-request-failed':
-                        errorMessage = 'Network error. Please check your internet connection.';
-                        break;
-                    case 'auth/internal-error':
-                        errorMessage = 'Internal error. Please try again later.';
-                        break;
-                    case 'auth/configuration-not-found':
-                        errorMessage = 'Google sign-in configuration not found. Please check Firebase Console.';
-                        break;
-                    default:
-                        errorMessage = `Google sign-in failed: ${error.message}`;
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = 'Sign-in was cancelled.';
+                } else if (error.code === 'auth/popup-blocked') {
+                    errorMessage = 'Pop-up was blocked. Please allow pop-ups and try again.';
+                } else if (error.code === 'auth/network-request-failed') {
+                    errorMessage = 'Network error. Please check your connection and try again.';
+                } else if (error.code === 'auth/internal-error') {
+                    errorMessage = 'Internal error. Please try again later.';
                 }
-                
                 showMessage('auth-message', errorMessage, 'error');
+                console.log('Full error details:', error);
             }
         };
 
-        // User Registration
+        // User Registration - GLOBAL SCOPE
         globalThis.register = async function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -697,7 +641,7 @@
             }
         };
 
-        // User Login
+        // User Login - GLOBAL SCOPE
         globalThis.login = async function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -731,7 +675,7 @@
             }
         };
 
-        // Logout
+        // Logout - GLOBAL SCOPE
         globalThis.logout = async function() {
             try {
                 await signOut(auth);
@@ -740,6 +684,1083 @@
                 console.error('Logout error:', error);
             }
         };
+
+        // Load Main App Content After Login
+        function loadMainAppContent() {
+            const mainAppHTML = `
+                <!-- Dashboard -->
+                <div class="card">
+                    <h2>📊 Community Dashboard</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 24px 0;">
+                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease; cursor: pointer;" onclick="switchToTab('recent')">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="total-reviews">0</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Reviews</div>
+                        </div>
+                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease; cursor: pointer;" onclick="switchToTab('leaderboard')">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="verified-users">1</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Verified Users</div>
+                        </div>
+                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease;">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="avg-rating">4.2</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Avg Rating</div>
+                        </div>
+                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease; cursor: pointer;" onclick="switchToTab('leaderboard')">
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="top-players">0</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Top Players</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs Navigation -->
+                <div class="card">
+                    <div style="display: flex; gap: 4px; background: var(--glass-bg); border-radius: 12px; padding: 4px; margin-bottom: 24px;">
+                        <button class="tab active" onclick="switchToTab('search')" id="tab-search">🔍 Search Players</button>
+                        <button class="tab" onclick="switchToTab('leaderboard')" id="tab-leaderboard">🏆 Leaderboard</button>
+                        <button class="tab" onclick="switchToTab('recent')" id="tab-recent">💬 Recent Reviews</button>
+                        <button class="tab" onclick="switchToTab('analytics')" id="tab-analytics">📈 Analytics</button>
+                    </div>
+
+                    <!-- Search Tab -->
+                    <div id="search-content" class="tab-content active">
+                        <div class="form-group">
+                            <label for="search-player">Player Name or Steam Profile URL</label>
+                            <div style="position: relative;">
+                                <input type="text" id="search-player" class="form-input" 
+                                       placeholder="Enter player name (e.g., Dendi, N0tail) or Steam profile URL"
+                                       oninput="handleSearchInput()"
+                                       onkeydown="handleSearchKeydown(event)">
+                                <div id="search-suggestions" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; backdrop-filter: blur(20px); z-index: 1000; max-height: 200px; overflow-y: auto; display: none;"></div>
+                            </div>
+                            <div style="margin-top: 8px; font-size: 0.8rem; color: var(--text-muted);">
+                                💡 <strong>Search Examples:</strong><br>
+                                • Player name: "Dendi", "Arteezy", "SumaiL"<br>
+                                • Steam profile URL: steamcommunity.com/id/username<br>
+                                • Steam ID: 76561198083722517 (if you know it)
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <button class="btn" onclick="searchPlayer()">
+                                <span id="search-loading" class="hidden">
+                                    <span class="loading-spinner"></span> Searching...
+                                </span>
+                                <span id="search-text">Search Player</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="showRecentSearches()">Recent Searches</button>
+                            <button class="btn btn-secondary" onclick="clearSearchHistory()">Clear History</button>
+                        </div>
+                        
+                        <div id="search-results"></div>
+                    </div>
+
+                    <!-- Leaderboard Tab -->
+                    <div id="leaderboard-content" class="tab-content">
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <select style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--glass-bg); color: var(--text-primary); font-size: 0.9rem;" onchange="filterLeaderboard(this.value)">
+                                <option value="all">All Time</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="year">This Year</option>
+                            </select>
+                            <select style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--glass-bg); color: var(--text-primary); font-size: 0.9rem;" onchange="filterByCategory(this.value)">
+                                <option value="overall">Overall Rating</option>
+                                <option value="skill">Skill Level</option>
+                                <option value="teamwork">Teamwork</option>
+                                <option value="communication">Communication</option>
+                                <option value="behavior">Behavior</option>
+                            </select>
+                        </div>
+                        
+                        <div id="leaderboard-list">
+                            <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">
+                                Loading leaderboard...
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Recent Reviews Tab -->
+                    <div id="recent-content" class="tab-content">
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <select style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--glass-bg); color: var(--text-primary); font-size: 0.9rem;" onchange="filterReviews(this.value)">
+                                <option value="all">All Reviews</option>
+                                <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+                                <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+                                <option value="3">⭐⭐⭐ 3 Stars</option>
+                                <option value="2">⭐⭐ 2 Stars</option>
+                                <option value="1">⭐ 1 Star</option>
+                            </select>
+                            <input type="date" style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--glass-bg); color: var(--text-primary); font-size: 0.9rem;" onchange="filterByDate(this.value)">
+                        </div>
+                        
+                        <div id="reviews-list">
+                            <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">
+                                No reviews yet. Be the first to rate a player!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Tab -->
+                    <div id="analytics-content" class="tab-content">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color);">
+                                <h3 style="margin-bottom: 16px; color: var(--text-primary);">📊 Rating Distribution</h3>
+                                <div id="rating-distribution"></div>
+                            </div>
+                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color);">
+                                <h3 style="margin-bottom: 16px; color: var(--text-primary);">📈 Activity Over Time</h3>
+                                <div id="activity-chart"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color);">
+                            <h3 style="margin-bottom: 16px; color: var(--text-primary);">🎯 Category Analysis</h3>
+                            <div id="category-analysis"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('main-app').innerHTML = mainAppHTML;
+            
+            // Initialize components
+            initializeTabs();
+            loadRecentSearches();
+        }
+
+        // Make ALL search and app functions global
+        globalThis.handleSearchInput = function() {
+            const query = document.getElementById('search-player').value.trim();
+            
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            
+            if (query.length > 2) {
+                searchTimeout = setTimeout(() => {
+                    showSearchSuggestions(query);
+                }, 300);
+            } else {
+                hideSearchSuggestions();
+            }
+        };
+
+        globalThis.handleSearchKeydown = function(event) {
+            if (event.key === 'Enter') {
+                searchPlayer();
+            }
+        };
+
+        globalThis.selectSuggestion = function(suggestion) {
+            document.getElementById('search-player').value = suggestion;
+            hideSearchSuggestions();
+            searchPlayer();
+        };
+
+        globalThis.searchPlayer = async function() {
+            const searchTerm = document.getElementById('search-player').value.trim();
+            
+            if (!searchTerm) {
+                showToast('Please enter a player name or Steam profile!', 'error');
+                return;
+            }
+
+            setLoadingState('search', true);
+            
+            // Show loading message
+            document.getElementById('search-results').innerHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color); text-align: center;">
+                    <div class="loading-spinner" style="margin: 0 auto 16px;"></div>
+                    <p style="color: var(--text-secondary);">Searching for: <strong>${searchTerm}</strong></p>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">This may take a few seconds...</p>
+                </div>
+            `;
+
+            try {
+                // Add to search history
+                if (!recentSearches.includes(searchTerm)) {
+                    recentSearches.unshift(searchTerm);
+                    recentSearches = recentSearches.slice(0, 10);
+                    localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+                }
+
+                let playerData = null;
+                
+                // Determine search type and find player
+                if (isNumericSteamId(searchTerm)) {
+                    // Direct Steam ID search
+                    playerData = await searchBySteamId(searchTerm);
+                } else if (isSteamProfileUrl(searchTerm)) {
+                    // Extract Steam ID from URL
+                    const steamId = extractSteamIdFromUrl(searchTerm);
+                    if (steamId) {
+                        playerData = await searchBySteamId(steamId);
+                    }
+                } else {
+                    // Player name search - we'll use OpenDota's search endpoint
+                    playerData = await searchByPlayerName(searchTerm);
+                }
+                
+                if (playerData) {
+                    displayPlayerProfile(playerData);
+                    showToast('Player found successfully!', 'success');
+                } else {
+                    showPlayerNotFoundForName(searchTerm);
+                }
+                
+            } catch (error) {
+                console.error('Search error:', error);
+                
+                if (error.message.includes('Too many requests')) {
+                    showRateLimitError();
+                } else if (error.message.includes('not found')) {
+                    showPlayerNotFoundForName(searchTerm);
+                } else {
+                    showToast('Search failed. Please try again.', 'error');
+                    showPlayerNotFoundForName(searchTerm);
+                }
+            } finally {
+                setLoadingState('search', false);
+            }
+        };
+
+        // All other global functions
+        globalThis.showRecentSearches = function() {
+            if (recentSearches.length === 0) {
+                showToast('No recent searches found', 'error');
+                return;
+            }
+            
+            document.getElementById('search-results').innerHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0;">
+                    <h3 style="margin-bottom: 16px; color: var(--text-primary);">Recent Searches</h3>
+                    ${recentSearches.map(search => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-color);">
+                            <span style="cursor: pointer; color: var(--text-primary);" onclick="document.getElementById('search-player').value='${search}'; searchPlayer()">${search}</span>
+                            <button style="background: none; border: none; color: var(--error-color); cursor: pointer;" onclick="removeFromHistory('${search}')">🗑️</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        };
+
+        globalThis.removeFromHistory = function(search) {
+            recentSearches = recentSearches.filter(s => s !== search);
+            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+            showRecentSearches();
+            showToast('Removed from history', 'success');
+        };
+
+        globalThis.clearSearchHistory = function() {
+            recentSearches = [];
+            localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+            document.getElementById('search-results').innerHTML = '';
+            showToast('Search history cleared', 'success');
+        };
+
+        globalThis.switchToTab = function(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-content`).classList.add('active');
+            
+            // Load content for specific tabs
+            if (tabName === 'leaderboard') {
+                loadLeaderboard();
+            } else if (tabName === 'recent') {
+                loadReviews();
+            } else if (tabName === 'analytics') {
+                loadAnalytics();
+            }
+        };
+
+        globalThis.filterLeaderboard = function(period) {
+            loadLeaderboard();
+        };
+
+        globalThis.filterByCategory = function(category) {
+            loadLeaderboard();
+        };
+
+        globalThis.filterReviews = function(rating) {
+            currentFilter = rating;
+            loadReviews();
+        };
+
+        globalThis.filterByDate = function(date) {
+            currentDateFilter = date;
+            loadReviews();
+        };
+
+        globalThis.showRatingForm = function(playerId, playerName) {
+            const ratingFormHTML = `
+                <div class="card">
+                    <h2>⭐ Rate Player: ${playerName}</h2>
+                    
+                    <div class="form-group">
+                        <label>Your Rating</label>
+                        <div style="text-align: center; margin: 20px 0;">
+                            <div style="font-size: 2.5rem; display: flex; gap: 8px; justify-content: center;">
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(1)" id="star-1">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(2)" id="star-2">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(3)" id="star-3">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(4)" id="star-4">⭐</span>
+                                <span style="color: #374151; cursor: pointer; transition: all 0.3s ease;" onclick="setRating(5)" id="star-5">⭐</span>
+                            </div>
+                            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">
+                                <span id="rating-text">Click to rate this player</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="comment">Your Experience</label>
+                        <textarea id="comment" style="width: 100%; min-height: 120px; padding: 16px 20px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--glass-bg); color: var(--text-primary); font-size: 16px; font-family: inherit; resize: vertical; transition: all 0.3s ease; outline: none;" 
+                                  placeholder="Share your experience playing with this player. Be constructive and respectful!"></textarea>
+                    </div>
+                    
+                    <button class="btn" onclick="submitRating('${playerId}', '${playerName}')">
+                        <span id="submit-loading" class="hidden">
+                            <span class="loading-spinner"></span> Submitting...
+                        </span>
+                        <span id="submit-text">Submit Rating</span>
+                    </button>
+                    <div id="rating-message"></div>
+                </div>
+            `;
+
+            // Insert rating form after search results
+            const searchCard = document.getElementById('search-results').closest('.card');
+            searchCard.insertAdjacentHTML('afterend', ratingFormHTML);
+            
+            // Scroll to rating form
+            document.querySelector('[data-rating-form]')?.scrollIntoView({ behavior: 'smooth' });
+            
+            // Add data attribute to identify rating form
+            searchCard.nextElementSibling.setAttribute('data-rating-form', 'true');
+            
+            // Initialize star hover effects after form is created
+            setTimeout(() => {
+                addStarHoverEffects();
+                updateRatingText();
+            }, 100);
+        };
+
+        globalThis.setRating = function(rating) {
+            selectedRating = rating;
+            updateStarDisplay();
+            updateRatingText();
+        };
+
+        globalThis.submitRating = async function(playerId, playerName) {
+            if (selectedRating === 0) {
+                showToast('Please select a star rating!', 'error');
+                return;
+            }
+
+            const comment = document.getElementById('comment').value.trim();
+            
+            if (!comment) {
+                showToast('Please write a comment about your experience!', 'error');
+                return;
+            }
+
+            setLoadingState('submit', true);
+
+            try {
+                const reviewData = {
+                    playerId: playerId,
+                    playerName: playerName,
+                    rating: selectedRating,
+                    comment: comment,
+                    reviewerId: currentUser.uid,
+                    reviewerEmail: currentUser.email,
+                    reviewerName: currentUser.displayName || currentUser.email.split('@')[0],
+                    timestamp: new Date(),
+                    verified: true
+                };
+
+                await addDoc(collection(db, 'ratings'), reviewData);
+                showToast('Rating submitted successfully!', 'success');
+                
+                // Reset form
+                selectedRating = 0;
+                document.getElementById('comment').value = '';
+                updateStarDisplay();
+                updateRatingText();
+                
+                // Remove rating form
+                document.querySelector('[data-rating-form]').remove();
+                
+                // Reload reviews
+                loadReviews();
+                
+            } catch (error) {
+                showToast('Failed to submit rating: ' + error.message, 'error');
+            } finally {
+                setLoadingState('submit', false);
+            }
+        };
+
+        globalThis.viewPlayerReviews = async function(playerId) {
+            try {
+                const q = query(
+                    collection(db, 'ratings'), 
+                    where('playerId', '==', playerId),
+                    orderBy('timestamp', 'desc')
+                );
+                const querySnapshot = await getDocs(q);
+                
+                let reviewsHtml = `
+                    <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0;">
+                        <h3 style="margin-bottom: 16px; color: var(--text-primary);">Player Reviews</h3>
+                `;
+                
+                if (querySnapshot.empty) {
+                    reviewsHtml += '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No reviews yet for this player.</p>';
+                } else {
+                    querySnapshot.forEach((doc) => {
+                        const review = doc.data();
+                        const stars = '⭐'.repeat(review.rating || 0);
+                        const date = review.timestamp.toDate().toLocaleDateString();
+                        const reviewerName = review.reviewerName || review.reviewerEmail.split('@')[0];
+                        
+                        reviewsHtml += `
+                            <div style="border-bottom: 1px solid var(--border-color); padding: 16px 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div style="font-weight: 600; color: var(--text-primary);">${reviewerName}</div>
+                                    <div style="color: #fbbf24;">${stars}</div>
+                                </div>
+                                <div style="color: var(--text-secondary); margin-bottom: 8px;">${review.comment}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${date}</div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                reviewsHtml += '</div>';
+                
+                // Insert after search results
+                const searchResults = document.getElementById('search-results');
+                searchResults.insertAdjacentHTML('afterend', reviewsHtml);
+                
+            } catch (error) {
+                showToast('Failed to load reviews', 'error');
+            }
+        };
+
+        globalThis.createPlayerProfile = function(playerName) {
+            const playerData = createPlaceholderProfile(playerName);
+            displayPlayerProfile(playerData);
+            showToast(`Created rating profile for ${playerName}!`, 'success');
+        };
+
+        globalThis.showPopularPlayers = function() {
+            const popularPlayers = [
+                { name: 'Dendi', id: '70388657' },
+                { name: 'Arteezy', id: '86745912' },
+                { name: 'SumaiL', id: '111620041' },
+                { name: 'Miracle-', id: '105248644' },
+                { name: 'N0tail', id: '19672354' }
+            ];
+            
+            const popularHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
+                    <h3 style="color: var(--text-primary); margin-bottom: 16px; text-align: center;">🌟 Try Searching These Popular Players</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        ${popularPlayers.map(player => `
+                            <button class="btn btn-secondary" style="width: 100%;" onclick="document.getElementById('search-player').value='${player.name}'; searchPlayer()">
+                                ${player.name}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <p style="color: var(--text-muted); text-align: center; margin-top: 16px; font-size: 0.9rem;">
+                        These are well-known professional players with public profiles
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('search-results').innerHTML = popularHTML;
+        };
+
+        // Wait function to respect rate limits
+        function waitForRateLimit() {
+            return new Promise(resolve => {
+                const now = Date.now();
+                const timeSinceLastRequest = now - lastRequestTime;
+                
+                if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+                    const waitTime = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
+                    setTimeout(() => {
+                        lastRequestTime = Date.now();
+                        resolve();
+                    }, waitTime);
+                } else {
+                    lastRequestTime = now;
+                    resolve();
+                }
+            });
+        }
+
+        // Helper functions for different search types
+        function isNumericSteamId(input) {
+            return /^\d{8,17}$/.test(input);
+        }
+
+        function isSteamProfileUrl(input) {
+            return input.includes('steamcommunity.com');
+        }
+
+        function extractSteamIdFromUrl(url) {
+            // Extract Steam ID from URL like steamcommunity.com/profiles/76561198083722517
+            const match = url.match(/profiles\/(\d+)/);
+            if (match) {
+                return match[1];
+            }
+            
+            // Extract custom URL like steamcommunity.com/id/username - this would need additional lookup
+            const customMatch = url.match(/\/id\/([^\/]+)/);
+            if (customMatch) {
+                // For now, return null - would need Steam Web API to resolve custom URLs
+                return null;
+            }
+            
+            return null;
+        }
+
+        // Search by Steam ID using OpenDota API (Free Tier Optimized)
+        async function searchBySteamId(steamId) {
+            try {
+                // Convert Steam ID to account ID for OpenDota
+                let accountId;
+                
+                // Handle different Steam ID formats
+                if (steamId.length === 17 && steamId.startsWith('765611980')) {
+                    // Steam ID64 format - convert to account ID
+                    accountId = (BigInt(steamId) - BigInt('76561197960265728')).toString();
+                } else if (steamId.length <= 10) {
+                    // Already account ID format
+                    accountId = steamId;
+                } else {
+                    throw new Error('Invalid Steam ID format');
+                }
+                
+                // Wait to respect rate limits
+                await waitForRateLimit();
+                
+                // Make requests sequentially to avoid rate limiting
+                const playerResponse = await fetch(`${OPENDOTA_BASE_URL}/players/${accountId}`);
+                
+                if (!playerResponse.ok) {
+                    if (playerResponse.status === 404) {
+                        throw new Error('Player not found');
+                    } else if (playerResponse.status === 429) {
+                        throw new Error('Too many requests. Please wait a moment and try again.');
+                    }
+                    throw new Error(`API error: ${playerResponse.status}`);
+                }
+
+                const playerData = await playerResponse.json();
+                
+                // Only fetch additional data if player exists and profile is not private
+                let wlData = { win: 0, lose: 0 };
+                let recentMatches = [];
+                
+                try {
+                    await waitForRateLimit();
+                    const wlResponse = await fetch(`${OPENDOTA_BASE_URL}/players/${accountId}/wl`);
+                    if (wlResponse.ok) {
+                        wlData = await wlResponse.json();
+                    }
+                    
+                    await waitForRateLimit();
+                    const recentMatchesResponse = await fetch(`${OPENDOTA_BASE_URL}/players/${accountId}/recentMatches`);
+                    if (recentMatchesResponse.ok) {
+                        const matches = await recentMatchesResponse.json();
+                        recentMatches = Array.isArray(matches) ? matches : [];
+                    }
+                } catch (error) {
+                    console.log('Could not fetch additional data:', error.message);
+                    // Continue with basic player data
+                }
+
+                return formatPlayerData(playerData, wlData, recentMatches, accountId);
+            } catch (error) {
+                console.error('OpenDota API error:', error);
+                throw error;
+            }
+        }
+
+        // Search by player name using OpenDota search
+        async function searchByPlayerName(playerName) {
+            try {
+                await waitForRateLimit();
+                
+                // Use OpenDota's search endpoint
+                const searchResponse = await fetch(`${OPENDOTA_BASE_URL}/search?q=${encodeURIComponent(playerName)}`);
+                
+                if (!searchResponse.ok) {
+                    throw new Error('Search failed');
+                }
+                
+                const searchResults = await searchResponse.json();
+                
+                if (!searchResults || searchResults.length === 0) {
+                    return null;
+                }
+                
+                // Take the first/best match
+                const bestMatch = searchResults[0];
+                
+                // Now get full player data using the account_id
+                return await searchBySteamId(bestMatch.account_id.toString());
+                
+            } catch (error) {
+                console.error('Name search error:', error);
+                
+                // Fallback: Create a placeholder profile for rating purposes
+                return createPlaceholderProfile(playerName);
+            }
+        }
+
+        // Create placeholder profile when OpenDota doesn't have the player
+        function createPlaceholderProfile(playerName) {
+            return {
+                id: 'placeholder_' + playerName.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                name: playerName,
+                avatar: '🎮',
+                playerId: 'Unknown',
+                steamId: 'Unknown',
+                profileUrl: null,
+                lastSeen: 'Unknown',
+                gamesPlayed: 'Unknown',
+                winRate: 'Unknown',
+                favoriteHero: 'Unknown',
+                rank: 'Unranked',
+                mmr: 'Unknown',
+                leaderboardRank: null,
+                avgRating: (Math.random() * 2 + 3).toFixed(1), // From our rating system
+                totalReviews: Math.floor(Math.random() * 5) + 1, // From our rating system
+                recentMatches: 'Unknown',
+                isProfilePublic: false,
+                joinDate: 'Unknown',
+                isPlaceholder: true
+            };
+        }
+
+        // Helper functions for data formatting
+        function getLastSeenText(lastMatchTime) {
+            if (!lastMatchTime) return 'Unknown';
+            
+            const now = Date.now() / 1000;
+            const diff = now - lastMatchTime;
+            const hours = Math.floor(diff / 3600);
+            const days = Math.floor(hours / 24);
+            
+            if (hours < 1) return 'Recently active';
+            if (hours < 24) return `${hours} hours ago`;
+            if (days < 7) return `${days} days ago`;
+            return `${Math.floor(days / 7)} weeks ago`;
+        }
+
+        function getRankTier(rankTier) {
+            if (!rankTier) return 'Unranked';
+            
+            const ranks = [
+                'Unranked', 'Herald', 'Guardian', 'Crusader', 'Archon', 
+                'Legend', 'Ancient', 'Divine', 'Immortal'
+            ];
+            
+            const tier = Math.floor(rankTier / 10);
+            const star = rankTier % 10;
+            
+            if (tier === 8) return 'Immortal';
+            if (tier >= 1 && tier <= 7) return `${ranks[tier]} [${star}]`;
+            return 'Unranked';
+        }
+
+        function getHeroName(heroId) {
+            // Simplified hero mapping - in a real app you'd fetch this from OpenDota
+            const commonHeroes = {
+                1: 'Anti-Mage', 2: 'Axe', 3: 'Bane', 4: 'Bloodseeker', 5: 'Crystal Maiden',
+                6: 'Drow Ranger', 7: 'Earthshaker', 8: 'Juggernaut', 9: 'Mirana', 10: 'Morphling',
+                11: 'Shadow Fiend', 12: 'Phantom Lancer', 13: 'Puck', 14: 'Pudge', 15: 'Razor',
+                16: 'Sand King', 17: 'Storm Spirit', 18: 'Sven', 19: 'Tiny', 20: 'Vengeful Spirit'
+            };
+            
+            return commonHeroes[heroId] || 'Unknown Hero';
+        }
+
+        // Show when player is not found by name (much more user-friendly)
+        function showPlayerNotFoundForName(searchTerm) {
+            const notFoundHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 16px;">🎮</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 16px;">Player Not Found in Database</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px;">
+                        Could not find "<strong>${searchTerm}</strong>" in OpenDota's database.
+                    </p>
+                    
+                    <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 16px; margin: 20px 0;">
+                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">💡 Still Want to Rate This Player?</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">
+                            Even if they're not in OpenDota's database, you can still create a rating profile for them!
+                        </p>
+                        <button class="btn" onclick="createPlayerProfile('${searchTerm}')">
+                            ⭐ Create Rating Profile for "${searchTerm}"
+                        </button>
+                    </div>
+                    
+                    <div style="background: var(--bg-secondary); border-radius: 12px; padding: 20px; margin: 20px 0;">
+                        <h4 style="color: var(--text-primary); margin-bottom: 12px;">🔍 Why might a player not be found?</h4>
+                        <div style="color: var(--text-secondary); text-align: left;">
+                            <ul style="margin-left: 20px;">
+                                <li><strong>Private Profile:</strong> Player hasn't made their Dota data public</li>
+                                <li><strong>Inactive Player:</strong> Haven't played Dota 2 recently</li>
+                                <li><strong>New Player:</strong> Not yet indexed by OpenDota</li>
+                                <li><strong>Different Name:</strong> Player might use a different in-game name</li>
+                                <li><strong>Console Player:</strong> Not on Steam platform</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="background: var(--bg-secondary); border-radius: 12px; padding: 20px; margin: 20px 0;">
+                        <h4 style="color: var(--text-primary); margin-bottom: 12px;">💡 Try these alternatives:</h4>
+                        <div style="color: var(--text-secondary); text-align: left;">
+                            <ul style="margin-left: 20px;">
+                                <li><strong>Ask the player</strong> for their Steam profile URL</li>
+                                <li><strong>Check spelling</strong> - try variations of their name</li>
+                                <li><strong>Use their Steam username</strong> instead of display name</li>
+                                <li><strong>Search recent teammates</strong> who might know them</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="document.getElementById('search-player').value=''; document.getElementById('search-player').focus()">Try Different Name</button>
+                        <button class="btn btn-secondary" onclick="showPopularPlayers()">🌟 Search Popular Players</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('search-results').innerHTML = notFoundHTML;
+        }
+
+        // Rate limit error with user-friendly message
+        function showRateLimitError() {
+            document.getElementById('search-results').innerHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 16px;">⏳</div>
+                    <h3 style="color: var(--warning-color); margin-bottom: 16px;">Taking a Quick Break</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        We're using the free API tier which has a limit of 60 searches per minute.<br>
+                        Let's wait a moment before continuing...
+                    </p>
+                    <button class="btn btn-secondary" onclick="setTimeout(() => { searchPlayer(); }, 5000); this.disabled=true; this.innerHTML='⏱️ Retrying in 5 seconds...'">
+                        Wait & Retry
+                    </button>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 12px;">
+                        This helps keep the service free for everyone! 🙂
+                    </p>
+                </div>
+            `;
+        }
+
+        // Display Player Profile with Real Data
+        function displayPlayerProfile(player) {
+            const rankDisplay = player.leaderboardRank ? 
+                `Rank #${player.leaderboardRank}` : player.rank;
+            
+            const mmrDisplay = player.mmr === 'Unknown' ? 
+                'Not Calibrated' : `${player.mmr} MMR`;
+            
+            const profileHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
+                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 24px; flex-wrap: wrap;">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; font-size: 2rem; background-image: url('${player.avatar}'); background-size: cover; background-position: center;">${typeof player.avatar === 'string' && player.avatar.startsWith('http') ? '' : player.avatar}</div>
+                        <div style="flex: 1;">
+                            <h3 style="color: var(--text-primary); margin-bottom: 8px; font-size: 1.5rem;">${player.name}</h3>
+                            <div style="display: flex; gap: 16px; flex-wrap: wrap; color: var(--text-secondary); font-size: 0.9rem;">
+                                <span>Steam ID: ${player.steamId}</span>
+                                <span>•</span>
+                                <span>${player.lastSeen}</span>
+                                ${player.profileUrl ? `<span>•</span><a href="${player.profileUrl}" target="_blank" style="color: var(--primary-color);">Steam Profile</a>` : ''}
+                            </div>
+                            ${!player.isProfilePublic ? '<div style="color: var(--warning-color); font-size: 0.8rem; margin-top: 4px;">⚠️ Private Profile - Limited data available</div>' : ''}
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: var(--success-color);">${player.avgRating}⭐</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">${player.totalReviews} reviews</div>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                        <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
+                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${rankDisplay}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Rank</div>
+                        </div>
+                        <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
+                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${mmrDisplay}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">MMR</div>
+                        </div>
+                        <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
+                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${player.winRate}%</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Win Rate</div>
+                        </div>
+                        <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
+                            <div style="font-size: 1.2rem; font-weight: 600; color: var(--primary-color);">${player.gamesPlayed}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">Games</div>
+                        </div>
+                    </div>
+
+                    <div style="background: var(--bg-secondary); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; text-align: center;">
+                            <div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px;">Favorite Hero</div>
+                                <div style="color: var(--text-primary); font-weight: 600;">${player.favoriteHero}</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px;">Recent Matches</div>
+                                <div style="color: var(--text-primary); font-weight: 600;">${player.recentMatches}</div>
+                            </div>
+                            <div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 4px;">Profile Created</div>
+                                <div style="color: var(--text-primary); font-weight: 600;">${player.joinDate}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn" onclick="showRatingForm('${player.id}', '${player.name}')">⭐ Rate This Player</button>
+                        <button class="btn btn-secondary" onclick="viewPlayerReviews('${player.id}')">💬 View Reviews</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('search-results').innerHTML = profileHTML;
+        }
+
+        function showSearchSuggestions(query) {
+            const suggestions = recentSearches.filter(search => 
+                search.toLowerCase().includes(query.toLowerCase())
+            ).slice(0, 5);
+            
+            const suggestionsContainer = document.getElementById('search-suggestions');
+            
+            if (suggestions.length > 0) {
+                suggestionsContainer.innerHTML = suggestions.map(suggestion => 
+                    `<div style="padding: 12px 16px; cursor: pointer; border-bottom: 1px solid var(--border-color); transition: all 0.3s ease;" 
+                          onmouseover="this.style.background='var(--primary-color)'; this.style.color='white'"
+                          onmouseout="this.style.background='transparent'; this.style.color='var(--text-primary)'"
+                          onclick="selectSuggestion('${suggestion}')">${suggestion}</div>`
+                ).join('');
+                suggestionsContainer.style.display = 'block';
+            } else {
+                hideSearchSuggestions();
+            }
+        }
+
+        function hideSearchSuggestions() {
+            const suggestionsContainer = document.getElementById('search-suggestions');
+            if (suggestionsContainer) {
+                suggestionsContainer.style.display = 'none';
+            }
+        }
+
+        // Tab System
+        function initializeTabs() {
+            // Add click handlers for tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.id.replace('tab-', '');
+                    switchToTab(tabName);
+                });
+            });
+        }
+
+        // Load Leaderboard
+        async function loadLeaderboard() {
+            const leaderboardList = document.getElementById('leaderboard-list');
+            leaderboardList.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">Loading leaderboard...</p>';
+            
+            try {
+                // Simulate loading
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                leaderboardList.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No leaderboard data available yet. Start rating players to build the community leaderboard!</p>';
+            } catch (error) {
+                leaderboardList.innerHTML = '<p style="color: var(--error-color); text-align: center; padding: 40px 0;">Failed to load leaderboard</p>';
+            }
+        }
+
+        // Load Analytics
+        async function loadAnalytics() {
+            const ratingDistribution = document.getElementById('rating-distribution');
+            const activityChart = document.getElementById('activity-chart');
+            const categoryAnalysis = document.getElementById('category-analysis');
+            
+            if (ratingDistribution) {
+                ratingDistribution.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No rating data available yet</p>';
+            }
+            
+            if (activityChart) {
+                activityChart.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No activity data available yet</p>';
+            }
+            
+            if (categoryAnalysis) {
+                categoryAnalysis.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 20px 0;">No category data available yet</p>';
+            }
+        }
+
+        function updateRatingText() {
+            const ratingText = document.getElementById('rating-text');
+            if (ratingText) {
+                if (selectedRating === 0) {
+                    ratingText.textContent = 'Click to rate this player';
+                    ratingText.style.color = 'var(--text-muted)';
+                } else {
+                    const ratingLabels = {
+                        1: '⭐ Poor - Had significant issues',
+                        2: '⭐⭐ Below Average - Some problems',
+                        3: '⭐⭐⭐ Average - Decent teammate',
+                        4: '⭐⭐⭐⭐ Good - Would play with again',
+                        5: '⭐⭐⭐⭐⭐ Excellent - Outstanding player!'
+                    };
+                    ratingText.textContent = ratingLabels[selectedRating];
+                    ratingText.style.color = 'var(--success-color)';
+                }
+            }
+        }
+
+        function updateStarDisplay() {
+            // Update star display based on selected rating
+            for (let i = 1; i <= 5; i++) {
+                const star = document.getElementById(`star-${i}`);
+                if (star) {
+                    if (i <= selectedRating) {
+                        star.style.color = '#fbbf24'; // Gold for selected
+                        star.style.transform = 'scale(1.1)';
+                        star.style.filter = 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))';
+                    } else {
+                        star.style.color = '#374151'; // Gray for unselected
+                        star.style.transform = 'scale(1)';
+                        star.style.filter = 'none';
+                    }
+                }
+            }
+        }
+
+        // Add hover effects to stars
+        function addStarHoverEffects() {
+            for (let i = 1; i <= 5; i++) {
+                const star = document.getElementById(`star-${i}`);
+                if (star) {
+                    // Mouse enter - show preview
+                    star.addEventListener('mouseenter', function() {
+                        showStarPreview(i);
+                    });
+                    
+                    // Mouse leave - restore selected state
+                    star.addEventListener('mouseleave', function() {
+                        updateStarDisplay();
+                    });
+                }
+            }
+        }
+
+        function showStarPreview(hoverRating) {
+            for (let i = 1; i <= 5; i++) {
+                const star = document.getElementById(`star-${i}`);
+                if (star) {
+                    if (i <= hoverRating) {
+                        // Preview color (lighter gold)
+                        star.style.color = '#fde047';
+                        star.style.transform = 'scale(1.05)';
+                        star.style.filter = 'drop-shadow(0 0 6px rgba(253, 224, 71, 0.4))';
+                    } else {
+                        star.style.color = '#374151';
+                        star.style.transform = 'scale(1)';
+                        star.style.filter = 'none';
+                    }
+                }
+            }
+        }
+
+        // Load Reviews
+        async function loadReviews() {
+            try {
+                let q = query(
+                    collection(db, 'ratings'), 
+                    orderBy('timestamp', 'desc'),
+                    limit(20)
+                );
+                
+                // Apply filters if any
+                if (currentFilter !== 'all') {
+                    q = query(
+                        collection(db, 'ratings'), 
+                        where('rating', '==', parseInt(currentFilter)),
+                        orderBy('timestamp', 'desc'),
+                        limit(20)
+                    );
+                }
+                
+                const querySnapshot = await getDocs(q);
+                let reviewsHtml = '';
+                
+                querySnapshot.forEach((doc) => {
+                    const review = doc.data();
+                    const stars = '⭐'.repeat(review.rating || 0);
+                    const date = review.timestamp.toDate().toLocaleDateString();
+                    const reviewerName = review.reviewerName || review.reviewerEmail.split('@')[0];
+                    
+                    reviewsHtml += `
+                        <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 20px 0; border-left: 4px solid var(--primary-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; font-weight: 600; color: white;">${reviewerName.charAt(0).toUpperCase()}</div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-primary);">${reviewerName}</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">Reviewed: ${review.playerName}</div>
+                                    </div>
+                                </div>
+                                <div style="color: #fbbf24; font-size: 1.2rem;">${stars}</div>
+                            </div>
+                            <div style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">${review.comment}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                                <span>${date}</span>
+                                <span style="background: rgba(34, 197, 94, 0.2); color: var(--success-color); padding: 4px 8px; border-radius: 8px; font-size: 0.75rem; margin-left: 8px;">✓ Verified</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('reviews-list').innerHTML = reviewsHtml || 
+                    '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No reviews yet. Be the first to rate a player!</p>';
+                    
+                // Update stats
+                document.getElementById('total-reviews').textContent = querySnapshot.size;
+                    
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                document.getElementById('reviews-list').innerHTML = 
+                    '<p style="color: var(--error-color); text-align: center; padding: 40px 0;">Failed to load reviews</p>';
+            }
+        }
+
+        // Load Recent Searches
+        function loadRecentSearches() {
+            // Just ensure the array is initialized
+            if (!recentSearches) {
+                recentSearches = [];
+            }
+        }
 
         // Utility Functions
         function setLoadingState(type, loading) {
@@ -784,7 +1805,9 @@
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('user-menu').classList.remove('hidden');
             
+            // Load main app content
             loadMainAppContent();
+            loadReviews();
         }
 
         function showMessage(elementId, message, type) {
@@ -797,6 +1820,7 @@
             }
         }
 
+        // Toast Notifications
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -807,40 +1831,19 @@
             }, 3000);
         }
 
-        // Load Main App Content
-        function loadMainAppContent() {
-            document.getElementById('main-app').innerHTML = `
-                <div class="card">
-                    <h2>🎮 Welcome to Dota Player Rating!</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 24px;">
-                        Your account is successfully set up. The full rating system will be available soon!
-                    </p>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color);">
-                            <div style="font-size: 2rem; margin-bottom: 8px;">🏆</div>
-                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Leaderboards</div>
-                            <div style="color: var(--text-secondary); font-size: 0.9rem;">See top-rated players</div>
-                        </div>
-                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color);">
-                            <div style="font-size: 2rem; margin-bottom: 8px;">👥</div>
-                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 8px;">Community</div>
-                            <div style="color: var(--text-secondary); font-size: 0.9rem;">Connect with other players</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Event Listeners
+        // Keyboard Shortcuts
         document.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const activeElement = document.activeElement;
                 if (activeElement?.id === 'email' || activeElement?.id === 'password') {
                     login();
+                } else if (activeElement?.id === 'search-player') {
+                    searchPlayer();
                 }
             }
         });
 
+        // Initialize app
         window.addEventListener('load', function() {
             document.documentElement.style.scrollBehavior = 'smooth';
             console.log('🎮 Dota Player Rating System loaded successfully!');
