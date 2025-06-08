@@ -1800,67 +1800,166 @@ Building positive gaming communities together.
                     return timeB - timeA;
                 });
                 
-                let reportsHtml = '<h3 style="color: var(--text-primary); margin-bottom: 20px;">🚩 All Reports</h3>';
+                // Enhanced tabular reports view with mass management
+                let reportsHtml = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                        <h3 style="color: var(--text-primary); margin: 0;">🚩 Reports Management</h3>
+                        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            <span style="color: var(--text-muted); font-size: 0.9rem;">Gesamt: ${allReports.length}</span>
+                            <button class="btn btn-small" onclick="selectAllReports()" style="font-size: 0.8rem;">
+                                ☑️ Alle auswählen
+                            </button>
+                            <button class="btn btn-small" onclick="deselectAllReports()" style="font-size: 0.8rem;">
+                                ⬜ Alle abwählen
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Mass Actions Bar -->
+                    <div id="mass-actions-bar" style="background: var(--glass-bg); border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 1px solid var(--border-color); display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                            <span id="selected-count" style="color: var(--text-primary); font-weight: 600;">0 Reports ausgewählt</span>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="btn btn-small btn-danger" onclick="massDeleteReports()" style="font-size: 0.8rem;">
+                                    🗑️ Ausgewählte löschen
+                                </button>
+                                <button class="btn btn-small" onclick="massResolveReports()" style="font-size: 0.8rem;">
+                                    ✅ Als erledigt markieren
+                                </button>
+                                <button class="btn btn-small" onclick="massRejectReports()" style="font-size: 0.8rem;">
+                                    ❌ Als abgelehnt markieren
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Filter Controls -->
+                    <div style="background: var(--glass-bg); border-radius: 12px; padding: 16px; margin-bottom: 20px; border: 1px solid var(--border-color);">
+                        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                            <label style="color: var(--text-primary); font-size: 0.9rem;">Filter:</label>
+                            <select id="status-filter" onchange="filterReports()" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--glass-bg); color: var(--text-primary); font-size: 0.8rem;">
+                                <option value="all">Alle Status</option>
+                                <option value="pending">Ausstehend</option>
+                                <option value="resolved">Erledigt</option>
+                                <option value="rejected">Abgelehnt</option>
+                            </select>
+                            <select id="source-filter" onchange="filterReports()" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--glass-bg); color: var(--text-primary); font-size: 0.8rem;">
+                                <option value="all">Alle Quellen</option>
+                                <option value="reports">Firebase Reports</option>
+                                <option value="fallback">Fallback</option>
+                                <option value="local_storage">Local Storage</option>
+                            </select>
+                            <input type="text" id="search-reports" placeholder="Nach Benutzer oder Details suchen..." onkeyup="filterReports()" style="padding: 6px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--glass-bg); color: var(--text-primary); font-size: 0.8rem; min-width: 200px;">
+                        </div>
+                    </div>
+                `;
                 
                 if (allReports.length === 0) {
-                    reportsHtml += '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No reports found.</p>';
+                    reportsHtml += '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">Keine Reports gefunden.</p>';
                 } else {
-                    allReports.forEach((report) => {
-                        const date = report.timestamp?.toDate?.().toLocaleDateString() || 'Unknown';
+                    // Enhanced tabular view
+                    reportsHtml += `
+                        <div style="background: var(--glass-bg); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color);">
+                            <div style="overflow-x: auto;">
+                                <table id="reports-table" style="width: 100%; border-collapse: collapse;">
+                                    <thead>
+                                        <tr style="background: rgba(var(--primary-color-rgb), 0.1); border-bottom: 1px solid var(--border-color);">
+                                            <th style="padding: 12px 8px; text-align: center; color: var(--text-primary); font-weight: 600; font-size: 0.8rem; border-right: 1px solid var(--border-color);">
+                                                <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll()" style="cursor: pointer;">
+                                            </th>
+                                            <th style="padding: 12px 8px; text-align: left; color: var(--text-primary); font-weight: 600; font-size: 0.8rem; border-right: 1px solid var(--border-color);">ID</th>
+                                            <th style="padding: 12px 8px; text-align: left; color: var(--text-primary); font-weight: 600; font-size: 0.8rem; border-right: 1px solid var(--border-color);">Status</th>
+                                            <th style="padding: 12px 8px; text-align: left; color: var(--text-primary); font-weight: 600; font-size: 0.8rem; border-right: 1px solid var(--border-color);">Datum</th>
+                                            <th style="padding: 12px 8px; text-align: left; color: var(--text-primary); font-weight: 600; font-size: 0.8rem; border-right: 1px solid var(--border-color);">Grund</th>
+                                            <th style="padding: 12px 8px; text-align: left; color: var(--text-primary); font-weight: 600; font-size: 0.8rem; border-right: 1px solid var(--border-color);">Gemeldet von</th>
+                                            <th style="padding: 12px 8px; text-align: left; color: var(--text-primary); font-weight: 600; font-size: 0.8rem; border-right: 1px solid var(--border-color);">Gemeldeter User</th>
+                                            <th style="padding: 12px 8px; text-align: left; color: var(--text-primary); font-weight: 600; font-size: 0.8rem; border-right: 1px solid var(--border-color);">Quelle</th>
+                                            <th style="padding: 12px 8px; text-align: center; color: var(--text-primary); font-weight: 600; font-size: 0.8rem;">Aktionen</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                    `;
+                    
+                    allReports.forEach((report, index) => {
+                        const date = report.timestamp?.toDate?.().toLocaleDateString('de-DE') || 'Unbekannt';
                         const status = report.status || 'pending';
                         const statusColor = status === 'resolved' ? 'var(--success-color)' : 
                                           status === 'rejected' ? 'var(--error-color)' : 'var(--warning-color)';
-                        const sourceLabel = report.source === 'fallback' ? ' (Fallback)' : 
-                                          report.source === 'local_storage' ? ' (Local)' : '';
+                        const sourceLabel = report.source === 'fallback' ? 'Fallback' : 
+                                          report.source === 'local_storage' ? 'Local' : 'Firebase';
+                        const statusText = status === 'resolved' ? 'Erledigt' : 
+                                         status === 'rejected' ? 'Abgelehnt' : 'Ausstehend';
+                        
+                        const reasonText = {
+                            'spam': 'Spam',
+                            'inappropriate': 'Unangemessen',
+                            'false_information': 'Falsche Info',
+                            'harassment': 'Belästigung',
+                            'other': 'Sonstiges'
+                        }[report.reason] || report.reason || 'Nicht angegeben';
+                        
+                        const rowClass = index % 2 === 0 ? 'even' : 'odd';
                         
                         reportsHtml += `
-                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; margin: 16px 0; border-left: 4px solid ${statusColor};">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
-                                    <div>
-                                        <strong style="color: var(--text-primary);">Report #${report.id.slice(-6)}${sourceLabel}</strong>
-                                        <span style="background: ${statusColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-left: 8px;">${status.toUpperCase()}</span>
-                                    </div>
-                                    <div style="color: var(--text-muted); font-size: 0.85rem;">${date}</div>
-                                </div>
-                                
-                                <div style="margin-bottom: 12px;">
-                                    <strong style="color: var(--text-primary);">Reason:</strong> 
-                                    <span style="color: var(--text-secondary);">${report.reason || 'Not specified'}</span>
-                                </div>
-                                
-                                <div style="margin-bottom: 12px;">
-                                    <strong style="color: var(--text-primary);">Reported by:</strong> 
-                                    <span style="color: var(--text-secondary);">${report.reporterName || report.reporterEmail}</span>
-                                </div>
-                                
-                                <div style="margin-bottom: 12px;">
-                                    <strong style="color: var(--text-primary);">Reported reviewer:</strong> 
-                                    <span style="color: var(--text-secondary);">${report.reportedReviewerName || 'Unknown'}</span>
-                                </div>
-                                
-                                ${report.details ? `
-                                    <div style="margin-bottom: 12px;">
-                                        <strong style="color: var(--text-primary);">Details:</strong><br>
-                                        <span style="color: var(--text-secondary); font-style: italic;">${report.details}</span>
-                                    </div>
-                                ` : ''}
-                                
-                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                    <button class="btn btn-small" onclick="viewReportedReview('${report.reviewId}')" style="font-size: 0.8rem;">
-                                        👁️ View Review
-                                    </button>
-                                    ${status === 'pending' ? `
-                                        <button class="btn btn-small btn-danger" onclick="deleteReportedReview('${report.reviewId}', '${report.id}', '${report.source}')" style="font-size: 0.8rem;">
-                                            🗑️ Delete Review
+                            <tr class="report-row ${rowClass}" data-report-id="${report.id}" data-status="${status}" data-source="${report.source}" style="border-bottom: 1px solid var(--border-color); transition: background-color 0.2s ease;" onmouseover="this.style.backgroundColor='rgba(var(--primary-color-rgb), 0.05)'" onmouseout="this.style.backgroundColor=''">
+                                <td style="padding: 12px 8px; text-align: center; border-right: 1px solid var(--border-color);">
+                                    <input type="checkbox" class="report-checkbox" value="${report.id}" data-review-id="${report.reviewId}" onchange="updateMassActions()" style="cursor: pointer;">
+                                </td>
+                                <td style="padding: 12px 8px; border-right: 1px solid var(--border-color);">
+                                    <div style="font-family: monospace; font-size: 0.75rem; color: var(--text-primary);">#${report.id.slice(-8)}</div>
+                                </td>
+                                <td style="padding: 12px 8px; border-right: 1px solid var(--border-color);">
+                                    <span style="background: ${statusColor}; color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase;">
+                                        ${statusText}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 8px; color: var(--text-secondary); font-size: 0.8rem; border-right: 1px solid var(--border-color);">
+                                    ${date}
+                                </td>
+                                <td style="padding: 12px 8px; color: var(--text-secondary); font-size: 0.8rem; border-right: 1px solid var(--border-color);">
+                                    <span style="background: rgba(var(--warning-color-rgb), 0.1); color: var(--warning-color); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">
+                                        ${reasonText}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 8px; color: var(--text-secondary); font-size: 0.8rem; border-right: 1px solid var(--border-color); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${report.reporterName || report.reporterEmail || 'Unbekannt'}">
+                                    ${(report.reporterName || report.reporterEmail || 'Unbekannt').split('@')[0]}
+                                </td>
+                                <td style="padding: 12px 8px; color: var(--text-secondary); font-size: 0.8rem; border-right: 1px solid var(--border-color); max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${report.reportedReviewerName || 'Unbekannt'}">
+                                    ${(report.reportedReviewerName || 'Unbekannt').split('@')[0]}
+                                </td>
+                                <td style="padding: 12px 8px; border-right: 1px solid var(--border-color);">
+                                    <span style="background: rgba(var(--info-color-rgb), 0.1); color: var(--info-color); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem;">
+                                        ${sourceLabel}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 8px; text-align: center;">
+                                    <div style="display: flex; gap: 4px; justify-content: center; flex-wrap: wrap;">
+                                        <button class="btn btn-small" onclick="viewReportDetails('${report.id}', ${JSON.stringify(report).replace(/"/g, '&quot;')})" style="font-size: 0.7rem; padding: 4px 8px;" title="Details anzeigen">
+                                            👁️
                                         </button>
-                                        <button class="btn btn-small" onclick="clearReportFlag('${report.reviewId}')" style="font-size: 0.8rem;">
-                                            ✅ Clear Flag
+                                        <button class="btn btn-small" onclick="viewReportedReview('${report.reviewId}')" style="font-size: 0.7rem; padding: 4px 8px;" title="Review anzeigen">
+                                            📄
                                         </button>
-                                    ` : ''}
-                                </div>
-                            </div>
+                                        ${status === 'pending' ? `
+                                            <button class="btn btn-small btn-danger" onclick="deleteReportedReview('${report.reviewId}', '${report.id}', '${report.source}')" style="font-size: 0.7rem; padding: 4px 8px;" title="Review löschen">
+                                                🗑️
+                                            </button>
+                                            <button class="btn btn-small" onclick="resolveReport('${report.id}', 'resolved')" style="font-size: 0.7rem; padding: 4px 8px;" title="Als erledigt markieren">
+                                                ✅
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </td>
+                            </tr>
                         `;
                     });
+                    
+                    reportsHtml += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
                 }
                 
                 adminResults.innerHTML = reportsHtml;
@@ -3754,6 +3853,281 @@ Building positive gaming communities together.
                 showToast('Local reports cleared', 'success');
                 console.log('🗑️ Local reports cleared');
             }
+        };
+
+        // === ENHANCED REPORTS MANAGEMENT FUNCTIONS ===
+        
+        // Mass selection functions
+        globalThis.selectAllReports = function() {
+            const checkboxes = document.querySelectorAll('.report-checkbox');
+            const selectAllCheckbox = document.getElementById('select-all-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            if (selectAllCheckbox) selectAllCheckbox.checked = true;
+            updateMassActions();
+        };
+
+        globalThis.deselectAllReports = function() {
+            const checkboxes = document.querySelectorAll('.report-checkbox');
+            const selectAllCheckbox = document.getElementById('select-all-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            if (selectAllCheckbox) selectAllCheckbox.checked = false;
+            updateMassActions();
+        };
+
+        globalThis.toggleSelectAll = function() {
+            const selectAllCheckbox = document.getElementById('select-all-checkbox');
+            const checkboxes = document.querySelectorAll('.report-checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+            updateMassActions();
+        };
+
+        globalThis.updateMassActions = function() {
+            const selectedCheckboxes = document.querySelectorAll('.report-checkbox:checked');
+            const massActionsBar = document.getElementById('mass-actions-bar');
+            const selectedCount = document.getElementById('selected-count');
+            
+            if (selectedCheckboxes.length > 0) {
+                massActionsBar.style.display = 'block';
+                selectedCount.textContent = `${selectedCheckboxes.length} Reports ausgewählt`;
+            } else {
+                massActionsBar.style.display = 'none';
+            }
+            
+            // Update select-all checkbox state
+            const allCheckboxes = document.querySelectorAll('.report-checkbox');
+            const selectAllCheckbox = document.getElementById('select-all-checkbox');
+            if (selectAllCheckbox) {
+                if (selectedCheckboxes.length === 0) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = false;
+                } else if (selectedCheckboxes.length === allCheckboxes.length) {
+                    selectAllCheckbox.indeterminate = false;
+                    selectAllCheckbox.checked = true;
+                } else {
+                    selectAllCheckbox.indeterminate = true;
+                }
+            }
+        };
+
+        // Mass actions
+        globalThis.massDeleteReports = async function() {
+            const selectedCheckboxes = document.querySelectorAll('.report-checkbox:checked');
+            if (selectedCheckboxes.length === 0) return;
+            
+            if (!confirm(`⚠️ Sind Sie sicher, dass Sie ${selectedCheckboxes.length} Reports und die zugehörigen Reviews PERMANENT löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden!`)) {
+                return;
+            }
+            
+            let successCount = 0;
+            let errorCount = 0;
+            
+                         for (const checkbox of selectedCheckboxes) {
+                 const reportId = checkbox.value;
+                 const reviewId = checkbox.dataset.reviewId;
+                 
+                 try {
+                     // Delete the associated review if reviewId exists
+                     if (reviewId && reviewId !== 'undefined') {
+                         await deleteDoc(doc(db, 'ratings', reviewId));
+                     }
+                    
+                    // Also try to delete from reports collection
+                    try {
+                        await deleteDoc(doc(db, 'reports', reportId));
+                    } catch (reportsError) {
+                        console.warn('Could not delete from reports collection:', reportsError);
+                    }
+                    
+                    successCount++;
+                } catch (error) {
+                    console.error(`Error deleting report ${reportId}:`, error);
+                    errorCount++;
+                }
+            }
+            
+            showToast(`${successCount} Reports gelöscht, ${errorCount} Fehler`, successCount > 0 ? 'success' : 'error');
+            loadReports(); // Reload the reports view
+        };
+
+        globalThis.massResolveReports = async function() {
+            const selectedCheckboxes = document.querySelectorAll('.report-checkbox:checked');
+            if (selectedCheckboxes.length === 0) return;
+            
+            if (!confirm(`Sollen ${selectedCheckboxes.length} Reports als erledigt markiert werden?`)) {
+                return;
+            }
+            
+            let successCount = 0;
+            let errorCount = 0;
+            
+            for (const checkbox of selectedCheckboxes) {
+                const reportId = checkbox.value;
+                
+                try {
+                    await updateDoc(doc(db, 'reports', reportId), {
+                        status: 'resolved',
+                        resolvedBy: currentUser.email,
+                        resolvedAt: new Date()
+                    });
+                    successCount++;
+                } catch (error) {
+                    console.error(`Error resolving report ${reportId}:`, error);
+                    errorCount++;
+                }
+            }
+            
+            showToast(`${successCount} Reports als erledigt markiert, ${errorCount} Fehler`, successCount > 0 ? 'success' : 'error');
+            loadReports(); // Reload the reports view
+        };
+
+        globalThis.massRejectReports = async function() {
+            const selectedCheckboxes = document.querySelectorAll('.report-checkbox:checked');
+            if (selectedCheckboxes.length === 0) return;
+            
+            if (!confirm(`Sollen ${selectedCheckboxes.length} Reports als abgelehnt markiert werden?`)) {
+                return;
+            }
+            
+            let successCount = 0;
+            let errorCount = 0;
+            
+            for (const checkbox of selectedCheckboxes) {
+                const reportId = checkbox.value;
+                
+                try {
+                    await updateDoc(doc(db, 'reports', reportId), {
+                        status: 'rejected',
+                        rejectedBy: currentUser.email,
+                        rejectedAt: new Date()
+                    });
+                    successCount++;
+                } catch (error) {
+                    console.error(`Error rejecting report ${reportId}:`, error);
+                    errorCount++;
+                }
+            }
+            
+            showToast(`${successCount} Reports abgelehnt, ${errorCount} Fehler`, successCount > 0 ? 'success' : 'error');
+            loadReports(); // Reload the reports view
+        };
+
+        // Filter functionality
+        globalThis.filterReports = function() {
+            const statusFilter = document.getElementById('status-filter')?.value || 'all';
+            const sourceFilter = document.getElementById('source-filter')?.value || 'all';
+            const searchTerm = document.getElementById('search-reports')?.value.toLowerCase() || '';
+            
+            const rows = document.querySelectorAll('.report-row');
+            
+            rows.forEach(row => {
+                const status = row.dataset.status;
+                const source = row.dataset.source;
+                const rowText = row.textContent.toLowerCase();
+                
+                const statusMatch = statusFilter === 'all' || status === statusFilter;
+                const sourceMatch = sourceFilter === 'all' || source === sourceFilter;
+                const searchMatch = searchTerm === '' || rowText.includes(searchTerm);
+                
+                if (statusMatch && sourceMatch && searchMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Update mass actions after filtering
+            updateMassActions();
+        };
+
+        // View report details in modal
+        globalThis.viewReportDetails = function(reportId, reportData) {
+            try {
+                const report = typeof reportData === 'string' ? JSON.parse(reportData) : reportData;
+                
+                const modalHtml = `
+                    <div id="report-details-modal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                        <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; border: 1px solid var(--border-color);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3 style="color: var(--text-primary); margin: 0;">🚩 Report Details</h3>
+                                <button onclick="closeReportDetailsModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem;">&times;</button>
+                            </div>
+                            
+                            <div style="space-y: 16px;">
+                                <div style="margin-bottom: 16px;">
+                                    <strong style="color: var(--text-primary);">Report ID:</strong>
+                                    <span style="color: var(--text-secondary); font-family: monospace;">${report.id}</span>
+                                </div>
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <strong style="color: var(--text-primary);">Status:</strong>
+                                    <span style="color: var(--text-secondary);">${report.status || 'pending'}</span>
+                                </div>
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <strong style="color: var(--text-primary);">Datum:</strong>
+                                    <span style="color: var(--text-secondary);">${report.timestamp?.toDate?.().toLocaleString('de-DE') || 'Unbekannt'}</span>
+                                </div>
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <strong style="color: var(--text-primary);">Grund:</strong>
+                                    <span style="color: var(--text-secondary);">${report.reason || 'Nicht angegeben'}</span>
+                                </div>
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <strong style="color: var(--text-primary);">Gemeldet von:</strong>
+                                    <span style="color: var(--text-secondary);">${report.reporterName || report.reporterEmail || 'Unbekannt'}</span>
+                                </div>
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <strong style="color: var(--text-primary);">Gemeldeter User:</strong>
+                                    <span style="color: var(--text-secondary);">${report.reportedReviewerName || 'Unbekannt'}</span>
+                                </div>
+                                
+                                ${report.details ? `
+                                    <div style="margin-bottom: 16px;">
+                                        <strong style="color: var(--text-primary);">Details:</strong>
+                                        <div style="background: rgba(var(--text-muted-rgb), 0.1); padding: 12px; border-radius: 8px; margin-top: 8px;">
+                                            <span style="color: var(--text-secondary); font-style: italic;">${report.details}</span>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <strong style="color: var(--text-primary);">Quelle:</strong>
+                                    <span style="color: var(--text-secondary);">${report.source || 'Unbekannt'}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap;">
+                                <button class="btn" onclick="viewReportedReview('${report.reviewId}')" style="font-size: 0.9rem;">
+                                    📄 Review anzeigen
+                                </button>
+                                <button class="btn btn-secondary" onclick="closeReportDetailsModal()" style="font-size: 0.9rem;">
+                                    Schließen
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+            } catch (error) {
+                console.error('Error showing report details:', error);
+                showToast('Fehler beim Anzeigen der Report-Details', 'error');
+            }
+        };
+
+        globalThis.closeReportDetailsModal = function() {
+            const modal = document.getElementById('report-details-modal');
+            if (modal) modal.remove();
         };
 
         globalThis.showPopularPlayers = function() {
