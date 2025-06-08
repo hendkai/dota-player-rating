@@ -1102,9 +1102,10 @@ Building positive gaming communities together.
                 // For mobile/app context, be more lenient with session validation
                 const userAgent = navigator.userAgent || '';
                 const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+                const isCapacitorApp = /Capacitor/i.test(userAgent) || window.Capacitor;
                 const isApp = window.location.protocol === 'https:' && window.location.hostname === 'hendkai.github.io';
                 
-                if (isMobile || isApp) {
+                if (isMobile || isApp || isCapacitorApp) {
                     // For mobile/app: Simple check if currentUser exists and has email
                     if (currentUser && currentUser.email) {
                         console.log('✅ Mobile/App session valid:', currentUser.email);
@@ -2963,19 +2964,31 @@ Building positive gaming communities together.
                 return;
             }
             
-            // Validate and refresh session before submission
+            // Validate and refresh session before submission - with fallback
+            let sessionValid = true;
             try {
                 await ensureValidSession();
-                console.log('Session validated for rating submission');
+                console.log('✅ Session validated for rating submission');
             } catch (sessionError) {
                 console.error('Session validation failed:', sessionError);
-                showToast('Your session has expired. Please log out and log in again to continue.', 'warning');
-                // Auto-suggest logout for convenience
-                setTimeout(() => {
-                    if (confirm('Your session has expired. Would you like to log out and log back in?')) {
-                        logout();
-                    }
-                }, 2000);
+                
+                // Fallback: Check if we at least have a currentUser with email
+                if (currentUser && currentUser.email) {
+                    console.log('⚠️ Session validation failed but user exists, continuing with review...');
+                    sessionValid = true;
+                } else {
+                    console.error('❌ No valid user found for rating submission');
+                    showToast('Please log in to submit ratings.', 'warning');
+                    setTimeout(() => {
+                        if (confirm('You need to be logged in to submit ratings. Would you like to log in?')) {
+                            showAuth();
+                        }
+                    }, 1000);
+                    return;
+                }
+            }
+            
+            if (!sessionValid) {
                 return;
             }
 
