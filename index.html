@@ -695,22 +695,52 @@
                 <!-- Dashboard -->
                 <div class="card">
                     <h2>📊 Community Dashboard</h2>
+                    
+                    <!-- Community Mission Statement -->
+                    <div style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05)); border: 1px solid var(--success-color); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                        <h3 style="color: var(--success-color); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            🌟 Building a Positive Dota Community
+                        </h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 0.95rem;">
+                            Our platform is dedicated to fostering positive interactions and constructive feedback in the Dota 2 community. 
+                            By highlighting good sportsmanship and helping players improve, we create better matches for everyone.
+                        </p>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; font-size: 0.9rem;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="color: var(--success-color);">🤝</span>
+                                <span style="color: var(--text-secondary);">Promote teamwork and collaboration</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="color: var(--success-color);">💡</span>
+                                <span style="color: var(--text-secondary);">Share constructive feedback for growth</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="color: var(--success-color);">🏆</span>
+                                <span style="color: var(--text-secondary);">Recognize exceptional players</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="color: var(--success-color);">🛡️</span>
+                                <span style="color: var(--text-secondary);">Maintain respectful communication</span>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 24px 0;">
                         <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease; cursor: pointer;" onclick="switchToTab('recent')">
                             <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="total-reviews">0</div>
                             <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Total Reviews</div>
                         </div>
                         <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease; cursor: pointer;" onclick="switchToTab('leaderboard')">
-                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="verified-users">1</div>
-                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Verified Users</div>
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--success-color); margin-bottom: 8px;" id="positive-reviews">0</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Positive Reviews</div>
                         </div>
                         <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease;">
                             <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="avg-rating">4.2</div>
                             <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Avg Rating</div>
                         </div>
                         <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color); transition: all 0.3s ease; cursor: pointer;" onclick="switchToTab('leaderboard')">
-                            <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="top-players">0</div>
-                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Top Players</div>
+                            <div style="font-size: 2rem; font-weight: 700; color: var(--warning-color); margin-bottom: 8px;" id="community-champions">0</div>
+                            <div style="color: var(--text-secondary); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px;">Community Champions</div>
                         </div>
                     </div>
                 </div>
@@ -1980,6 +2010,17 @@
                                 <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 8px;">
                                     <span id="overall-rating-text">General experience with this player</span>
                                 </p>
+                                
+                                <!-- Positive Rating Encouragement -->
+                                <div id="positive-encouragement" style="display: none; background: rgba(34, 197, 94, 0.1); border-radius: 8px; padding: 12px; margin-top: 12px; border-left: 4px solid var(--success-color);">
+                                    <div style="color: var(--success-color); font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">🌟 Thanks for the positive feedback!</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.85rem;">High ratings help players build reputation and improve matchmaking quality for everyone.</div>
+                                </div>
+                                
+                                <div id="constructive-encouragement" style="display: none; background: rgba(59, 130, 246, 0.1); border-radius: 8px; padding: 12px; margin-top: 12px; border-left: 4px solid #3b82f6;">
+                                    <div style="color: #3b82f6; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">💡 Consider constructive feedback</div>
+                                    <div style="color: var(--text-secondary); font-size: 0.85rem;">Share what they did well and how they could improve. This helps players grow!</div>
+                                </div>
                             </div>
                         </div>
                         
@@ -2062,10 +2103,39 @@
                         </div>
                     </div>
                     
+                    <!-- Positive Feedback Guidelines -->
+                    <div style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.05)); border: 1px solid var(--success-color); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                        <h4 style="color: var(--success-color); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                            🌟 Writing Constructive Reviews
+                        </h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; font-size: 0.9rem;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="color: var(--success-color);">✓</span>
+                                <span style="color: var(--text-secondary);">Highlight specific good plays</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="color: var(--success-color);">✓</span>
+                                <span style="color: var(--text-secondary);">Mention positive communication</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="color: var(--success-color);">✓</span>
+                                <span style="color: var(--text-secondary);">Give improvement suggestions</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="color: var(--success-color);">✓</span>
+                                <span style="color: var(--text-secondary);">Focus on teamwork examples</span>
+                            </div>
+                        </div>
+                        <div style="background: rgba(34, 197, 94, 0.1); border-radius: 6px; padding: 8px; margin-top: 12px; font-size: 0.85rem;">
+                            <strong style="color: var(--success-color);">💡 Bonus:</strong> 
+                            <span style="color: var(--text-secondary);">Detailed positive reviews boost your reviewer reputation and help build a better community!</span>
+                        </div>
+                    </div>
+                    
                     <div class="form-group">
                         <label for="comment">Your Experience</label>
                         <textarea id="comment" style="width: 100%; min-height: 120px; padding: 16px 20px; border: 2px solid var(--border-color); border-radius: 12px; background: var(--glass-bg); color: var(--text-primary); font-size: 16px; font-family: inherit; resize: vertical; transition: all 0.3s ease; outline: none;" 
-                                  placeholder="Share your experience playing with this player. Be constructive and respectful!"></textarea>
+                                  placeholder="Share your experience playing with this player. What did they do well? How did they contribute to the team? Any suggestions for improvement?"></textarea>
                     </div>
                     
                     <button class="btn" onclick="submitRating('${playerId}', '${playerName}')">
@@ -2116,6 +2186,28 @@
             updateCategoryStarDisplay(category);
             updateCategoryRatingText(category);
             
+            // Show encouragement messages for overall rating
+            if (category === 'overall') {
+                const positiveEncouragement = document.getElementById('positive-encouragement');
+                const constructiveEncouragement = document.getElementById('constructive-encouragement');
+                
+                if (positiveEncouragement && constructiveEncouragement) {
+                    if (rating >= 4) {
+                        // Show positive encouragement for 4-5 star ratings
+                        positiveEncouragement.style.display = 'block';
+                        constructiveEncouragement.style.display = 'none';
+                    } else if (rating >= 2 && rating <= 3) {
+                        // Show constructive encouragement for 2-3 star ratings
+                        constructiveEncouragement.style.display = 'block';
+                        positiveEncouragement.style.display = 'none';
+                    } else {
+                        // Hide both for 1 star or no rating
+                        positiveEncouragement.style.display = 'none';
+                        constructiveEncouragement.style.display = 'none';
+                    }
+                }
+            }
+            
             // Auto-calculate overall rating based on categories (except overall itself)
             if (category !== 'overall') {
                 const categories = ['skill', 'teamwork', 'communication', 'behavior', 'leadership'];
@@ -2125,6 +2217,24 @@
                     categoryRatings.overall = Math.round(avgRating);
                     updateCategoryStarDisplay('overall');
                     updateCategoryRatingText('overall');
+                    
+                    // Also trigger encouragement messages for auto-calculated overall rating
+                    const overallRating = categoryRatings.overall;
+                    const positiveEncouragement = document.getElementById('positive-encouragement');
+                    const constructiveEncouragement = document.getElementById('constructive-encouragement');
+                    
+                    if (positiveEncouragement && constructiveEncouragement) {
+                        if (overallRating >= 4) {
+                            positiveEncouragement.style.display = 'block';
+                            constructiveEncouragement.style.display = 'none';
+                        } else if (overallRating >= 2 && overallRating <= 3) {
+                            constructiveEncouragement.style.display = 'block';
+                            positiveEncouragement.style.display = 'none';
+                        } else {
+                            positiveEncouragement.style.display = 'none';
+                            constructiveEncouragement.style.display = 'none';
+                        }
+                    }
                 }
             }
         };
@@ -3319,12 +3429,213 @@
             leaderboardList.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">Loading leaderboard...</p>';
             
             try {
-                // Simulate loading
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // Get all ratings from Firebase
+                const ratingsQuery = query(collection(db, 'ratings'), orderBy('timestamp', 'desc'), limit(1000));
+                const ratingsSnapshot = await getDocs(ratingsQuery);
                 
-                leaderboardList.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No leaderboard data available yet. Start rating players to build the community leaderboard!</p>';
+                // Process ratings data to create leaderboard
+                const playerStats = {};
+                const ratingsData = [];
+                
+                ratingsSnapshot.forEach((doc) => {
+                    const rating = doc.data();
+                    ratingsData.push(rating);
+                    
+                    if (!playerStats[rating.playerId]) {
+                        playerStats[rating.playerId] = {
+                            playerId: rating.playerId,
+                            playerName: rating.playerName,
+                            totalRatings: 0,
+                            overallSum: 0,
+                            skillSum: 0,
+                            teamworkSum: 0,
+                            communicationSum: 0,
+                            behaviorSum: 0,
+                            leadershipSum: 0,
+                            positiveReviews: 0,
+                            constructiveReviews: 0,
+                            helpfulReviews: 0,
+                            lastActive: rating.timestamp
+                        };
+                    }
+                    
+                    const stats = playerStats[rating.playerId];
+                    stats.totalRatings++;
+                    stats.overallSum += rating.overall || 0;
+                    stats.skillSum += rating.skill || 0;
+                    stats.teamworkSum += rating.teamwork || 0;
+                    stats.communicationSum += rating.communication || 0;
+                    stats.behaviorSum += rating.behavior || 0;
+                    stats.leadershipSum += rating.leadership || 0;
+                    
+                    // Count positive feedback types
+                    if (rating.overall >= 4) stats.positiveReviews++;
+                    if (rating.comment && rating.comment.length > 50) stats.constructiveReviews++;
+                    if (rating.behavior >= 4 && rating.communication >= 4) stats.helpfulReviews++;
+                    
+                    // Update last active time
+                    if (rating.timestamp > stats.lastActive) {
+                        stats.lastActive = rating.timestamp;
+                    }
+                });
+                
+                // Calculate averages and create leaderboard entries
+                const leaderboardEntries = Object.values(playerStats).map(stats => {
+                    const avgOverall = stats.totalRatings > 0 ? (stats.overallSum / stats.totalRatings) : 0;
+                    const avgSkill = stats.totalRatings > 0 ? (stats.skillSum / stats.totalRatings) : 0;
+                    const avgTeamwork = stats.totalRatings > 0 ? (stats.teamworkSum / stats.totalRatings) : 0;
+                    const avgCommunication = stats.totalRatings > 0 ? (stats.communicationSum / stats.totalRatings) : 0;
+                    const avgBehavior = stats.totalRatings > 0 ? (stats.behaviorSum / stats.totalRatings) : 0;
+                    const avgLeadership = stats.totalRatings > 0 ? (stats.leadershipSum / stats.totalRatings) : 0;
+                    
+                    // Calculate community score with positive bias
+                    const baseScore = avgOverall;
+                    const positiveBonus = (stats.positiveReviews / stats.totalRatings) * 0.5;
+                    const constructiveBonus = (stats.constructiveReviews / stats.totalRatings) * 0.3;
+                    const helpfulBonus = (stats.helpfulReviews / stats.totalRatings) * 0.2;
+                    const communityScore = baseScore + positiveBonus + constructiveBonus + helpfulBonus;
+                    
+                    return {
+                        ...stats,
+                        avgOverall: avgOverall.toFixed(1),
+                        avgSkill: avgSkill.toFixed(1),
+                        avgTeamwork: avgTeamwork.toFixed(1),
+                        avgCommunication: avgCommunication.toFixed(1),
+                        avgBehavior: avgBehavior.toFixed(1),
+                        avgLeadership: avgLeadership.toFixed(1),
+                        communityScore: communityScore.toFixed(2),
+                        positiveRatio: stats.totalRatings > 0 ? ((stats.positiveReviews / stats.totalRatings) * 100).toFixed(0) : 0
+                    };
+                }).filter(entry => entry.totalRatings >= 1); // Only show players with at least 1 rating
+                
+                // Sort by community score (descending)
+                leaderboardEntries.sort((a, b) => parseFloat(b.communityScore) - parseFloat(a.communityScore));
+                
+                // Render leaderboard
+                if (leaderboardEntries.length === 0) {
+                    leaderboardList.innerHTML = `
+                        <div style="text-align: center; padding: 40px 20px;">
+                            <div style="font-size: 3rem; margin-bottom: 16px;">🏆</div>
+                            <h3 style="color: var(--text-primary); margin-bottom: 12px;">Community Leaderboard</h3>
+                            <p style="color: var(--text-muted); margin-bottom: 24px;">No ratings yet! Be the first to rate players and build our positive community.</p>
+                            <button class="btn" onclick="switchToTab('search')" style="margin: 0 auto;">Start Rating Players</button>
+                        </div>
+                    `;
+                } else {
+                    let leaderboardHtml = `
+                        <!-- Community Honor Code -->
+                        <div style="background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(22, 163, 74, 0.1)); border: 2px solid var(--success-color); border-radius: 16px; padding: 24px; margin-bottom: 32px;">
+                            <h3 style="color: var(--success-color); margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                🛡️ Community Honor Code
+                                <span style="background: var(--success-color); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600;">POSITIVE COMMUNITY</span>
+                            </h3>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="background: var(--success-color); color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold;">✓</div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-primary);">Focus on Growth</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.85rem;">Help teammates improve rather than criticize</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="background: var(--success-color); color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold;">✓</div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-primary);">Constructive Feedback</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.85rem;">Share specific examples and suggestions</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="background: var(--success-color); color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold;">✓</div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-primary);">Recognize Good Play</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.85rem;">Acknowledge teamwork and positive behavior</div>
+                                    </div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="background: var(--success-color); color: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: bold;">✓</div>
+                                    <div>
+                                        <div style="font-weight: 600; color: var(--text-primary);">Build Community</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.85rem;">Foster positive relationships and sportsmanship</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="background: rgba(34, 197, 94, 0.1); border-radius: 8px; padding: 12px; border-left: 4px solid var(--success-color);">
+                                <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">
+                                    <strong>💡 Tip:</strong> Players with high positive feedback ratios and constructive reviews get community score bonuses!
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <!-- Leaderboard Entries -->
+                        <div style="display: grid; gap: 16px;">
+                    `;
+                    
+                    leaderboardEntries.forEach((entry, index) => {
+                        const rank = index + 1;
+                        const rankIcon = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+                        const isTopPlayer = rank <= 3;
+                        
+                        leaderboardHtml += `
+                            <div style="background: ${isTopPlayer ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.05))' : 'var(--glass-bg)'}; border-radius: 16px; padding: 20px; border: ${isTopPlayer ? '2px solid rgba(251, 191, 36, 0.3)' : '1px solid var(--border-color)'}; transition: all 0.3s ease;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+                                    <div style="display: flex; align-items: center; gap: 16px;">
+                                        <div style="font-size: 1.5rem; font-weight: bold; ${isTopPlayer ? 'color: #f59e0b;' : 'color: var(--text-primary);'}">${rankIcon}</div>
+                                        <div>
+                                            <h3 style="margin: 0; color: var(--text-primary); font-size: 1.2rem;">${entry.playerName}</h3>
+                                            <div style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px;">
+                                                ${entry.totalRatings} review${entry.totalRatings === 1 ? '' : 's'} • ${entry.positiveRatio}% positive
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 1.4rem; font-weight: bold; color: var(--success-color);">${entry.communityScore}</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Community Score</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                                    <div style="text-align: center; padding: 8px;">
+                                        <div style="font-weight: 600; color: var(--text-primary);">${entry.avgOverall}⭐</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Overall</div>
+                                    </div>
+                                    <div style="text-align: center; padding: 8px;">
+                                        <div style="font-weight: 600; color: var(--text-primary);">${entry.avgSkill}⭐</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Skill</div>
+                                    </div>
+                                    <div style="text-align: center; padding: 8px;">
+                                        <div style="font-weight: 600; color: var(--text-primary);">${entry.avgTeamwork}⭐</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Teamwork</div>
+                                    </div>
+                                    <div style="text-align: center; padding: 8px;">
+                                        <div style="font-weight: 600; color: var(--text-primary);">${entry.avgBehavior}⭐</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.8rem;">Behavior</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Achievement Badges -->
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    ${entry.positiveRatio >= 80 ? '<span style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">🌟 Positive Player</span>' : ''}
+                                    ${entry.constructiveReviews >= 5 ? '<span style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">💬 Constructive Reviewer</span>' : ''}
+                                    ${entry.avgTeamwork >= 4.5 ? '<span style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">🤝 Team Player</span>' : ''}
+                                    ${entry.avgLeadership >= 4.0 ? '<span style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600;">👑 Leader</span>' : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    leaderboardHtml += '</div>';
+                    leaderboardList.innerHTML = leaderboardHtml;
+                }
+                
             } catch (error) {
-                leaderboardList.innerHTML = '<p style="color: var(--error-color); text-align: center; padding: 40px 0;">Failed to load leaderboard</p>';
+                console.error('Error loading leaderboard:', error);
+                leaderboardList.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 2rem; margin-bottom: 16px;">❌</div>
+                        <p style="color: var(--error-color);">Failed to load leaderboard</p>
+                        <button class="btn btn-secondary" onclick="loadLeaderboard()" style="margin-top: 16px;">Try Again</button>
+                    </div>
+                `;
             }
         }
 
