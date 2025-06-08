@@ -885,26 +885,6 @@
             }
         }
         
-        // Email Display Function (Anti-Scraping Protection)
-        globalThis.showEmail = function() {
-            const emailParts = ['hendrikkaiser', '@', 'posteo', '.', 'de'];
-            const email = emailParts.join('');
-            
-            const contactElements = [
-                document.getElementById('contact-email'),
-                document.getElementById('contact-email-footer')
-            ];
-            
-            contactElements.forEach(element => {
-                if (element) {
-                    element.innerHTML = `<a href="mailto:${email}" style="color: var(--primary-color); text-decoration: underline;">${email}</a>`;
-                    element.onclick = null;
-                }
-            });
-            
-            showToast('E-Mail-Adresse angezeigt!', 'success');
-        };
-
         // Fediverse Integration Functions
         globalThis.shareToFediverse = function(playerName, score, rank) {
             const text = `🎮 Check out ${playerName} - Rank #${rank} on Dota Player Rating with ${score} community score! 
@@ -1112,8 +1092,13 @@ Building positive gaming communities together.
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, where, limit, doc, getDoc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Import Android Auth Fix for Capacitor (will only work in Capacitor environment)
+        if (window.Capacitor && window.Capacitor.platform !== 'web') {
+            import('./android-auth-fix.js');
+        }
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -1173,9 +1158,29 @@ Building positive gaming communities together.
         globalThis.signInWithGoogle = async function() {
             try {
                 console.log('Attempting Google sign in...');
-                const result = await signInWithPopup(auth, googleProvider);
-                console.log('Google sign in successful:', result.user);
-                showToast('Successfully signed in with Google!', 'success');
+                
+                // Check if we're in a Capacitor/Android environment
+                if (window.Capacitor && window.Capacitor.platform === 'android') {
+                    // For Android, use redirect instead of popup
+                    console.log('Using Android redirect method');
+                    
+                    // Check for existing redirect result first
+                    const result = await getRedirectResult(auth);
+                    if (result) {
+                        console.log('Google sign in successful (redirect):', result.user);
+                        showToast('Successfully signed in with Google!', 'success');
+                        return;
+                    }
+                    
+                    // Start new redirect
+                    await signInWithRedirect(auth, googleProvider);
+                } else {
+                    // For web, use popup
+                    console.log('Using web popup method');
+                    const result = await signInWithPopup(auth, googleProvider);
+                    console.log('Google sign in successful:', result.user);
+                    showToast('Successfully signed in with Google!', 'success');
+                }
             } catch (error) {
                 console.error('Google sign in error:', error);
                 let errorMessage = 'Google sign-in failed!';
@@ -1333,12 +1338,11 @@ Building positive gaming communities together.
 
                 <!-- Tabs Navigation -->
                 <div class="card">
-                    <div style="display: flex; gap: 4px; background: var(--glass-bg); border-radius: 12px; padding: 4px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 4px; background: var(--glass-bg); border-radius: 12px; padding: 4px; margin-bottom: 24px;">
                         <button class="tab active" onclick="switchToTab('search')" id="tab-search">🔍 Search Players</button>
                         <button class="tab" onclick="switchToTab('leaderboard')" id="tab-leaderboard">🏆 Leaderboard</button>
                         <button class="tab" onclick="switchToTab('recent')" id="tab-recent">💬 Recent Reviews</button>
                         <button class="tab" onclick="switchToTab('analytics')" id="tab-analytics">📈 Analytics</button>
-                        <button class="tab" onclick="switchToTab('impressum')" id="tab-impressum">⚖️ Impressum</button>
                         <button class="tab hidden" onclick="switchToTab('admin')" id="tab-admin">🛡️ Admin Panel</button>
                     </div>
 
@@ -1437,66 +1441,6 @@ Building positive gaming communities together.
                         <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color);">
                             <h3 style="margin-bottom: 16px; color: var(--text-primary);">🎯 Category Analysis</h3>
                             <div id="category-analysis"></div>
-                        </div>
-                    </div>
-
-                    <!-- Impressum Tab -->
-                    <div id="impressum-content" class="tab-content">
-                        <div style="max-width: 800px; margin: 0 auto;">
-                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 24px; border: 1px solid var(--border-color); margin-bottom: 20px;">
-                                <h2 style="color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
-                                    ⚖️ Impressum / Disclaimer
-                                </h2>
-                                
-                                <div style="color: var(--text-secondary); line-height: 1.6;">
-                                    <h3 style="color: var(--primary-color); margin: 20px 0 12px 0;">Angaben gemäß § 5 TMG</h3>
-                                    <p><strong>Private Hobby-Website</strong></p>
-                                    
-                                    <p><strong>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</strong><br>
-                                    Hendrik Kaiser<br>
-                                    <span id="contact-email" style="cursor: pointer; color: var(--primary-color);" onclick="showEmail()">
-                                        E-Mail anzeigen (Klick hier)
-                                    </span></p>
-                                    
-                                    <h3 style="color: var(--primary-color); margin: 24px 0 12px 0;">Haftungsausschluss (Disclaimer)</h3>
-                                    
-                                    <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">1. Inhalt der Website</h4>
-                                    <p>Die Inhalte dieser Website (https://hendkai.github.io/dota-player-rating/) dienen ausschließlich privaten und nicht-kommerziellen Zwecken.<br>
-                                    Es handelt sich um ein rein privates Hobby-Projekt ohne Gewinnerzielungsabsicht.</p>
-                                    
-                                    <p>Die bereitgestellten Informationen und Funktionen (z.B. Player Rating Tool) dienen ausschließlich der Unterhaltung und spiegeln persönliche Einschätzungen der Nutzer wider.<br>
-                                    Es besteht keinerlei Anspruch auf Richtigkeit, Vollständigkeit oder Aktualität der bereitgestellten Inhalte.</p>
-                                    
-                                    <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">2. Haftung für externe Links</h4>
-                                    <p>Diese Website enthält ggf. Links zu externen Webseiten Dritter, auf deren Inhalte ich keinen Einfluss habe.<br>
-                                    Daher kann ich für diese fremden Inhalte auch keine Gewähr übernehmen.<br>
-                                    Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber der Seiten verantwortlich.</p>
-                                    
-                                    <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">3. Urheberrecht</h4>
-                                    <p>Die auf dieser Website veröffentlichten Inhalte und Werke unterliegen dem deutschen Urheberrecht.<br>
-                                    Eine Vervielfältigung, Bearbeitung oder Verwertung außerhalb der Grenzen des Urheberrechts bedarf der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
-                                    
-                                    <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">4. Datenschutz</h4>
-                                    <p>Diese Website speichert und verarbeitet keine personenbezogenen Daten außer den vom Nutzer freiwillig eingegebenen Bewertungen.<br>
-                                    Die Nutzung erfolgt weitgehend anonym.<br>
-                                    Für die Anmeldung werden E-Mail-Adressen verwendet, diese werden nicht an Dritte weitergegeben.</p>
-                                    
-                                    <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">Hinweis zur Player-Bewertung</h4>
-                                    <p>Die Bewertungsfunktion dient rein der privaten und spielerischen Einschätzung im Rahmen des Spiels "Dota 2".<br>
-                                    Es werden keine personenbezogenen Daten veröffentlicht.<br>
-                                    Bewertungen sind subjektiv und stellen keine öffentliche oder rechtlich bindende Aussage dar.</p>
-                                    
-                                    <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">Kontakt</h4>
-                                    <p>Bei Fragen oder Anliegen kontaktieren Sie mich bitte per E-Mail:<br>
-                                    <span id="contact-email-footer" style="cursor: pointer; color: var(--primary-color);" onclick="showEmail()">
-                                        E-Mail anzeigen (Klick hier)
-                                    </span></p>
-                                    
-                                    <p style="margin-top: 24px; font-size: 0.9rem; color: var(--text-muted);">
-                                        <strong>Stand:</strong> 12. Dezember 2024
-                                    </p>
-                                </div>
-                            </div>
                         </div>
                     </div>
 

@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Android SDK and build files
+android-sdk/
+*.zip
+cmdline-tools.zip
+
+# Android build outputs
+android/app/build/
+android/.gradle/
+android/gradle/
+
+# Capacitor
+ios/
+android/capacitor-cordova-android-plugins/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+
+# Editor
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log* 

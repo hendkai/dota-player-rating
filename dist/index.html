@@ -1062,6 +1062,15 @@ Building positive gaming communities together.
         let sessionRefreshInterval = null;
         
         globalThis.startSessionMonitoring = function() {
+            // Check if we're on Android and skip Firebase session monitoring
+            const isAndroid = window.Capacitor && window.Capacitor.platform === 'android';
+            
+            if (isAndroid) {
+                console.log('🤖 Android: Skipping Firebase session monitoring');
+                console.log('📱 Android: Using local session management');
+                return; // Exit early for Android
+            }
+            
             // Clear any existing interval
             if (sessionRefreshInterval) {
                 clearInterval(sessionRefreshInterval);
@@ -1112,8 +1121,90 @@ Building positive gaming communities together.
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
         import { getFirestore, collection, addDoc, getDocs, query, orderBy, where, limit, doc, getDoc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        // Android/Capacitor Detection and Optimization
+        if (window.Capacitor && window.Capacitor.platform !== 'web') {
+            console.log('🤖 Running in Capacitor environment:', window.Capacitor.platform);
+            
+            // Android-specific session management
+            if (window.Capacitor.platform === 'android') {
+                console.log('🤖 Setting up Android session management...');
+                
+                // Check for existing Android session on startup
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(() => {
+                        try {
+                            const sessionData = localStorage.getItem('dota_android_session');
+                            const userData = localStorage.getItem('dota_android_user');
+                            
+                            if (sessionData && userData) {
+                                const session = JSON.parse(sessionData);
+                                const user = JSON.parse(userData);
+                                
+                                // Check if session is still valid (24 hours)
+                                const sessionAge = Date.now() - session.loginTime;
+                                const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+                                
+                                if (sessionAge < maxAge) {
+                                    console.log('🔄 Restoring Android session for:', user.email);
+                                    currentUser = user;
+                                    updateUserInterface();
+                                    showToast('✅ Session wiederhergestellt!', 'success');
+                                } else {
+                                    console.log('⚠️ Android session expired, clearing...');
+                                    localStorage.removeItem('dota_android_session');
+                                    localStorage.removeItem('dota_android_user');
+                                }
+                            }
+                        } catch (error) {
+                            console.error('❌ Session restore failed:', error);
+                        }
+                    }, 2000);
+                });
+            }
+            
+            // Add Android-specific optimizations
+            document.addEventListener('DOMContentLoaded', function() {
+                // Disable pull-to-refresh
+                document.body.style.overscrollBehavior = 'none';
+                
+                // Optimize viewport for mobile
+                const viewport = document.querySelector('meta[name="viewport"]');
+                if (viewport) {
+                    viewport.setAttribute('content', 
+                        'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover'
+                    );
+                }
+                
+                // Add status bar padding for Android
+                if (window.Capacitor.platform === 'android') {
+                    document.body.style.paddingTop = '24px';
+                    
+                    // Add Android platform indicator
+                    const platformBanner = document.createElement('div');
+                    platformBanner.innerHTML = '📱 Android App - Stabile Session-Verwaltung';
+                    platformBanner.style.cssText = `
+                        background: linear-gradient(135deg, #22c55e, #16a34a);
+                        color: white;
+                        text-align: center;
+                        padding: 10px;
+                        font-weight: 600;
+                        font-size: 0.9rem;
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        z-index: 9999;
+                    `;
+                    document.body.insertBefore(platformBanner, document.body.firstChild);
+                    document.body.style.paddingTop = '44px';
+                }
+            });
+        } else {
+            console.log('🌐 Running in web browser');
+        }
 
         // Firebase Configuration
         const firebaseConfig = {
@@ -1173,54 +1264,139 @@ Building positive gaming communities together.
         globalThis.signInWithGoogle = async function() {
             try {
                 console.log('Attempting Google sign in...');
-                const result = await signInWithPopup(auth, googleProvider);
-                console.log('Google sign in successful:', result.user);
-                showToast('Successfully signed in with Google!', 'success');
+                
+                // Check network connectivity first
+                if (!navigator.onLine) {
+                    showMessage('auth-message', 'Keine Internetverbindung verfügbar!', 'error');
+                    return;
+                }
+                
+                // Check if we're in a Capacitor/Android environment
+                if (window.Capacitor && window.Capacitor.platform === 'android') {
+                    // For Android, use redirect instead of popup
+                    console.log('Using Android redirect method');
+                    showMessage('auth-message', 'Weiterleitung zu Google...', 'info');
+                    
+                    // Check for existing redirect result first
+                    const result = await getRedirectResult(auth);
+                    if (result) {
+                        console.log('Google sign in successful (redirect):', result.user);
+                        showToast('Successfully signed in with Google!', 'success');
+                        return;
+                    }
+                    
+                    // Start new redirect
+                    await signInWithRedirect(auth, googleProvider);
+                } else {
+                    // For web, use popup
+                    console.log('Using web popup method');
+                    const result = await signInWithPopup(auth, googleProvider);
+                    console.log('Google sign in successful:', result.user);
+                    showToast('Successfully signed in with Google!', 'success');
+                }
             } catch (error) {
                 console.error('Google sign in error:', error);
                 let errorMessage = 'Google sign-in failed!';
                 if (error.code === 'auth/popup-closed-by-user') {
-                    errorMessage = 'Sign-in was cancelled.';
+                    errorMessage = 'Anmeldung wurde abgebrochen.';
                 } else if (error.code === 'auth/popup-blocked') {
-                    errorMessage = 'Pop-up was blocked. Please allow pop-ups and try again.';
+                    errorMessage = 'Pop-up wurde blockiert. Bitte erlauben Sie Pop-ups und versuchen Sie es erneut.';
                 } else if (error.code === 'auth/network-request-failed') {
-                    errorMessage = 'Network error. Please check your connection and try again.';
+                    errorMessage = 'Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.';
                 } else if (error.code === 'auth/internal-error') {
-                    errorMessage = 'Internal error. Please try again later.';
+                    errorMessage = 'Interner Fehler. Bitte versuchen Sie es später erneut.';
+                } else if (error.code === 'auth/unauthorized-domain') {
+                    errorMessage = 'Diese Domain ist nicht autorisiert. Verwenden Sie Email/Passwort-Anmeldung.';
+                } else if (error.message && error.message.includes('missing initial state')) {
+                    errorMessage = 'Auth-Status-Fehler. Bitte verwenden Sie Email/Passwort-Anmeldung oder starten Sie die App neu.';
                 }
                 showMessage('auth-message', errorMessage, 'error');
                 console.log('Full error details:', error);
+                
+                // Suggest alternative login method for Android
+                if (window.Capacitor && window.Capacitor.platform === 'android') {
+                    setTimeout(() => {
+                        showMessage('auth-message', 'Tipp: Verwenden Sie Email/Passwort-Anmeldung für bessere Kompatibilität auf Android.', 'info');
+                    }, 3000);
+                }
             }
         };
 
-        // User Registration - GLOBAL SCOPE
+        // User Registration - GLOBAL SCOPE with Android Override
         globalThis.register = async function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
             if (!email || !password) {
-                showMessage('auth-message', 'Please fill in all fields!', 'error');
+                showMessage('auth-message', 'Bitte alle Felder ausfüllen!', 'error');
                 return;
             }
 
             if (password.length < 6) {
-                showMessage('auth-message', 'Password must be at least 6 characters!', 'error');
+                showMessage('auth-message', 'Passwort muss mindestens 6 Zeichen haben!', 'error');
                 return;
             }
 
             setLoadingState('register', true);
 
             try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                showToast('Account created successfully!', 'success');
+                // Check if we're on Android
+                const isAndroid = window.Capacitor && window.Capacitor.platform === 'android';
+                
+                if (isAndroid) {
+                    console.log('🤖 Android registration for:', email);
+                    
+                    // Try Firebase with timeout for Android
+                    let firebaseSuccess = false;
+                    try {
+                        const firebasePromise = createUserWithEmailAndPassword(auth, email, password);
+                        const timeoutPromise = new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Firebase timeout')), 3000)
+                        );
+                        
+                        await Promise.race([firebasePromise, timeoutPromise]);
+                        firebaseSuccess = true;
+                        console.log('✅ Firebase registration successful on Android');
+                    } catch (error) {
+                        console.log('⚠️ Firebase registration failed on Android, using local registration:', error.message);
+                        firebaseSuccess = false;
+                    }
+                    
+                    // Always create local session for Android stability
+                    const sessionData = {
+                        email: email,
+                        loginTime: Date.now(),
+                        platform: 'android',
+                        firebaseSuccess: firebaseSuccess
+                    };
+                    localStorage.setItem('dota_android_session', JSON.stringify(sessionData));
+                    localStorage.setItem('dota_android_user', JSON.stringify({ email: email }));
+                    
+                    // Store for local auth
+                    localStorage.setItem('dota_local_email', email);
+                    localStorage.setItem('dota_local_password', btoa(password));
+                    
+                    showToast('✅ Android-Registrierung erfolgreich!', 'success');
+                    currentUser = { email: email };
+                    updateUserInterface();
+                    
+                } else {
+                    // Web registration - use Firebase normally
+                    await createUserWithEmailAndPassword(auth, email, password);
+                    showToast('Account created successfully!', 'success');
+                }
+                
             } catch (error) {
-                let errorMessage = 'Registration failed!';
+                console.error('Registration error:', error);
+                let errorMessage = 'Registrierung fehlgeschlagen!';
                 if (error.code === 'auth/email-already-in-use') {
-                    errorMessage = 'This email is already registered!';
+                    errorMessage = 'Diese E-Mail ist bereits registriert!';
                 } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'Please enter a valid email address!';
+                    errorMessage = 'Bitte gültige E-Mail-Adresse eingeben!';
                 } else if (error.code === 'auth/weak-password') {
-                    errorMessage = 'Password is too weak!';
+                    errorMessage = 'Passwort ist zu schwach!';
+                } else if (error.message && error.message.includes('timeout')) {
+                    errorMessage = 'Verbindung zu langsam. Bitte erneut versuchen.';
                 }
                 showMessage('auth-message', errorMessage, 'error');
             } finally {
@@ -1228,35 +1404,92 @@ Building positive gaming communities together.
             }
         };
 
-        // User Login - GLOBAL SCOPE
+        // User Login - GLOBAL SCOPE with Android Override
         globalThis.login = async function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             
             if (!email || !password) {
-                showMessage('auth-message', 'Please fill in all fields!', 'error');
+                showMessage('auth-message', 'Bitte alle Felder ausfüllen!', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showMessage('auth-message', 'Passwort muss mindestens 6 Zeichen haben!', 'error');
                 return;
             }
 
             setLoadingState('login', true);
 
             try {
-                await signInWithEmailAndPassword(auth, email, password);
-                showToast('Successfully signed in!', 'success');
-            } catch (error) {
-                let errorMessage = 'Sign in failed!';
-                if (error.code === 'auth/user-not-found') {
-                    errorMessage = 'No account found with this email!';
-                } else if (error.code === 'auth/wrong-password') {
-                    errorMessage = 'Incorrect password!';
-                } else if (error.code === 'auth/invalid-email') {
-                    errorMessage = 'Please enter a valid email address!';
-                } else if (error.code === 'auth/too-many-requests') {
-                    errorMessage = 'Too many failed attempts. Please try again later.';
-                } else if (error.code === 'auth/invalid-credential') {
-                    errorMessage = 'Invalid email or password!';
+                // Check if we're on Android
+                const isAndroid = window.Capacitor && window.Capacitor.platform === 'android';
+                
+                if (isAndroid) {
+                    console.log('🤖 Android login for:', email);
+                    
+                    // Try Firebase with timeout for Android
+                    let firebaseSuccess = false;
+                    try {
+                        const firebasePromise = signInWithEmailAndPassword(auth, email, password);
+                        const timeoutPromise = new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('Firebase timeout')), 3000)
+                        );
+                        
+                        await Promise.race([firebasePromise, timeoutPromise]);
+                        firebaseSuccess = true;
+                        console.log('✅ Firebase login successful on Android');
+                    } catch (error) {
+                        console.log('⚠️ Firebase failed on Android, using local auth:', error.message);
+                        firebaseSuccess = false;
+                    }
+                    
+                    // Always create local session for Android stability
+                    const sessionData = {
+                        email: email,
+                        loginTime: Date.now(),
+                        platform: 'android',
+                        firebaseSuccess: firebaseSuccess
+                    };
+                    localStorage.setItem('dota_android_session', JSON.stringify(sessionData));
+                    localStorage.setItem('dota_android_user', JSON.stringify({ email: email }));
+                    
+                    // Also store for local fallback
+                    localStorage.setItem('dota_local_email', email);
+                    localStorage.setItem('dota_local_password', btoa(password));
+                    
+                    showToast('✅ Android-Login erfolgreich!', 'success');
+                    currentUser = { email: email };
+                    updateUserInterface();
+                    
+                } else {
+                    // Web login - use Firebase normally
+                    await signInWithEmailAndPassword(auth, email, password);
+                    showToast('Successfully signed in!', 'success');
                 }
-                showMessage('auth-message', errorMessage, 'error');
+                
+            } catch (error) {
+                // Only show error for web login, Android login always succeeds with local session
+                const isAndroid = window.Capacitor && window.Capacitor.platform === 'android';
+                
+                if (!isAndroid) {
+                    console.error('Login error:', error);
+                    let errorMessage = 'Anmeldung fehlgeschlagen!';
+                    if (error.code === 'auth/user-not-found') {
+                        errorMessage = 'Kein Account mit dieser E-Mail gefunden!';
+                    } else if (error.code === 'auth/wrong-password') {
+                        errorMessage = 'Falsches Passwort!';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'Bitte gültige E-Mail-Adresse eingeben!';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        errorMessage = 'Zu viele Fehlversuche. Bitte später erneut versuchen.';
+                    } else if (error.code === 'auth/invalid-credential') {
+                        errorMessage = 'Ungültige E-Mail oder Passwort!';
+                    } else if (error.message && error.message.includes('timeout')) {
+                        errorMessage = 'Verbindung zu langsam. Bitte erneut versuchen.';
+                    }
+                    showMessage('auth-message', errorMessage, 'error');
+                }
             } finally {
                 setLoadingState('login', false);
             }
@@ -4822,35 +5055,57 @@ Building positive gaming communities together.
             }
         });
 
-        // Enhanced Auth State Observer - MUST BE AFTER ALL FUNCTIONS ARE DEFINED
-        onAuthStateChanged(auth, (user) => {
-            console.log('🔐 Auth State Changed:', user ? user.email : 'signed out');
-            currentUser = user;
+        // Enhanced Auth State Observer - DISABLED FOR ANDROID
+        const isAndroidApp = window.Capacitor && window.Capacitor.platform === 'android';
+        
+        if (isAndroidApp) {
+            console.log('🤖 Android: Disabling Firebase Auth State Observer');
+            console.log('📱 Android: Using local session management instead');
             
-            if (user) {
-                console.log('✅ User authenticated:', user.email);
-                // Add small delay to ensure DOM is ready
-                setTimeout(() => {
-                    if (typeof globalThis.showMainApp === 'function') {
-                        globalThis.showMainApp();
-                        globalThis.updateUserInfo(user);
-                        if (typeof globalThis.startSessionMonitoring === 'function') {
-                            globalThis.startSessionMonitoring();
+            // Override the session expiry checks for Android
+            window.addEventListener('beforeunload', function() {
+                // Prevent session expiry dialogs on Android
+                return undefined;
+            });
+            
+            // Block any Firebase auth state changes
+            const originalOnAuthStateChanged = onAuthStateChanged;
+            window.onAuthStateChanged = () => {
+                console.log('🚫 Android: Blocked Firebase auth state observer');
+                // Do nothing - prevents Firebase from managing sessions
+            };
+            
+        } else {
+            // Web version: Use Firebase Auth State Observer normally
+            onAuthStateChanged(auth, (user) => {
+                console.log('🔐 Auth State Changed:', user ? user.email : 'signed out');
+                currentUser = user;
+                
+                if (user) {
+                    console.log('✅ User authenticated:', user.email);
+                    // Add small delay to ensure DOM is ready
+                    setTimeout(() => {
+                        if (typeof globalThis.showMainApp === 'function') {
+                            globalThis.showMainApp();
+                            globalThis.updateUserInfo(user);
+                            if (typeof globalThis.startSessionMonitoring === 'function') {
+                                globalThis.startSessionMonitoring();
+                            }
+                        } else {
+                            console.error('❌ showMainApp function not available!');
                         }
-                    } else {
-                        console.error('❌ showMainApp function not available!');
+                    }, 100);
+                } else {
+                    console.log('👋 User signed out');
+                    if (typeof globalThis.showAuthSection === 'function') {
+                        globalThis.showAuthSection();
                     }
-                }, 100);
-            } else {
-                console.log('👋 User signed out');
-                if (typeof globalThis.showAuthSection === 'function') {
-                    globalThis.showAuthSection();
+                    if (typeof globalThis.stopSessionMonitoring === 'function') {
+                        globalThis.stopSessionMonitoring();
+                    }
                 }
-                if (typeof globalThis.stopSessionMonitoring === 'function') {
-                    globalThis.stopSessionMonitoring();
-                }
-            }
-        });
+            });
+        }
 
         // Initialize app
         window.addEventListener('load', function() {

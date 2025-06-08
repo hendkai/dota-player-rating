@@ -1,0 +1,25 @@
+{
+  "name": "dota-player-rating",
+  "version": "1.0.0",
+  "description": "Professional Dota 2 player rating and review platform",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'Build complete'",
+    "sync": "npx cap sync",
+    "open:android": "npx cap open android"
+  },
+  "keywords": [
+    "dota2",
+    "gaming",
+    "player-rating",
+    "esports"
+  ],
+  "author": "Dota Player Rating Team",
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^6.2.1",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4"
+  }
+}

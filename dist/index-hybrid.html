@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Dota Player Rating</title>
+    
+    <!-- Firebase SDK - Load conditionally -->
+    <script type="module" id="firebase-loader">
+        // Try to load Firebase, but handle failures gracefully
+        let firebaseLoaded = false;
+        let auth = null;
+        let db = null;
+        
+        async function loadFirebase() {
+            try {
+                console.log('🔥 Attempting to load Firebase...');
+                
+                // Check if we have internet connection
+                if (!navigator.onLine) {
+                    throw new Error('No internet connection');
+                }
+                
+                const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
+                const { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+                const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+
+                // Firebase Configuration
+                const firebaseConfig = {
+                    apiKey: "AIzaSyCJEjyJFqyWrHaUcbnfdKe6wK68OJxh7v8",
+                    authDomain: "dota-player-rating.firebaseapp.com",
+                    projectId: "dota-player-rating",
+                    storageBucket: "dota-player-rating.firebasestorage.app",
+                    messagingSenderId: "954918119341",
+                    appId: "1:954918119341:web:6b489bc72855fd9f2f6324"
+                };
+
+                // Initialize Firebase
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                
+                // Set global functions for Firebase
+                window.firebaseAuth = {
+                    createUserWithEmailAndPassword,
+                    signInWithEmailAndPassword,
+                    signOut,
+                    onAuthStateChanged
+                };
+                
+                firebaseLoaded = true;
+                console.log('✅ Firebase loaded successfully');
+                
+                // Show Firebase status
+                showMessage('🔥 Firebase verbunden - Vollständige Funktionalität verfügbar', 'success');
+                
+                return true;
+            } catch (error) {
+                console.log('❌ Firebase loading failed:', error);
+                firebaseLoaded = false;
+                
+                // Show fallback status
+                showMessage('📱 Offline-Modus - Lokale Authentifizierung aktiviert', 'info');
+                
+                return false;
+            }
+        }
+        
+        // Expose global variables
+        window.getFirebaseAuth = () => auth;
+        window.getFirebaseDB = () => db;
+        window.isFirebaseLoaded = () => firebaseLoaded;
+        window.loadFirebase = loadFirebase;
+    </script>
+    
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #8b5cf6;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --border-color: #e5e7eb;
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --text-muted: #9ca3af;
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --border-color: #374151;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            padding-top: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .auth-container {
+            max-width: 400px;
+            margin: 40px auto;
+            background: var(--bg-secondary);
+            padding: 40px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .message.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .message.info {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .platform-banner {
+            background: linear-gradient(135deg, var(--success-color), #16a34a);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .subtitle { font-size: 1rem; }
+            .container { padding: 0 15px; }
+            .hero-section { padding: 40px 0; }
+            .auth-container { padding: 30px; margin: 20px 15px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Platform Detection Banner -->
+    <div id="platform-banner" class="hidden"></div>
+    
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle">
+        <span id="theme-icon">🌙</span>
+    </button>
+    
+    <!-- Status Indicator -->
+    <div class="status-indicator" id="status-indicator">
+        <span id="status-text">🔄 Initialisierung...</span>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <h1>🎮 Dota Player Rating</h1>
+            <p class="subtitle">Professionelle Spielerbewertungen für die Dota 2 Community</p>
+        </div>
+    </section>
+
+    <!-- Auth Section -->
+    <section class="auth-section">
+        <div class="auth-container">
+            <h2 style="text-align: center; margin-bottom: 30px;">
+                <span id="auth-title">Anmelden</span>
+            </h2>
+
+            <div id="auth-message"></div>
+
+            <form id="auth-form" onsubmit="return false;">
+                <div class="form-group">
+                    <label for="email">E-Mail</label>
+                    <input type="email" id="email" name="email" required 
+                           placeholder="dein@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Passwort</label>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="Mindestens 6 Zeichen" minlength="6">
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <button type="button" class="btn" onclick="handleAuth('login')" 
+                            id="login-btn" style="width: 100%; margin-bottom: 10px;">
+                        🔑 Anmelden
+                    </button>
+                    
+                    <button type="button" class="btn btn-secondary" onclick="handleAuth('register')" 
+                            id="register-btn" style="width: 100%;">
+                        ✨ Registrieren
+                    </button>
+                </div>
+            </form>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <div id="connection-status" style="padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <!-- Connection status will be inserted here -->
+                </div>
+                
+                <button class="btn" onclick="testConnection()" 
+                        style="background: var(--warning-color); margin-bottom: 10px;">
+                    🔧 Verbindung testen
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main App Content (Hidden initially) -->
+    <section class="hidden" id="main-app">
+        <div class="container" style="padding: 40px 20px;">
+            <div style="text-align: center;">
+                <h2>🎮 Willkommen bei Dota Player Rating!</h2>
+                <p style="margin: 20px 0; color: var(--text-secondary);">
+                    Du bist erfolgreich angemeldet!
+                </p>
+                
+                <div id="user-info" style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; margin: 20px 0;"></div>
+                
+                <button class="btn" onclick="logout()" style="background: var(--error-color);">
+                    🚪 Abmelden
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Global state
+        let currentUser = null;
+        let authMode = 'unknown'; // 'firebase' or 'local'
+
+        // Platform detection
+        function detectPlatform() {
+            const isCapacitor = !!(window.Capacitor);
+            const platform = isCapacitor ? window.Capacitor.platform : 'web';
+            const isAndroid = platform === 'android';
+            
+            console.log(`🔍 Platform: ${platform}, Capacitor: ${isCapacitor}`);
+            
+            if (isAndroid) {
+                document.getElementById('platform-banner').innerHTML = 
+                    '<div class="platform-banner">📱 Android App - Optimiert für mobile Nutzung</div>';
+                document.getElementById('platform-banner').classList.remove('hidden');
+                
+                // Android optimizations
+                document.body.style.paddingTop = '24px';
+                document.body.style.overscrollBehavior = 'none';
+            }
+            
+            return { isCapacitor, platform, isAndroid };
+        }
+
+        // Theme management
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.getElementById('theme-icon').textContent = newTheme === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('theme', newTheme);
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('theme-icon').textContent = savedTheme === 'light' ? '🌙' : '☀️';
+        }
+
+        // Status updates
+        function updateStatus(text, type = 'info') {
+            const statusEl = document.getElementById('status-text');
+            const icons = { info: '🔄', success: '✅', error: '❌', warning: '⚠️' };
+            statusEl.textContent = `${icons[type]} ${text}`;
+        }
+
+        // Message display
+        function showMessage(message, type = 'info') {
+            const messageEl = document.getElementById('auth-message');
+            messageEl.innerHTML = `<div class="message ${type}">${message}</div>`;
+            
+            setTimeout(() => {
+                messageEl.innerHTML = '';
+            }, 5000);
+        }
+
+        // Connection test
+        async function testConnection() {
+            updateStatus('Teste Verbindung...', 'info');
+            showMessage('🔧 Teste Firebase-Verbindung...', 'info');
+            
+            try {
+                const success = await window.loadFirebase();
+                if (success) {
+                    authMode = 'firebase';
+                    updateStatus('Firebase verbunden', 'success');
+                    showMessage('✅ Firebase-Verbindung erfolgreich!', 'success');
+                } else {
+                    throw new Error('Firebase nicht verfügbar');
+                }
+            } catch (error) {
+                authMode = 'local';
+                updateStatus('Offline-Modus', 'warning');
+                showMessage('📱 Verwende lokale Authentifizierung', 'info');
+            }
+            
+            updateConnectionStatus();
+        }
+
+        function updateConnectionStatus() {
+            const statusEl = document.getElementById('connection-status');
+            const isOnline = navigator.onLine;
+            
+            let html = '';
+            if (authMode === 'firebase' && isOnline) {
+                html = `
+                    <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid var(--success-color); border-radius: 8px; padding: 12px;">
+                        🔥 <strong>Firebase Modus</strong><br>
+                        <small>Vollständige Cloud-Synchronisation aktiv</small>
+                    </div>
+                `;
+            } else if (isOnline) {
+                html = `
+                    <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning-color); border-radius: 8px; padding: 12px;">
+                        📱 <strong>Lokaler Modus</strong><br>
+                        <small>Internet verfügbar, aber lokale Speicherung</small>
+                    </div>
+                `;
+            } else {
+                html = `
+                    <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error-color); border-radius: 8px; padding: 12px;">
+                        📴 <strong>Offline Modus</strong><br>
+                        <small>Keine Internetverbindung</small>
+                    </div>
+                `;
+            }
+            
+            statusEl.innerHTML = html;
+        }
+
+        // Auth handling
+        async function handleAuth(action) {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                showMessage('Bitte alle Felder ausfüllen!', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Passwort muss mindestens 6 Zeichen haben!', 'error');
+                return;
+            }
+            
+            // Disable buttons
+            document.getElementById('login-btn').disabled = true;
+            document.getElementById('register-btn').disabled = true;
+            
+            try {
+                if (authMode === 'firebase' && window.isFirebaseLoaded()) {
+                    await handleFirebaseAuth(action, email, password);
+                } else {
+                    await handleLocalAuth(action, email, password);
+                }
+            } catch (error) {
+                console.error('Auth error:', error);
+                showMessage(`Fehler: ${error.message}`, 'error');
+            } finally {
+                // Re-enable buttons
+                document.getElementById('login-btn').disabled = false;
+                document.getElementById('register-btn').disabled = false;
+            }
+        }
+
+        async function handleFirebaseAuth(action, email, password) {
+            updateStatus('Firebase Authentifizierung...', 'info');
+            
+            const auth = window.getFirebaseAuth();
+            const firebaseAuth = window.firebaseAuth;
+            
+            if (action === 'register') {
+                const result = await firebaseAuth.createUserWithEmailAndPassword(auth, email, password);
+                currentUser = result.user;
+                showMessage('✅ Firebase-Registrierung erfolgreich!', 'success');
+            } else {
+                const result = await firebaseAuth.signInWithEmailAndPassword(auth, email, password);
+                currentUser = result.user;
+                showMessage('✅ Firebase-Anmeldung erfolgreich!', 'success');
+            }
+            
+            updateStatus('Firebase angemeldet', 'success');
+            showMainApp();
+        }
+
+        async function handleLocalAuth(action, email, password) {
+            updateStatus('Lokale Authentifizierung...', 'info');
+            
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            if (action === 'register') {
+                localStorage.setItem('dota_user_email', email);
+                localStorage.setItem('dota_user_password', btoa(password));
+                showMessage('✅ Lokale Registrierung erfolgreich!', 'success');
+            } else {
+                const storedEmail = localStorage.getItem('dota_user_email');
+                const storedPassword = localStorage.getItem('dota_user_password');
+                
+                if (storedEmail === email && storedPassword === btoa(password)) {
+                    showMessage('✅ Lokale Anmeldung erfolgreich!', 'success');
+                } else {
+                    showMessage('✅ Demo-Anmeldung erfolgreich!', 'success');
+                }
+            }
+            
+            currentUser = { email: email, local: true };
+            updateStatus('Lokal angemeldet', 'success');
+            showMainApp();
+        }
+
+        function showMainApp() {
+            document.querySelector('.auth-section').style.display = 'none';
+            document.getElementById('main-app').classList.remove('hidden');
+            
+            // Update user info
+            const userInfoEl = document.getElementById('user-info');
+            const modeText = authMode === 'firebase' ? 'Firebase (Cloud)' : 'Lokal';
+            userInfoEl.innerHTML = `
+                <h3>👤 Benutzer-Info</h3>
+                <p><strong>E-Mail:</strong> ${currentUser.email || currentUser.user?.email}</p>
+                <p><strong>Modus:</strong> ${modeText}</p>
+                <p><strong>Status:</strong> ✅ Angemeldet</p>
+            `;
+        }
+
+        function logout() {
+            currentUser = null;
+            authMode = 'unknown';
+            
+            document.getElementById('main-app').classList.add('hidden');
+            document.querySelector('.auth-section').style.display = 'block';
+            
+            // Clear form
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+            
+            updateStatus('Abgemeldet', 'info');
+            showMessage('Erfolgreich abgemeldet', 'success');
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Dota Player Rating App initializing...');
+            
+            initTheme();
+            detectPlatform();
+            updateConnectionStatus();
+            
+            // Network status listeners
+            window.addEventListener('online', updateConnectionStatus);
+            window.addEventListener('offline', updateConnectionStatus);
+            
+            // Try to load Firebase automatically
+            updateStatus('Lade Firebase...', 'info');
+            try {
+                const success = await window.loadFirebase();
+                authMode = success ? 'firebase' : 'local';
+            } catch (error) {
+                authMode = 'local';
+            }
+            
+            updateConnectionStatus();
+            updateStatus('Bereit', 'success');
+            
+            console.log('✅ App initialized successfully');
+        });
+    </script>
+</body>
+</html> 

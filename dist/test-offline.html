@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dota Player Rating - Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status {
+            font-size: 1.5rem;
+            margin: 20px 0;
+        }
+        
+        .success {
+            color: #4ade80;
+        }
+        
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .platform-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Dota Player Rating</h1>
+        <div class="status success">✅ Android App funktioniert!</div>
+        
+        <div class="info">
+            <h3>📱 Platform Test</h3>
+            <p id="platform-info">Lade Platform-Informationen...</p>
+        </div>
+        
+        <div class="info">
+            <h3>🌐 Verbindung</h3>
+            <p id="connection-info">Teste Verbindung...</p>
+        </div>
+        
+        <button class="btn" onclick="testCapacitor()">🔧 Test Capacitor</button>
+        <button class="btn" onclick="testNetwork()">🌐 Test Netzwerk</button>
+        <button class="btn" onclick="loadMainApp()">🚀 Vollständige App laden</button>
+        
+        <div class="platform-info">
+            <h4>System Info:</h4>
+            <p id="system-info">Lade...</p>
+        </div>
+    </div>
+
+    <script>
+        // Platform Detection
+        function detectPlatform() {
+            const info = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                isCapacitor: !!window.Capacitor,
+                capacitorPlatform: window.Capacitor ? window.Capacitor.platform : 'nicht verfügbar',
+                screenSize: `${window.screen.width}x${window.screen.height}`,
+                windowSize: `${window.innerWidth}x${window.innerHeight}`,
+                language: navigator.language,
+                online: navigator.onLine
+            };
+            
+            document.getElementById('platform-info').innerHTML = 
+                `Platform: ${info.capacitorPlatform}<br>
+                 Capacitor: ${info.isCapacitor ? 'Ja' : 'Nein'}<br>
+                 Sprache: ${info.language}`;
+                 
+            document.getElementById('system-info').innerHTML = 
+                `Bildschirm: ${info.screenSize}<br>
+                 Fenster: ${info.windowSize}<br>
+                 Online: ${info.online ? 'Ja' : 'Nein'}`;
+                 
+            document.getElementById('connection-info').innerHTML = 
+                info.online ? '✅ Internet verfügbar' : '❌ Kein Internet';
+        }
+        
+        function testCapacitor() {
+            if (window.Capacitor) {
+                alert(`✅ Capacitor funktioniert!\nPlatform: ${window.Capacitor.platform}`);
+            } else {
+                alert('❌ Capacitor nicht verfügbar - läuft im Browser');
+            }
+        }
+        
+        function testNetwork() {
+            if (navigator.onLine) {
+                alert('✅ Netzwerk verfügbar');
+            } else {
+                alert('❌ Kein Netzwerk');
+            }
+        }
+        
+        function loadMainApp() {
+            // Versuche die Hauptapp zu laden
+            window.location.href = './index.html';
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            detectPlatform();
+            
+            // Update connection status every 5 seconds
+            setInterval(detectPlatform, 5000);
+        });
+        
+        // Handle online/offline events
+        window.addEventListener('online', function() {
+            document.getElementById('connection-info').innerHTML = '✅ Internet verfügbar';
+        });
+        
+        window.addEventListener('offline', function() {
+            document.getElementById('connection-info').innerHTML = '❌ Kein Internet';
+        });
+    </script>
+</body>
+</html> 

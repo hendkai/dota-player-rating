@@ -1,0 +1,39 @@
+{
+  "appId": "io.github.hendkai.dota_player_rating",
+  "appName": "Dota Player Rating",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": [
+      "https://api.opendota.com/*",
+      "https://www.gstatic.com/*",
+      "https://dota-player-rating.firebaseapp.com/*",
+      "https://identitytoolkit.googleapis.com/*",
+      "https://securetoken.googleapis.com/*"
+    ]
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#6366f1",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "LIGHT_CONTENT",
+      "backgroundColor": "#6366f1"
+    },
+    "GoogleAuth": {
+      "scopes": ["profile", "email"],
+      "serverClientId": "954918119341-XXXXXXXXXXXXXXXXX.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
+    }
+  }
+}
