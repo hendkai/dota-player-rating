@@ -396,6 +396,33 @@
             font-size: 0.8rem;
         }
 
+        .rating-form-container {
+            position: relative;
+        }
+
+        .rating-form-container .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: var(--error-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .rating-form-container .close-btn:hover {
+            transform: scale(1.1);
+            background: #dc2626;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 12px;
@@ -431,34 +458,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        /* Fix für Rating Form Container */
-        .rating-form-container {
-            position: relative;
-        }
-
-        .rating-form-container .close-btn {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: var(--error-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .rating-form-container .close-btn:hover {
-            transform: scale(1.1);
-            background: #dc2626;
         }
     </style>
 </head>
@@ -572,15 +571,15 @@
         let currentFilter = 'all';
         let currentDateFilter = null;
         let selectedRating = 0;
-        let isRatingFormOpen = false; // NEUE VARIABLE zur Kontrolle der Rating Form
+        let isRatingFormOpen = false;
 
         // Auth Providers
         const googleProvider = new GoogleAuthProvider();
 
-        // OpenDota API Configuration for Free Tier
+        // OpenDota API Configuration
         const OPENDOTA_BASE_URL = 'https://api.opendota.com/api';
         let lastRequestTime = 0;
-        const MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
+        const MIN_REQUEST_INTERVAL = 1000;
 
         // Auth State Observer
         onAuthStateChanged(auth, (user) => {
@@ -594,7 +593,7 @@
             }
         });
 
-        // Theme Management - GLOBAL SCOPE
+        // Theme Management
         globalThis.toggleTheme = function() {
             const currentTheme = document.documentElement.getAttribute('data-theme');
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
@@ -611,12 +610,10 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
         document.getElementById('theme-icon').textContent = savedTheme === 'light' ? '🌙' : '☀️';
 
-        // Google Sign In - GLOBAL SCOPE
+        // Google Sign In
         globalThis.signInWithGoogle = async function() {
             try {
-                console.log('Attempting Google sign in...');
                 const result = await signInWithPopup(auth, googleProvider);
-                console.log('Google sign in successful:', result.user);
                 showToast('Successfully signed in with Google!', 'success');
             } catch (error) {
                 console.error('Google sign in error:', error);
@@ -625,17 +622,12 @@
                     errorMessage = 'Sign-in was cancelled.';
                 } else if (error.code === 'auth/popup-blocked') {
                     errorMessage = 'Pop-up was blocked. Please allow pop-ups and try again.';
-                } else if (error.code === 'auth/network-request-failed') {
-                    errorMessage = 'Network error. Please check your connection and try again.';
-                } else if (error.code === 'auth/internal-error') {
-                    errorMessage = 'Internal error. Please try again later.';
                 }
                 showMessage('auth-message', errorMessage, 'error');
-                console.log('Full error details:', error);
             }
         };
 
-        // User Registration - GLOBAL SCOPE
+        // User Registration
         globalThis.register = async function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -670,7 +662,7 @@
             }
         };
 
-        // User Login - GLOBAL SCOPE
+        // User Login
         globalThis.login = async function() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -704,7 +696,7 @@
             }
         };
 
-        // Logout - GLOBAL SCOPE
+        // Logout
         globalThis.logout = async function() {
             try {
                 await signOut(auth);
@@ -714,7 +706,7 @@
             }
         };
 
-        // Load Main App Content After Login
+        // Load Main App Content
         function loadMainAppContent() {
             const mainAppHTML = `
                 <!-- Dashboard -->
@@ -791,13 +783,6 @@
                                 <option value="month">This Month</option>
                                 <option value="year">This Year</option>
                             </select>
-                            <select style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--glass-bg); color: var(--text-primary); font-size: 0.9rem;" onchange="filterByCategory(this.value)">
-                                <option value="overall">Overall Rating</option>
-                                <option value="skill">Skill Level</option>
-                                <option value="teamwork">Teamwork</option>
-                                <option value="communication">Communication</option>
-                                <option value="behavior">Behavior</option>
-                            </select>
                         </div>
                         
                         <div id="leaderboard-list">
@@ -850,14 +835,12 @@
             `;
 
             document.getElementById('main-app').innerHTML = mainAppHTML;
-            
-            // Initialize components
             initializeTabs();
             loadRecentSearches();
-            loadDashboardStats(); // Neue Funktion für echte Dashboard-Daten
+            loadDashboardStats();
         }
 
-        // Make ALL search and app functions global
+        // Search Functions
         globalThis.handleSearchInput = function() {
             const query = document.getElementById('search-player').value.trim();
             
@@ -896,7 +879,6 @@
 
             setLoadingState('search', true);
             
-            // Show loading message
             document.getElementById('search-results').innerHTML = `
                 <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color); text-align: center;">
                     <div class="loading-spinner" style="margin: 0 auto 16px;"></div>
@@ -906,7 +888,6 @@
             `;
 
             try {
-                // Add to search history
                 if (!recentSearches.includes(searchTerm)) {
                     recentSearches.unshift(searchTerm);
                     recentSearches = recentSearches.slice(0, 10);
@@ -915,18 +896,14 @@
 
                 let playerData = null;
                 
-                // Determine search type and find player
                 if (isNumericSteamId(searchTerm)) {
-                    // Direct Steam ID search
                     playerData = await searchBySteamId(searchTerm);
                 } else if (isSteamProfileUrl(searchTerm)) {
-                    // Extract Steam ID from URL
                     const steamId = extractSteamIdFromUrl(searchTerm);
                     if (steamId) {
                         playerData = await searchBySteamId(steamId);
                     }
                 } else {
-                    // Player name search - we'll use OpenDota's search endpoint
                     playerData = await searchByPlayerName(searchTerm);
                 }
                 
@@ -939,21 +916,12 @@
                 
             } catch (error) {
                 console.error('Search error:', error);
-                
-                if (error.message.includes('Too many requests')) {
-                    showRateLimitError();
-                } else if (error.message.includes('not found')) {
-                    showPlayerNotFoundForName(searchTerm);
-                } else {
-                    showToast('Search failed. Please try again.', 'error');
-                    showPlayerNotFoundForName(searchTerm);
-                }
+                showPlayerNotFoundForName(searchTerm);
             } finally {
                 setLoadingState('search', false);
             }
         };
 
-        // All other global functions
         globalThis.showRecentSearches = function() {
             if (recentSearches.length === 0) {
                 showToast('No recent searches found', 'error');
@@ -987,20 +955,18 @@
             showToast('Search history cleared', 'success');
         };
 
+        // Tab Functions
         globalThis.switchToTab = function(tabName) {
-            // Update tab buttons
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             document.getElementById(`tab-${tabName}`).classList.add('active');
             
-            // Update tab content
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.remove('active');
             });
             document.getElementById(`${tabName}-content`).classList.add('active');
             
-            // Load content for specific tabs
             if (tabName === 'leaderboard') {
                 loadLeaderboard();
             } else if (tabName === 'recent') {
@@ -1014,10 +980,6 @@
             loadLeaderboard();
         };
 
-        globalThis.filterByCategory = function(category) {
-            loadLeaderboard();
-        };
-
         globalThis.filterReviews = function(rating) {
             currentFilter = rating;
             loadReviews();
@@ -1028,21 +990,19 @@
             loadReviews();
         };
 
-        // FIXED: Verhindert multiple Rating Forms
+        // Rating Functions
         globalThis.showRatingForm = function(playerId, playerName) {
-            // Check if rating form is already open
             if (isRatingFormOpen) {
                 showToast('Rating form is already open!', 'error');
                 return;
             }
 
-            // Remove any existing rating forms first
             const existingForm = document.querySelector('.rating-form-container');
             if (existingForm) {
                 existingForm.remove();
             }
 
-            isRatingFormOpen = true; // Set flag
+            isRatingFormOpen = true;
 
             const ratingFormHTML = `
                 <div class="card rating-form-container">
@@ -1081,21 +1041,17 @@
                 </div>
             `;
 
-            // Insert rating form after search results
             const searchCard = document.getElementById('search-results').closest('.card');
             searchCard.insertAdjacentHTML('afterend', ratingFormHTML);
             
-            // Scroll to rating form
             document.querySelector('.rating-form-container')?.scrollIntoView({ behavior: 'smooth' });
             
-            // Initialize star hover effects after form is created
             setTimeout(() => {
                 addStarHoverEffects();
                 updateRatingText();
             }, 100);
         };
 
-        // NEW: Close rating form function
         globalThis.closeRatingForm = function() {
             const ratingForm = document.querySelector('.rating-form-container');
             if (ratingForm) {
@@ -1142,10 +1098,7 @@
                 await addDoc(collection(db, 'ratings'), reviewData);
                 showToast('Rating submitted successfully!', 'success');
                 
-                // Close rating form
                 closeRatingForm();
-                
-                // Reload reviews and dashboard
                 loadReviews();
                 loadDashboardStats();
                 
@@ -1156,7 +1109,6 @@
             }
         };
 
-        // FIXED: Load real rating data for player profile  
         globalThis.viewPlayerReviews = async function(playerId) {
             try {
                 const q = query(
@@ -1195,7 +1147,6 @@
                 
                 reviewsHtml += '</div>';
                 
-                // Insert after search results
                 const searchResults = document.getElementById('search-results');
                 searchResults.insertAdjacentHTML('afterend', reviewsHtml);
                 
@@ -1238,33 +1189,253 @@
             document.getElementById('search-results').innerHTML = popularHTML;
         };
 
-        // FIXED: Load real dashboard statistics
-        async function loadDashboardStats() {
+        // API Functions
+        function waitForRateLimit() {
+            return new Promise(resolve => {
+                const now = Date.now();
+                const timeSinceLastRequest = now - lastRequestTime;
+                
+                if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+                    const waitTime = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
+                    setTimeout(() => {
+                        lastRequestTime = Date.now();
+                        resolve();
+                    }, waitTime);
+                } else {
+                    lastRequestTime = now;
+                    resolve();
+                }
+            });
+        }
+
+        function isNumericSteamId(input) {
+            return /^\d{8,17}$/.test(input);
+        }
+
+        function isSteamProfileUrl(input) {
+            return input.includes('steamcommunity.com');
+        }
+
+        function extractSteamIdFromUrl(url) {
+            const match = url.match(/profiles\/(\d+)/);
+            if (match) {
+                return match[1];
+            }
+            
+            const customMatch = url.match(/\/id\/([^\/]+)/);
+            if (customMatch) {
+                return null;
+            }
+            
+            return null;
+        }
+
+        async function searchBySteamId(steamId) {
             try {
-                const q = query(collection(db, 'ratings'), orderBy('timestamp', 'desc'));
-                const querySnapshot = await getDocs(q);
+                let accountId;
                 
-                let totalRatings = 0;
-                let totalRatingSum = 0;
-                let uniquePlayers = new Set();
+                if (steamId.length === 17 && steamId.startsWith('765611980')) {
+                    accountId = (BigInt(steamId) - BigInt('76561197960265728')).toString();
+                } else if (steamId.length <= 10) {
+                    accountId = steamId;
+                } else {
+                    throw new Error('Invalid Steam ID format');
+                }
                 
-                querySnapshot.forEach((doc) => {
-                    const review = doc.data();
-                    totalRatings++;
-                    totalRatingSum += review.rating || 0;
-                    uniquePlayers.add(review.playerId);
-                });
+                await waitForRateLimit();
                 
-                const avgRating = totalRatings > 0 ? (totalRatingSum / totalRatings).toFixed(1) : '0.0';
-                const verifiedUsers = querySnapshot.size > 0 ? new Set(querySnapshot.docs.map(doc => doc.data().reviewerId)).size : 1;
+                const playerResponse = await fetch(`${OPENDOTA_BASE_URL}/players/${accountId}`);
                 
-                // Update dashboard
-                document.getElementById('total-reviews').textContent = totalRatings;
-                document.getElementById('verified-users').textContent = verifiedUsers;
-                document.getElementById('avg-rating').textContent = avgRating;
-                document.getElementById('top-players').textContent = uniquePlayers.size;
+                if (!playerResponse.ok) {
+                    if (playerResponse.status === 404) {
+                        throw new Error('Player not found');
+                    } else if (playerResponse.status === 429) {
+                        throw new Error('Too many requests. Please wait a moment and try again.');
+                    }
+                    throw new Error(`API error: ${playerResponse.status}`);
+                }
+
+                const playerData = await playerResponse.json();
                 
+                let wlData = { win: 0, lose: 0 };
+                let recentMatches = [];
+                
+                try {
+                    await waitForRateLimit();
+                    const wlResponse = await fetch(`${OPENDOTA_BASE_URL}/players/${accountId}/wl`);
+                    if (wlResponse.ok) {
+                        wlData = await wlResponse.json();
+                    }
+                    
+                    await waitForRateLimit();
+                    const recentMatchesResponse = await fetch(`${OPENDOTA_BASE_URL}/players/${accountId}/recentMatches`);
+                    if (recentMatchesResponse.ok) {
+                        const matches = await recentMatchesResponse.json();
+                        recentMatches = Array.isArray(matches) ? matches : [];
+                    }
+                } catch (error) {
+                    console.log('Could not fetch additional data:', error.message);
+                }
+
+                return await formatPlayerData(playerData, wlData, recentMatches, accountId);
             } catch (error) {
-                console.error('Error loading dashboard stats:', error);
+                console.error('OpenDota API error:', error);
+                throw error;
             }
         }
+
+        async function searchByPlayerName(playerName) {
+            try {
+                await waitForRateLimit();
+                
+                const searchResponse = await fetch(`${OPENDOTA_BASE_URL}/search?q=${encodeURIComponent(playerName)}`);
+                
+                if (!searchResponse.ok) {
+                    throw new Error('Search failed');
+                }
+                
+                const searchResults = await searchResponse.json();
+                
+                if (!searchResults || searchResults.length === 0) {
+                    return null;
+                }
+                
+                const bestMatch = searchResults[0];
+                
+                return await searchBySteamId(bestMatch.account_id.toString());
+                
+            } catch (error) {
+                console.error('Name search error:', error);
+                return createPlaceholderProfile(playerName);
+            }
+        }
+
+        async function getPlayerRatingData(playerId) {
+            try {
+                const q = query(
+                    collection(db, 'ratings'), 
+                    where('playerId', '==', playerId)
+                );
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    return {
+                        avgRating: 0,
+                        totalReviews: 0
+                    };
+                }
+
+                let totalRating = 0;
+                let reviewCount = 0;
+
+                querySnapshot.forEach((doc) => {
+                    const review = doc.data();
+                    totalRating += review.rating || 0;
+                    reviewCount++;
+                });
+
+                return {
+                    avgRating: reviewCount > 0 ? (totalRating / reviewCount).toFixed(1) : 0,
+                    totalReviews: reviewCount
+                };
+            } catch (error) {
+                console.error('Error getting player rating data:', error);
+                return {
+                    avgRating: 0,
+                    totalReviews: 0
+                };
+            }
+        }
+
+        async function formatPlayerData(playerData, wlData, recentMatches, accountId) {
+            const totalGames = (wlData.win || 0) + (wlData.lose || 0);
+            const winRate = totalGames > 0 ? ((wlData.win || 0) / totalGames * 100).toFixed(1) : 0;
+            
+            const ratingData = await getPlayerRatingData(accountId);
+            
+            let favoriteHero = 'Unknown';
+            if (recentMatches && recentMatches.length > 0) {
+                const heroCount = {};
+                recentMatches.slice(0, 10).forEach(match => {
+                    if (match.hero_id) {
+                        heroCount[match.hero_id] = (heroCount[match.hero_id] || 0) + 1;
+                    }
+                });
+                
+                if (Object.keys(heroCount).length > 0) {
+                    const mostPlayedHeroId = Object.keys(heroCount).reduce((a, b) => 
+                        heroCount[a] > heroCount[b] ? a : b
+                    );
+                    favoriteHero = getHeroName(parseInt(mostPlayedHeroId));
+                }
+            }
+
+            let lastMatchTime = null;
+            if (recentMatches && recentMatches.length > 0) {
+                lastMatchTime = recentMatches[0].start_time;
+            }
+
+            return {
+                id: accountId,
+                name: playerData.profile?.personaname || playerData.profile?.name || 'Unknown Player',
+                avatar: playerData.profile?.avatarfull || '🎮',
+                playerId: accountId,
+                steamId: playerData.profile?.steamid || 'Unknown',
+                profileUrl: playerData.profile?.profileurl || null,
+                lastSeen: getLastSeenText(lastMatchTime),
+                gamesPlayed: totalGames > 0 ? totalGames.toLocaleString() : 'Unknown',
+                winRate: winRate,
+                favoriteHero: favoriteHero,
+                rank: getRankTier(playerData.rank_tier),
+                mmr: playerData.mmr_estimate?.estimate || 'Unknown',
+                leaderboardRank: playerData.leaderboard_rank || null,
+                avgRating: ratingData.avgRating,
+                totalReviews: ratingData.totalReviews,
+                recentMatches: recentMatches ? recentMatches.length : 'Unknown',
+                isProfilePublic: !!(playerData.profile),
+                joinDate: playerData.profile?.timecreated ? 
+                    new Date(playerData.profile.timecreated * 1000).getFullYear() : 'Unknown',
+                isPlaceholder: false
+            };
+        }
+
+        async function createPlaceholderProfile(playerName) {
+            const playerId = 'placeholder_' + playerName.toLowerCase().replace(/[^a-z0-9]/g, '');
+            
+            const ratingData = await getPlayerRatingData(playerId);
+            
+            return {
+                id: playerId,
+                name: playerName,
+                avatar: '🎮',
+                playerId: playerId,
+                steamId: 'Unknown',
+                profileUrl: null,
+                lastSeen: 'Unknown',
+                gamesPlayed: 'Unknown',
+                winRate: 'Unknown',
+                favoriteHero: 'Unknown',
+                rank: 'Unranked',
+                mmr: 'Unknown',
+                leaderboardRank: null,
+                avgRating: ratingData.avgRating,
+                totalReviews: ratingData.totalReviews,
+                recentMatches: 'Unknown',
+                isProfilePublic: false,
+                joinDate: 'Unknown',
+                isPlaceholder: true
+            };
+        }
+
+        function getLastSeenText(lastMatchTime) {
+            if (!lastMatchTime) return 'Unknown';
+            
+            const now = Date.now() / 1000;
+            const diff = now - lastMatchTime;
+            const hours = Math.floor(diff / 3600);
+            const days = Math.floor(hours / 24);
+            
+            if (hours < 1) return 'Recently active';
+            if (hours < 24) return `${hours} hours ago`;
+            if (days < 7) return `${days} days ago`;
+            return `${Math.floor
