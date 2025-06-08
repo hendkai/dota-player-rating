@@ -700,6 +700,188 @@
     <!-- Toast Notifications -->
     <div id="toast" class="toast"></div>
 
+    <!-- PWA Install Prompt -->
+    <div id="pwa-install-prompt" class="pwa-install-prompt hidden">
+        <div class="pwa-install-content">
+            <h3>📱 Install Dota Player Rating</h3>
+            <p>Get the full app experience with offline access and push notifications!</p>
+            <div class="pwa-install-buttons">
+                <button id="pwa-install-btn" class="btn">Install App</button>
+                <button id="pwa-dismiss-btn" class="btn btn-secondary">Maybe Later</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA Styles -->
+    <style>
+        .pwa-install-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            background: var(--glass-bg);
+            border: 2px solid var(--primary-color);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .pwa-install-prompt.hidden {
+            display: none;
+        }
+        
+        .pwa-install-content h3 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .pwa-install-content p {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+        
+        .pwa-install-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .pwa-install-buttons .btn {
+            flex: 1;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .pwa-install-prompt {
+                left: 12px;
+                right: 12px;
+                bottom: 12px;
+            }
+        }
+    </style>
+
+    <!-- Service Worker Registration -->
+    <script>
+        // Register Service Worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('Service Worker registered successfully:', registration.scope);
+                    
+                    // Check for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Show update available notification
+                                showToast('App update available! Refresh to get the latest version.', 'info');
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error('Service Worker registration failed:', error);
+                }
+            });
+        }
+
+        // PWA Install Prompt
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('PWA: Install prompt triggered');
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show custom install prompt after a delay
+            setTimeout(() => {
+                showPWAInstallPrompt();
+            }, 3000);
+        });
+        
+        function showPWAInstallPrompt() {
+            const prompt = document.getElementById('pwa-install-prompt');
+            const installBtn = document.getElementById('pwa-install-btn');
+            const dismissBtn = document.getElementById('pwa-dismiss-btn');
+            
+            // Check if user already dismissed
+            if (localStorage.getItem('pwa-install-dismissed') === 'true') {
+                return;
+            }
+            
+            prompt.classList.remove('hidden');
+            
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const result = await deferredPrompt.userChoice;
+                    console.log('PWA Install result:', result.outcome);
+                    
+                    if (result.outcome === 'accepted') {
+                        showToast('App installing... Check your home screen!', 'success');
+                    }
+                    
+                    deferredPrompt = null;
+                    prompt.classList.add('hidden');
+                }
+            });
+            
+            dismissBtn.addEventListener('click', () => {
+                prompt.classList.add('hidden');
+                localStorage.setItem('pwa-install-dismissed', 'true');
+            });
+        }
+        
+        // Handle successful installation
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA: App installed successfully');
+            showToast('Dota Player Rating installed successfully! 🎉', 'success');
+            localStorage.setItem('pwa-installed', 'true');
+        });
+        
+        // Check if running as PWA
+        function isPWA() {
+            return window.matchMedia('(display-mode: standalone)').matches ||
+                   window.navigator.standalone ||
+                   document.referrer.includes('android-app://');
+        }
+        
+        // PWA-specific features
+        if (isPWA()) {
+            console.log('Running as PWA');
+            // Add PWA-specific styling or features
+            document.body.classList.add('pwa-mode');
+        }
+        
+        // Push Notifications (optional)
+        async function requestNotificationPermission() {
+            if ('Notification' in window && 'serviceWorker' in navigator) {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    console.log('Notification permission granted');
+                    showToast('Notifications enabled! You\'ll be notified of new reviews.', 'success');
+                }
+            }
+        }
+    </script>
+
     <!-- Firebase SDK -->
     <script type="module">
         // Import Firebase modules

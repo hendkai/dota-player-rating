@@ -1,0 +1,22 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.netlify.dota_player_rating.twa",
+      "sha256_cert_fingerprints": [
+        "SHA256_FINGERPRINT_HERE"
+      ]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.get_login_creds"],
+    "target": {
+      "namespace": "android_app", 
+      "package_name": "app.netlify.dota_player_rating.twa",
+      "sha256_cert_fingerprints": [
+        "SHA256_FINGERPRINT_HERE"
+      ]
+    }
+  }
+] 
