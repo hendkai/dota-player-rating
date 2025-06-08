@@ -5829,13 +5829,6 @@ Building positive gaming communities together.
             }
         };
 
-        // Newsmast Gaming Channel Footer
-        const NEWSMAST_FOOTER = `
-
-🎮 Join Newsmast Gaming Channel for more gaming content!
-👉 https://newsmast.social/@newsmast
-📖 Learn more: https://newsmast.social/@newsmast/1119`;
-
         // Mastodon API Integration
         globalThis.MastodonBot = {
             // Post to Mastodon
@@ -6038,7 +6031,7 @@ Building positive gaming communities together.
 ${stats.topPlayer ? `🏆 Top Player: ${stats.topPlayer.name} (⭐${stats.topPlayer.avgRating})` : '🎯 Join our positive gaming community!'}
 
 ${MASTODON_BOT_CONFIG.defaultHashtags}
-🔗 https://hendkai.github.io/dota-player-rating/${NEWSMAST_FOOTER}`,
+🔗 https://hendkai.github.io/dota-player-rating/`,
 
                     `🚀 Community keeps growing!
 
@@ -6048,7 +6041,7 @@ ${MASTODON_BOT_CONFIG.defaultHashtags}
 
 ${stats.topPlayer ? `🥇 Highlight: ${stats.topPlayer.name} with ${stats.topPlayer.reviewCount} great reviews!` : '💫 Thanks to everyone sharing positive gaming experiences!'}
 
-${MASTODON_BOT_CONFIG.defaultHashtags}${NEWSMAST_FOOTER}`,
+${MASTODON_BOT_CONFIG.defaultHashtags}`,
 
                     `🎯 Positive Gaming Community Update!
 
@@ -6059,7 +6052,7 @@ ${MASTODON_BOT_CONFIG.defaultHashtags}${NEWSMAST_FOOTER}`,
 ${stats.dailyReviews > 0 ? `🆕 ${stats.dailyReviews} new reviews today` : '🌟 Share your positive gaming experiences!'}
 
 🎮 Find amazing teammates!
-${MASTODON_BOT_CONFIG.defaultHashtags}${NEWSMAST_FOOTER}`
+${MASTODON_BOT_CONFIG.defaultHashtags}`
                 ];
 
                 return templates[Math.floor(Math.random() * templates.length)];
@@ -6090,7 +6083,6 @@ ${MASTODON_BOT_CONFIG.defaultHashtags}${NEWSMAST_FOOTER}`
                 post += `🎮 Join the friendliest Dota 2 community!\n`;
                 post += `${MASTODON_BOT_CONFIG.defaultHashtags}\n`;
                 post += `🔗 https://hendkai.github.io/dota-player-rating/`;
-                post += NEWSMAST_FOOTER;
 
                 return post;
             },
@@ -6117,7 +6109,7 @@ Our Dota 2 community keeps growing!
 Thanks to everyone participating! 💚
 
 ${MASTODON_BOT_CONFIG.defaultHashtags}
-🔗 https://hendkai.github.io/dota-player-rating/${NEWSMAST_FOOTER}`;
+🔗 https://hendkai.github.io/dota-player-rating/`;
             },
 
             // Automated posting scheduler
@@ -6232,7 +6224,7 @@ ${MASTODON_BOT_CONFIG.defaultHashtags}
 This post tests the Mastodon integration.
 Timestamp: ${new Date().toLocaleString('en-US')}
 
-${MASTODON_BOT_CONFIG.defaultHashtags}${NEWSMAST_FOOTER}`;
+${MASTODON_BOT_CONFIG.defaultHashtags}`;
 
             const result = await MastodonBot.postToMastodon(testContent);
             if (result.success) {
