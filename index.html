@@ -1040,12 +1040,75 @@ Building positive gaming communities together.
              showFediverseShareModal(text);
          };
          
-         // Initialize Fediverse features when page loads
-         if (document.readyState === 'loading') {
-             document.addEventListener('DOMContentLoaded', addFediverseToFooter);
-         } else {
-             addFediverseToFooter();
-         }
+                 // Initialize Fediverse features when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', addFediverseToFooter);
+        } else {
+            addFediverseToFooter();
+        }
+        
+        // Enhanced Session Management - Proactive token refresh
+        let sessionRefreshInterval = null;
+        
+        function startSessionMonitoring() {
+            // Clear any existing interval
+            if (sessionRefreshInterval) {
+                clearInterval(sessionRefreshInterval);
+            }
+            
+            // Refresh auth token every 30 minutes to prevent expiration
+            sessionRefreshInterval = setInterval(async () => {
+                if (currentUser) {
+                    try {
+                        console.log('Proactive token refresh...');
+                        await currentUser.getIdToken(true);
+                        console.log('Token refreshed successfully');
+                    } catch (error) {
+                        console.warn('Proactive token refresh failed:', error);
+                        // If token refresh fails, the user will get prompted on their next action
+                    }
+                }
+            }, 30 * 60 * 1000); // 30 minutes
+        }
+        
+        function stopSessionMonitoring() {
+            if (sessionRefreshInterval) {
+                clearInterval(sessionRefreshInterval);
+                sessionRefreshInterval = null;
+            }
+        }
+        
+        // Enhanced Auth State Observer
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            
+            if (user) {
+                console.log('User authenticated:', user.email);
+                showMainApp();
+                updateUserInfo(user);
+                startSessionMonitoring();
+            } else {
+                console.log('User signed out');
+                showAuthSection();
+                stopSessionMonitoring();
+            }
+        });
+        
+        // Session validation before critical operations
+        async function ensureValidSession() {
+            if (!currentUser) {
+                throw new Error('No authenticated user');
+            }
+            
+            try {
+                // Force token refresh to ensure it's valid
+                await currentUser.getIdToken(true);
+                return true;
+            } catch (error) {
+                console.error('Session validation failed:', error);
+                throw new Error('Session expired');
+            }
+        }
      </script>
 
     <!-- Firebase SDK -->
@@ -1090,17 +1153,7 @@ Building positive gaming communities together.
         let lastReportTime = 0;
         const MIN_REPORT_INTERVAL = 30000; // 30 seconds between reports
 
-        // Auth State Observer
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                showMainApp();
-                updateUserInfo(user);
-            } else {
-                currentUser = null;
-                showAuthSection();
-            }
-        });
+        // NOTE: Enhanced Auth State Observer is defined in main script section
 
         // Theme Management - GLOBAL SCOPE
         globalThis.toggleTheme = function() {
@@ -2785,6 +2838,12 @@ Building positive gaming communities together.
                 showToast('Please write a comment about your experience!', 'error');
                 return;
             }
+            
+            // Check if user is actually logged in
+            if (!currentUser) {
+                showToast('Please log in to submit reviews', 'error');
+                return;
+            }
 
             // Rate limiting check - prevent spam
             const lastReviewTime = localStorage.getItem(`lastReview_${currentUser.uid}`);
@@ -2794,6 +2853,22 @@ Building positive gaming communities together.
             if (lastReviewTime && (now - parseInt(lastReviewTime)) < MIN_REVIEW_INTERVAL) {
                 const remainingTime = Math.ceil((MIN_REVIEW_INTERVAL - (now - parseInt(lastReviewTime))) / 1000);
                 showToast(`Please wait ${remainingTime} seconds before submitting another review.`, 'error');
+                return;
+            }
+            
+            // Validate and refresh session before submission
+            try {
+                await ensureValidSession();
+                console.log('Session validated for rating submission');
+            } catch (sessionError) {
+                console.error('Session validation failed:', sessionError);
+                showToast('Your session has expired. Please log out and log in again to continue.', 'warning');
+                // Auto-suggest logout for convenience
+                setTimeout(() => {
+                    if (confirm('Your session has expired. Would you like to log out and log back in?')) {
+                        logout();
+                    }
+                }, 2000);
                 return;
             }
 
@@ -2851,7 +2926,33 @@ Building positive gaming communities together.
                 loadReviews();
                 
             } catch (error) {
-                showToast('Failed to submit rating: ' + error.message, 'error');
+                console.error('Detailed error submitting rating:', error);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+                
+                let errorMessage = 'Failed to submit rating. Please try again.';
+                
+                if (error.code === 'permission-denied') {
+                    errorMessage = 'Session expired. Please log out and log in again to continue.';
+                    // Auto-suggest logout for convenience
+                    setTimeout(() => {
+                        if (confirm('Your session has expired. Would you like to log out and log back in?')) {
+                            logout();
+                        }
+                    }, 2000);
+                } else if (error.code === 'unavailable') {
+                    errorMessage = 'Service temporarily unavailable. Please try again later.';
+                } else if (error.code === 'failed-precondition') {
+                    errorMessage = 'Database configuration error. Please try again.';
+                } else if (error.message && error.message.includes('Missing or insufficient permissions')) {
+                    errorMessage = 'Database permissions issue. Please log out and log back in.';
+                } else if (error.code === 'unauthenticated') {
+                    errorMessage = 'Authentication error. Please log out and log in again.';
+                } else if (error.message && error.message.includes('network')) {
+                    errorMessage = 'Network error. Please check your connection and try again.';
+                }
+                
+                showToast(errorMessage, 'error');
             } finally {
                 setLoadingState('submit', false);
             }
@@ -3213,21 +3314,20 @@ Building positive gaming communities together.
                     return;
                 }
                 
-                // Refresh the user's authentication token to avoid permission denied errors
+                // Validate and refresh session before submission
                 try {
-                    await currentUser.getIdToken(true); // Force refresh token
-                    console.log('Authentication token refreshed');
-                } catch (tokenError) {
-                    console.warn('Could not refresh auth token:', tokenError);
-                    // Try to re-authenticate silently
-                    try {
-                        await currentUser.reload();
-                        console.log('User session reloaded');
-                    } catch (reloadError) {
-                        console.warn('Could not reload user session:', reloadError);
-                        showToast('Your session may have expired. Please log out and log in again.', 'warning');
-                        return; // Exit if session can't be reloaded
-                    }
+                    await ensureValidSession();
+                    console.log('Session validated for report submission');
+                } catch (sessionError) {
+                    console.error('Session validation failed:', sessionError);
+                    showToast('Your session has expired. Please log out and log in again to continue reporting.', 'warning');
+                    // Auto-suggest logout for convenience
+                    setTimeout(() => {
+                        if (confirm('Your session has expired. Would you like to log out and log back in?')) {
+                            logout();
+                        }
+                    }, 2000);
+                    return;
                 }
                 
                 console.log('Current user:', currentUser.email);
