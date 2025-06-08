@@ -1800,20 +1800,28 @@
 
         // Add hover effects to stars
         function addStarHoverEffects() {
+            const starContainer = document.querySelector('[id^="star-"]')?.parentElement;
+            if (!starContainer) return;
+            
             for (let i = 1; i <= 5; i++) {
                 const star = document.getElementById(`star-${i}`);
                 if (star) {
-                    // Mouse enter - show preview
+                    // Mouse enter - show preview only for hovered star and below
                     star.addEventListener('mouseenter', function() {
                         showStarPreview(i);
                     });
                     
-                    // Mouse leave - restore selected state
-                    star.addEventListener('mouseleave', function() {
-                        updateStarDisplay();
+                    // Click to set rating
+                    star.addEventListener('click', function() {
+                        setRating(i);
                     });
                 }
             }
+            
+            // Add container mouse leave to restore selected state
+            starContainer.addEventListener('mouseleave', function() {
+                updateStarDisplay();
+            });
         }
 
         function showStarPreview(hoverRating) {
@@ -1821,11 +1829,12 @@
                 const star = document.getElementById(`star-${i}`);
                 if (star) {
                     if (i <= hoverRating) {
-                        // Preview color (lighter gold)
+                        // Preview color (lighter gold) - only up to hovered star
                         star.style.color = '#fde047';
                         star.style.transform = 'scale(1.05)';
                         star.style.filter = 'drop-shadow(0 0 6px rgba(253, 224, 71, 0.4))';
                     } else {
+                        // Gray for stars beyond hovered star
                         star.style.color = '#374151';
                         star.style.transform = 'scale(1)';
                         star.style.filter = 'none';
