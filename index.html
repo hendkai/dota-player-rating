@@ -1320,18 +1320,70 @@
         globalThis.deleteReview = async function(reviewId) {
             if (!checkAdminAccess()) return;
             
-            if (!confirm('⚠️ Are you sure you want to permanently delete this review?')) {
+            if (!confirm('⚠️ Are you sure you want to permanently delete this review? This action cannot be undone.')) {
                 return;
             }
             
             try {
-                await deleteDoc(doc(db, 'ratings', reviewId));
+                console.log('Attempting to delete review:', reviewId);
+                console.log('Current user:', currentUser.email);
+                
+                // Check if review exists first
+                const reviewRef = doc(db, 'ratings', reviewId);
+                const reviewSnap = await getDoc(reviewRef);
+                
+                if (!reviewSnap.exists()) {
+                    showToast('Review not found', 'error');
+                    return;
+                }
+                
+                console.log('Review found, deleting...');
+                await deleteDoc(reviewRef);
+                console.log('Review deleted successfully');
+                
                 showToast('Review deleted successfully!', 'success');
-                loadFlaggedReviews(); // Reload flagged reviews
+                
+                // Reload the current view
+                const currentContent = document.querySelector('.tab-content.active');
+                if (currentContent) {
+                    const contentId = currentContent.id;
+                    if (contentId === 'admin-content') {
+                        // If we're in admin panel, reload flagged reviews or reports
+                        const adminResults = document.getElementById('admin-results');
+                        if (adminResults.innerHTML.includes('Flagged Reviews')) {
+                            loadFlaggedReviews();
+                        } else if (adminResults.innerHTML.includes('All Reports')) {
+                            loadReports();
+                        } else {
+                            // Default to flagged reviews
+                            loadFlaggedReviews();
+                        }
+                    } else if (contentId === 'recent-content') {
+                        loadReviews();
+                    }
+                }
+                
+                // Update admin stats
+                updateAdminStats();
                 
             } catch (error) {
-                console.error('Error deleting review:', error);
-                showToast('Failed to delete review', 'error');
+                console.error('Detailed error deleting review:', error);
+                console.error('Error code:', error.code);
+                console.error('Error message:', error.message);
+                
+                let errorMessage = 'Failed to delete review';
+                
+                if (error.code === 'permission-denied') {
+                    errorMessage = 'Permission denied. You may not have the required permissions to delete this review.';
+                } else if (error.code === 'not-found') {
+                    errorMessage = 'Review not found. It may have already been deleted.';
+                } else if (error.code === 'unavailable') {
+                    errorMessage = 'Service temporarily unavailable. Please try again later.';
+                } else if (error.message) {
+                    errorMessage = `Failed to delete review: ${error.message}`;
+                }
+                
+                showToast(errorMessage, 'error');
             }
         };
 
