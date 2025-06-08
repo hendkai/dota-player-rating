@@ -5022,7 +5022,7 @@ Building positive gaming communities together.
             console.log('🔍 Loading Analytics...');
             
             try {
-                setLoadingState('analytics', true);
+                setAnalyticsLoadingState('analytics', true);
                 
                 // Load all reviews from Firebase
                 const reviewsSnapshot = await getDocs(collection(db, 'ratings'));
@@ -5044,11 +5044,11 @@ Building positive gaming communities together.
                 generateActivityChart(reviews);
                 generateCategoryAnalysis(reviews);
                 
-                setLoadingState('analytics', false);
+                setAnalyticsLoadingState('analytics', false);
                 
             } catch (error) {
                 console.error('❌ Error loading analytics:', error);
-                setLoadingState('analytics', false);
+                setAnalyticsLoadingState('analytics', false);
                 
                 const ratingDistribution = document.getElementById('rating-distribution');
                 const activityChart = document.getElementById('activity-chart');
@@ -5300,7 +5300,7 @@ Building positive gaming communities together.
             categoryAnalysis.innerHTML = html;
         }
 
-        function setLoadingState(type, loading) {
+        function setAnalyticsLoadingState(type, loading) {
             const containers = [
                 document.getElementById('rating-distribution'),
                 document.getElementById('activity-chart'),
