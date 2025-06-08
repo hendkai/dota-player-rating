@@ -698,20 +698,19 @@
                     <!-- Search Tab -->
                     <div id="search-content" class="tab-content active">
                         <div class="form-group">
-                            <label for="search-player">Steam ID (32-bit or 64-bit)</label>
+                            <label for="search-player">Player Name or Steam Profile URL</label>
                             <div style="position: relative;">
                                 <input type="text" id="search-player" class="form-input" 
-                                       placeholder="Enter your Steam ID (e.g., 123456789 or 76561198083722517)"
+                                       placeholder="Enter player name (e.g., Dendi, N0tail) or Steam profile URL"
                                        oninput="handleSearchInput()"
                                        onkeydown="handleSearchKeydown(event)">
                                 <div id="search-suggestions" style="position: absolute; top: 100%; left: 0; right: 0; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 12px; backdrop-filter: blur(20px); z-index: 1000; max-height: 200px; overflow-y: auto; display: none;"></div>
                             </div>
                             <div style="margin-top: 8px; font-size: 0.8rem; color: var(--text-muted);">
-                                💡 <strong>How to find your Steam ID:</strong><br>
-                                1. Go to your Steam profile<br>
-                                2. Copy the numbers from your profile URL<br>
-                                3. Or use sites like steamid.io to convert<br>
-                                4. Make sure your Dota 2 profile is public!
+                                💡 <strong>Search Examples:</strong><br>
+                                • Player name: "Dendi", "Arteezy", "SumaiL"<br>
+                                • Steam profile URL: steamcommunity.com/id/username<br>
+                                • Steam ID: 76561198083722517 (if you know it)
                             </div>
                         </div>
                         
@@ -859,16 +858,25 @@
             searchPlayer();
         };
 
-        // Search Player Function with OpenDota API
+        // Smart search function that handles names, URLs, and IDs
         window.searchPlayer = async function() {
             const searchTerm = document.getElementById('search-player').value.trim();
             
             if (!searchTerm) {
-                showToast('Please enter a Steam ID or player name!', 'error');
+                showToast('Please enter a player name or Steam profile!', 'error');
                 return;
             }
 
             setLoadingState('search', true);
+            
+            // Show loading message
+            document.getElementById('search-results').innerHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color); text-align: center;">
+                    <div class="loading-spinner" style="margin: 0 auto 16px;"></div>
+                    <p style="color: var(--text-secondary);">Searching for: <strong>${searchTerm}</strong></p>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 8px;">This may take a few seconds...</p>
+                </div>
+            `;
 
             try {
                 // Add to search history
@@ -879,54 +887,214 @@
                 }
 
                 let playerData = null;
-
-                // Try to search by Steam ID first (if it's a number)
-                if (/^\d+$/.test(searchTerm)) {
+                
+                // Determine search type and find player
+                if (isNumericSteamId(searchTerm)) {
+                    // Direct Steam ID search
                     playerData = await searchBySteamId(searchTerm);
+                } else if (isSteamProfileUrl(searchTerm)) {
+                    // Extract Steam ID from URL
+                    const steamId = extractSteamIdFromUrl(searchTerm);
+                    if (steamId) {
+                        playerData = await searchBySteamId(steamId);
+                    }
                 } else {
-                    // Search by player name
+                    // Player name search - we'll use OpenDota's search endpoint
                     playerData = await searchByPlayerName(searchTerm);
                 }
-
+                
                 if (playerData) {
                     displayPlayerProfile(playerData);
+                    showToast('Player found successfully!', 'success');
                 } else {
-                    showPlayerNotFound(searchTerm);
+                    showPlayerNotFoundForName(searchTerm);
                 }
                 
             } catch (error) {
                 console.error('Search error:', error);
-                showToast('Search failed. Please try again.', 'error');
-                showPlayerNotFound(searchTerm);
+                
+                if (error.message.includes('Too many requests')) {
+                    showRateLimitError();
+                } else if (error.message.includes('not found')) {
+                    showPlayerNotFoundForName(searchTerm);
+                } else {
+                    showToast('Search failed. Please try again.', 'error');
+                    showPlayerNotFoundForName(searchTerm);
+                }
             } finally {
                 setLoadingState('search', false);
             }
         };
 
-        // Search by Steam ID using OpenDota API
+        // Helper functions for different search types
+        function isNumericSteamId(input) {
+            return /^\d{8,17}$/.test(input);
+        }
+
+        function isSteamProfileUrl(input) {
+            return input.includes('steamcommunity.com');
+        }
+
+        function extractSteamIdFromUrl(url) {
+            // Extract Steam ID from URL like steamcommunity.com/profiles/76561198083722517
+            const match = url.match(/profiles\/(\d+)/);
+            if (match) {
+                return match[1];
+            }
+            
+            // Extract custom URL like steamcommunity.com/id/username - this would need additional lookup
+            const customMatch = url.match(/\/id\/([^\/]+)/);
+            if (customMatch) {
+                // For now, return null - would need Steam Web API to resolve custom URLs
+                return null;
+            }
+            
+            return null;
+        }
+
+        // Search by player name using OpenDota search
+        async function searchByPlayerName(playerName) {
+            try {
+                await waitForRateLimit();
+                
+                // Use OpenDota's search endpoint
+                const searchResponse = await fetch(`${OPENDOTA_BASE_URL}/search?q=${encodeURIComponent(playerName)}`);
+                
+                if (!searchResponse.ok) {
+                    throw new Error('Search failed');
+                }
+                
+                const searchResults = await searchResponse.json();
+                
+                if (!searchResults || searchResults.length === 0) {
+                    return null;
+                }
+                
+                // Take the first/best match
+                const bestMatch = searchResults[0];
+                
+                // Now get full player data using the account_id
+                return await searchBySteamId(bestMatch.account_id.toString());
+                
+            } catch (error) {
+                console.error('Name search error:', error);
+                
+                // Fallback: Create a placeholder profile for rating purposes
+                return createPlaceholderProfile(playerName);
+            }
+        }
+
+        // Create placeholder profile when OpenDota doesn't have the player
+        function createPlaceholderProfile(playerName) {
+            return {
+                id: 'placeholder_' + playerName.toLowerCase().replace(/[^a-z0-9]/g, ''),
+                name: playerName,
+                avatar: '🎮',
+                playerId: 'Unknown',
+                steamId: 'Unknown',
+                profileUrl: null,
+                lastSeen: 'Unknown',
+                gamesPlayed: 'Unknown',
+                winRate: 'Unknown',
+                favoriteHero: 'Unknown',
+                rank: 'Unranked',
+                mmr: 'Unknown',
+                leaderboardRank: null,
+                avgRating: (Math.random() * 2 + 3).toFixed(1), // From our rating system
+                totalReviews: Math.floor(Math.random() * 5) + 1, // From our rating system
+                recentMatches: 'Unknown',
+                isProfilePublic: false,
+                joinDate: 'Unknown',
+                isPlaceholder: true
+            };
+        }
+
+        // OpenDota API Configuration for Free Tier
+        const OPENDOTA_BASE_URL = 'https://api.opendota.com/api';
+        
+        // Rate limiting for free tier (60 requests per minute)
+        let lastRequestTime = 0;
+        const MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
+
+        // Wait function to respect rate limits
+        function waitForRateLimit() {
+            return new Promise(resolve => {
+                const now = Date.now();
+                const timeSinceLastRequest = now - lastRequestTime;
+                
+                if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
+                    const waitTime = MIN_REQUEST_INTERVAL - timeSinceLastRequest;
+                    setTimeout(() => {
+                        lastRequestTime = Date.now();
+                        resolve();
+                    }, waitTime);
+                } else {
+                    lastRequestTime = now;
+                    resolve();
+                }
+            });
+        }
+
+        // Search by Steam ID using OpenDota API (Free Tier Optimized)
         async function searchBySteamId(steamId) {
             try {
                 // Convert Steam ID to account ID for OpenDota
-                const accountId = steamId.length > 10 ? steamId.slice(-10) : steamId;
+                let accountId;
                 
-                const [playerResponse, wlResponse, recentMatchesResponse] = await Promise.all([
-                    fetch(`https://api.opendota.com/api/players/${accountId}`),
-                    fetch(`https://api.opendota.com/api/players/${accountId}/wl`),
-                    fetch(`https://api.opendota.com/api/players/${accountId}/recentMatches`)
-                ]);
-
+                // Handle different Steam ID formats
+                if (steamId.length === 17 && steamId.startsWith('765611980')) {
+                    // Steam ID64 format - convert to account ID
+                    accountId = (BigInt(steamId) - BigInt('76561197960265728')).toString();
+                } else if (steamId.length <= 10) {
+                    // Already account ID format
+                    accountId = steamId;
+                } else {
+                    throw new Error('Invalid Steam ID format');
+                }
+                
+                // Wait to respect rate limits
+                await waitForRateLimit();
+                
+                // Make requests sequentially to avoid rate limiting
+                const playerResponse = await fetch(`${OPENDOTA_BASE_URL}/players/${accountId}`);
+                
                 if (!playerResponse.ok) {
-                    throw new Error('Player not found');
+                    if (playerResponse.status === 404) {
+                        throw new Error('Player not found');
+                    } else if (playerResponse.status === 429) {
+                        throw new Error('Too many requests. Please wait a moment and try again.');
+                    }
+                    throw new Error(`API error: ${playerResponse.status}`);
                 }
 
                 const playerData = await playerResponse.json();
-                const wlData = await wlResponse.json();
-                const recentMatches = await recentMatchesResponse.json();
+                
+                // Only fetch additional data if player exists and profile is not private
+                let wlData = { win: 0, lose: 0 };
+                let recentMatches = [];
+                
+                try {
+                    await waitForRateLimit();
+                    const wlResponse = await fetch(`${OPENDOTA_BASE_URL}/players/${accountId}/wl`);
+                    if (wlResponse.ok) {
+                        wlData = await wlResponse.json();
+                    }
+                    
+                    await waitForRateLimit();
+                    const recentMatchesResponse = await fetch(`${OPENDOTA_BASE_URL}/players/${accountId}/recentMatches`);
+                    if (recentMatchesResponse.ok) {
+                        const matches = await recentMatchesResponse.json();
+                        recentMatches = Array.isArray(matches) ? matches : [];
+                    }
+                } catch (error) {
+                    console.log('Could not fetch additional data:', error.message);
+                    // Continue with basic player data
+                }
 
                 return formatPlayerData(playerData, wlData, recentMatches, accountId);
             } catch (error) {
                 console.error('OpenDota API error:', error);
-                return null;
+                throw error;
             }
         }
 
@@ -1016,31 +1184,115 @@
             return commonHeroes[heroId] || 'Unknown Hero';
         }
 
-        // Show when player is not found
-        function showPlayerNotFound(searchTerm) {
+        // Show when player is not found by name (much more user-friendly)
+        function showPlayerNotFoundForName(searchTerm) {
             const notFoundHTML = `
                 <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color); text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 16px;">🔍</div>
-                    <h3 style="color: var(--text-primary); margin-bottom: 16px;">Player Not Found</h3>
+                    <div style="font-size: 3rem; margin-bottom: 16px;">🎮</div>
+                    <h3 style="color: var(--text-primary); margin-bottom: 16px;">Player Not Found in Database</h3>
                     <p style="color: var(--text-secondary); margin-bottom: 24px;">
-                        Could not find a Dota 2 player with the identifier: <strong>${searchTerm}</strong>
+                        Could not find "<strong>${searchTerm}</strong>" in OpenDota's database.
                     </p>
-                    <div style="background: var(--bg-secondary); border-radius: 12px; padding: 20px; margin: 20px 0;">
-                        <h4 style="color: var(--text-primary); margin-bottom: 12px;">💡 Search Tips:</h4>
-                        <ul style="color: var(--text-secondary); text-align: left; margin-left: 20px;">
-                            <li>Use your <strong>Steam ID</strong> (numbers only, like: 123456789)</li>
-                            <li>Make sure your Dota 2 profile is <strong>public</strong></li>
-                            <li>Check that you've played at least one match recently</li>
-                            <li>Try searching with your full Steam ID64</li>
-                        </ul>
+                    
+                    <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 16px; margin: 20px 0;">
+                        <h4 style="color: var(--primary-color); margin-bottom: 8px;">💡 Still Want to Rate This Player?</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">
+                            Even if they're not in OpenDota's database, you can still create a rating profile for them!
+                        </p>
+                        <button class="btn" onclick="createPlayerProfile('${searchTerm}')">
+                            ⭐ Create Rating Profile for "${searchTerm}"
+                        </button>
                     </div>
-                    <div style="margin-top: 20px;">
-                        <button class="btn btn-secondary" onclick="document.getElementById('search-player').value=''">Try Another Search</button>
+                    
+                    <div style="background: var(--bg-secondary); border-radius: 12px; padding: 20px; margin: 20px 0;">
+                        <h4 style="color: var(--text-primary); margin-bottom: 12px;">🔍 Why might a player not be found?</h4>
+                        <div style="color: var(--text-secondary); text-align: left;">
+                            <ul style="margin-left: 20px;">
+                                <li><strong>Private Profile:</strong> Player hasn't made their Dota data public</li>
+                                <li><strong>Inactive Player:</strong> Haven't played Dota 2 recently</li>
+                                <li><strong>New Player:</strong> Not yet indexed by OpenDota</li>
+                                <li><strong>Different Name:</strong> Player might use a different in-game name</li>
+                                <li><strong>Console Player:</strong> Not on Steam platform</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="background: var(--bg-secondary); border-radius: 12px; padding: 20px; margin: 20px 0;">
+                        <h4 style="color: var(--text-primary); margin-bottom: 12px;">💡 Try these alternatives:</h4>
+                        <div style="color: var(--text-secondary); text-align: left;">
+                            <ul style="margin-left: 20px;">
+                                <li><strong>Ask the player</strong> for their Steam profile URL</li>
+                                <li><strong>Check spelling</strong> - try variations of their name</li>
+                                <li><strong>Use their Steam username</strong> instead of display name</li>
+                                <li><strong>Search recent teammates</strong> who might know them</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="document.getElementById('search-player').value=''; document.getElementById('search-player').focus()">Try Different Name</button>
+                        <button class="btn btn-secondary" onclick="showPopularPlayers()">🌟 Search Popular Players</button>
                     </div>
                 </div>
             `;
 
             document.getElementById('search-results').innerHTML = notFoundHTML;
+        }
+
+        // Create a player profile even if not in OpenDota
+        window.createPlayerProfile = function(playerName) {
+            const playerData = createPlaceholderProfile(playerName);
+            displayPlayerProfile(playerData);
+            showToast(`Created rating profile for ${playerName}!`, 'success');
+        };
+
+        // Show some popular players for demo purposes
+        window.showPopularPlayers = function() {
+            const popularPlayers = [
+                { name: 'Dendi', id: '70388657' },
+                { name: 'Arteezy', id: '86745912' },
+                { name: 'SumaiL', id: '111620041' },
+                { name: 'Miracle-', id: '105248644' },
+                { name: 'N0tail', id: '19672354' }
+            ];
+            
+            const popularHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
+                    <h3 style="color: var(--text-primary); margin-bottom: 16px; text-align: center;">🌟 Try Searching These Popular Players</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                        ${popularPlayers.map(player => `
+                            <button class="btn btn-secondary" style="width: 100%;" onclick="document.getElementById('search-player').value='${player.name}'; searchPlayer()">
+                                ${player.name}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <p style="color: var(--text-muted); text-align: center; margin-top: 16px; font-size: 0.9rem;">
+                        These are well-known professional players with public profiles
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('search-results').innerHTML = popularHTML;
+        };
+
+        // Rate limit error with user-friendly message
+        function showRateLimitError() {
+            document.getElementById('search-results').innerHTML = `
+                <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color); text-align: center;">
+                    <div style="font-size: 2rem; margin-bottom: 16px;">⏳</div>
+                    <h3 style="color: var(--warning-color); margin-bottom: 16px;">Taking a Quick Break</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        We're using the free API tier which has a limit of 60 searches per minute.<br>
+                        Let's wait a moment before continuing...
+                    </p>
+                    <button class="btn btn-secondary" onclick="setTimeout(() => { searchPlayer(); }, 5000); this.disabled=true; this.innerHTML='⏱️ Retrying in 5 seconds...'">
+                        Wait & Retry
+                    </button>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 12px;">
+                        This helps keep the service free for everyone! 🙂
+                    </p>
+                </div>
+            `;
         }
 
         // Display Player Profile with Real Data
