@@ -1,51 +1,51 @@
 {
-  "subject": "acct:dotarating@dota-player-rating.netlify.app",
+  "subject": "acct:dotarating@hendkai.github.io",
   "aliases": [
-    "https://dota-player-rating.netlify.app",
-    "https://dota-player-rating.netlify.app/actor",
+    "https://hendkai.github.io/dota-player-rating",
+    "https://hendkai.github.io/dota-player-rating/actor",
     "acct:dotarating@mastodon.social"
   ],
   "links": [
     {
       "rel": "self",
       "type": "application/activity+json",
-      "href": "https://dota-player-rating.netlify.app/actor"
+      "href": "https://hendkai.github.io/dota-player-rating/actor"
     },
     {
       "rel": "alternate",
       "type": "text/html",
-      "href": "https://dota-player-rating.netlify.app"
+      "href": "https://hendkai.github.io/dota-player-rating"
     },
     {
       "rel": "alternate",
       "type": "application/rss+xml",
-      "href": "https://dota-player-rating.netlify.app/feed.xml"
+      "href": "https://hendkai.github.io/dota-player-rating/feed.xml"
     },
     {
       "rel": "alternate", 
       "type": "application/atom+xml",
-      "href": "https://dota-player-rating.netlify.app/atom.xml"
+      "href": "https://hendkai.github.io/dota-player-rating/atom.xml"
     },
     {
       "rel": "http://webfinger.net/rel/profile-page",
       "type": "text/html",
-      "href": "https://dota-player-rating.netlify.app"
+      "href": "https://hendkai.github.io/dota-player-rating"
     },
     {
       "rel": "http://webfinger.net/rel/avatar",
       "type": "image/png",
-      "href": "https://dota-player-rating.netlify.app/icon-192x192.png"
+      "href": "https://hendkai.github.io/dota-player-rating/icon-192x192.png"
     },
     {
       "rel": "http://schemas.google.com/g/2010#updates-from",
       "type": "application/atom+xml",
-      "href": "https://dota-player-rating.netlify.app/atom.xml"
+      "href": "https://hendkai.github.io/dota-player-rating/atom.xml"
     }
   ],
   "properties": {
     "https://schema.org/name": "Dota Player Rating",
     "https://schema.org/description": "Building positive gaming communities together - Rate and review Dota 2 players based on teamwork, leadership, and constructive behavior",
-    "https://schema.org/url": "https://dota-player-rating.netlify.app",
-    "https://schema.org/image": "https://dota-player-rating.netlify.app/icon-512x512.png"
+    "https://schema.org/url": "https://hendkai.github.io/dota-player-rating",
+    "https://schema.org/image": "https://hendkai.github.io/dota-player-rating/icon-512x512.png"
   }
 } 

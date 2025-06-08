@@ -58,51 +58,51 @@
       }
     }
   ],
-  "id": "https://dota-player-rating.netlify.app/actor",
+  "id": "https://hendkai.github.io/dota-player-rating/actor",
   "type": "Service",
-  "following": "https://dota-player-rating.netlify.app/actor/following",
-  "followers": "https://dota-player-rating.netlify.app/actor/followers",
-  "inbox": "https://dota-player-rating.netlify.app/actor/inbox",
-  "outbox": "https://dota-player-rating.netlify.app/actor/outbox",
-  "featured": "https://dota-player-rating.netlify.app/actor/collections/featured",
-  "featuredTags": "https://dota-player-rating.netlify.app/actor/collections/tags",
+  "following": "https://hendkai.github.io/dota-player-rating/actor/following",
+  "followers": "https://hendkai.github.io/dota-player-rating/actor/followers",
+  "inbox": "https://hendkai.github.io/dota-player-rating/actor/inbox",
+  "outbox": "https://hendkai.github.io/dota-player-rating/actor/outbox",
+  "featured": "https://hendkai.github.io/dota-player-rating/actor/collections/featured",
+  "featuredTags": "https://hendkai.github.io/dota-player-rating/actor/collections/tags",
   "preferredUsername": "dotarating",
   "name": "Dota Player Rating 🎮",
   "summary": "<p>🏆 Building positive gaming communities together!</p><p>Rate and review Dota 2 players based on:</p><p>🤝 Teamwork<br>👑 Leadership<br>💬 Constructive Behavior<br>🌱 Growth Mindset</p><p>Join our mission to make gaming more positive and inclusive for everyone!</p><p>🌍 #Dota2 #Gaming #Community #Fediverse #PositiveGaming</p>",
-  "url": "https://dota-player-rating.netlify.app",
+  "url": "https://hendkai.github.io/dota-player-rating",
   "manuallyApprovesFollowers": false,
   "discoverable": true,
   "published": "2025-12-23T00:00:00Z",
   "memorial": false,
   "publicKey": {
-    "id": "https://dota-player-rating.netlify.app/actor#main-key",
-    "owner": "https://dota-player-rating.netlify.app/actor",
+    "id": "https://hendkai.github.io/dota-player-rating/actor#main-key",
+    "owner": "https://hendkai.github.io/dota-player-rating/actor",
     "publicKeyPem": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1234567890abcdef...\n(This would be a real public key in production)\n-----END PUBLIC KEY-----\n"
   },
   "tag": [
     {
       "type": "Hashtag",
-      "href": "https://dota-player-rating.netlify.app/tags/dota2",
+      "href": "https://hendkai.github.io/dota-player-rating/tags/dota2",
       "name": "#Dota2"
     },
     {
       "type": "Hashtag", 
-      "href": "https://dota-player-rating.netlify.app/tags/gaming",
+      "href": "https://hendkai.github.io/dota-player-rating/tags/gaming",
       "name": "#Gaming"
     },
     {
       "type": "Hashtag",
-      "href": "https://dota-player-rating.netlify.app/tags/community",
+      "href": "https://hendkai.github.io/dota-player-rating/tags/community",
       "name": "#Community"
     },
     {
       "type": "Hashtag",
-      "href": "https://dota-player-rating.netlify.app/tags/positivegaming",
+      "href": "https://hendkai.github.io/dota-player-rating/tags/positivegaming",
       "name": "#PositiveGaming"
     },
     {
       "type": "Hashtag",
-      "href": "https://dota-player-rating.netlify.app/tags/fediverse", 
+      "href": "https://hendkai.github.io/dota-player-rating/tags/fediverse", 
       "name": "#Fediverse"
     }
   ],
@@ -110,7 +110,7 @@
     {
       "type": "PropertyValue",
       "name": "Website",
-      "value": "<a href=\"https://dota-player-rating.netlify.app\" target=\"_blank\" rel=\"nofollow noopener noreferrer me\">dota-player-rating.netlify.app</a>"
+      "value": "<a href=\"https://hendkai.github.io/dota-player-rating\" target=\"_blank\" rel=\"nofollow noopener noreferrer me\">hendkai.github.io/dota-player-rating</a>"
     },
     {
       "type": "PropertyValue",
@@ -125,20 +125,20 @@
     {
       "type": "PropertyValue",
       "name": "RSS Feed",
-      "value": "<a href=\"https://dota-player-rating.netlify.app/feed.xml\" target=\"_blank\" rel=\"nofollow noopener noreferrer me\">Community Updates</a>"
+      "value": "<a href=\"https://hendkai.github.io/dota-player-rating/feed.xml\" target=\"_blank\" rel=\"nofollow noopener noreferrer me\">Community Updates</a>"
     }
   ],
   "endpoints": {
-    "sharedInbox": "https://dota-player-rating.netlify.app/inbox"
+    "sharedInbox": "https://hendkai.github.io/dota-player-rating/inbox"
   },
   "icon": {
     "type": "Image",
     "mediaType": "image/png",
-    "url": "https://dota-player-rating.netlify.app/icon-192x192.png"
+    "url": "https://hendkai.github.io/dota-player-rating/icon-192x192.png"
   },
   "image": {
     "type": "Image", 
     "mediaType": "image/png",
-    "url": "https://dota-player-rating.netlify.app/icon-512x512.png"
+    "url": "https://hendkai.github.io/dota-player-rating/icon-512x512.png"
   }
 } 

@@ -3,8 +3,8 @@
     <channel>
         <title>Dota Player Rating - Latest Reviews</title>
         <description>Latest player reviews and community updates from Dota Player Rating - Building positive gaming communities together</description>
-        <link>https://dota-player-rating.netlify.app</link>
-        <atom:link href="https://dota-player-rating.netlify.app/feed.xml" rel="self" type="application/rss+xml"/>
+        <link>https://hendkai.github.io/dota-player-rating</link>
+        <atom:link href="https://hendkai.github.io/dota-player-rating/feed.xml" rel="self" type="application/rss+xml"/>
         <language>en-us</language>
         <managingEditor>bitsofmuschi@gmail.com (Dota Player Rating Team)</managingEditor>
         <webMaster>bitsofmuschi@gmail.com (Dota Player Rating Team)</webMaster>
@@ -17,9 +17,9 @@
         <ttl>60</ttl>
         
         <image>
-            <url>https://dota-player-rating.netlify.app/icon-192x192.png</url>
+            <url>https://hendkai.github.io/dota-player-rating/icon-192x192.png</url>
             <title>Dota Player Rating</title>
-            <link>https://dota-player-rating.netlify.app</link>
+            <link>https://hendkai.github.io/dota-player-rating</link>
             <width>192</width>
             <height>192</height>
         </image>
@@ -43,9 +43,9 @@
                 
                 <p><strong>Join our mission:</strong> We believe that gaming should be fun, inclusive, and supportive for everyone. Rate players based on their positive contributions, not just their skill level.</p>
                 
-                <p><a href="https://dota-player-rating.netlify.app">View Latest Rankings →</a></p>
+                <p><a href="https://hendkai.github.io/dota-player-rating">View Latest Rankings →</a></p>
             ]]></content:encoded>
-            <link>https://dota-player-rating.netlify.app</link>
+            <link>https://hendkai.github.io/dota-player-rating</link>
             <guid isPermaLink="false">community-update-2025-12-23</guid>
             <pubDate>Mon, 23 Dec 2025 12:00:00 +0000</pubDate>
             <category>Community</category>
@@ -74,9 +74,9 @@
                 
                 <p><strong>Follow us:</strong> @dotarating@mastodon.social</p>
                 
-                <p><a href="https://dota-player-rating.netlify.app">Join the Community →</a></p>
+                <p><a href="https://hendkai.github.io/dota-player-rating">Join the Community →</a></p>
             ]]></content:encoded>
-            <link>https://dota-player-rating.netlify.app</link>
+            <link>https://hendkai.github.io/dota-player-rating</link>
             <guid isPermaLink="false">fediverse-integration-2025-12-23</guid>
             <pubDate>Mon, 23 Dec 2025 10:00:00 +0000</pubDate>
             <category>Fediverse</category>
@@ -108,9 +108,9 @@
                 <h3>🎯 Making a Difference</h3>
                 <p>By following these principles, we're not just rating players - we're building a culture of respect, growth, and positivity that makes gaming better for everyone.</p>
                 
-                <p><a href="https://dota-player-rating.netlify.app">Read Full Honor Code →</a></p>
+                <p><a href="https://hendkai.github.io/dota-player-rating">Read Full Honor Code →</a></p>
             ]]></content:encoded>
-            <link>https://dota-player-rating.netlify.app</link>
+            <link>https://hendkai.github.io/dota-player-rating</link>
             <guid isPermaLink="false">honor-code-2025-12-22</guid>
             <pubDate>Sun, 22 Dec 2025 18:00:00 +0000</pubDate>
             <category>Honor Code</category>

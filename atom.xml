@@ -2,41 +2,41 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
     <title>Dota Player Rating - Community Feed</title>
     <subtitle>Building positive gaming communities together - Latest updates from Dota Player Rating</subtitle>
-    <link href="https://dota-player-rating.netlify.app/atom.xml" rel="self" type="application/atom+xml"/>
-    <link href="https://dota-player-rating.netlify.app" rel="alternate" type="text/html"/>
-    <id>https://dota-player-rating.netlify.app/</id>
+    <link href="https://hendkai.github.io/dota-player-rating/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://hendkai.github.io/dota-player-rating" rel="alternate" type="text/html"/>
+    <id>https://hendkai.github.io/dota-player-rating/</id>
     <updated>2025-12-23T12:00:00Z</updated>
     <rights>© 2025 Dota Player Rating Community</rights>
-    <generator uri="https://dota-player-rating.netlify.app" version="1.0">Dota Player Rating Platform</generator>
+    <generator uri="https://hendkai.github.io/dota-player-rating" version="1.0">Dota Player Rating Platform</generator>
     
     <author>
         <name>Dota Player Rating Team</name>
         <email>bitsofmuschi@gmail.com</email>
-        <uri>https://dota-player-rating.netlify.app</uri>
+        <uri>https://hendkai.github.io/dota-player-rating</uri>
     </author>
     
-    <category term="Gaming" scheme="https://dota-player-rating.netlify.app/categories/" />
-    <category term="Dota2" scheme="https://dota-player-rating.netlify.app/categories/" />
-    <category term="Community" scheme="https://dota-player-rating.netlify.app/categories/" />
-    <category term="Fediverse" scheme="https://dota-player-rating.netlify.app/categories/" />
+    <category term="Gaming" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
+    <category term="Dota2" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
+    <category term="Community" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
+    <category term="Fediverse" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
     
-    <icon>https://dota-player-rating.netlify.app/icon-192x192.png</icon>
-    <logo>https://dota-player-rating.netlify.app/icon-512x512.png</logo>
+    <icon>https://hendkai.github.io/dota-player-rating/icon-192x192.png</icon>
+    <logo>https://hendkai.github.io/dota-player-rating/icon-512x512.png</logo>
     
     <entry>
         <title type="html">🎮 Community Leaderboard Updated - New Top Players!</title>
-        <id>https://dota-player-rating.netlify.app/updates/community-leaderboard-2025-12-23</id>
+        <id>https://hendkai.github.io/dota-player-rating/updates/community-leaderboard-2025-12-23</id>
         <updated>2025-12-23T12:00:00Z</updated>
         <published>2025-12-23T12:00:00Z</published>
-        <link href="https://dota-player-rating.netlify.app" rel="alternate" type="text/html"/>
+        <link href="https://hendkai.github.io/dota-player-rating" rel="alternate" type="text/html"/>
         
         <author>
             <name>Community Team</name>
             <email>bitsofmuschi@gmail.com</email>
         </author>
         
-        <category term="Leaderboard" scheme="https://dota-player-rating.netlify.app/categories/" />
-        <category term="Community" scheme="https://dota-player-rating.netlify.app/categories/" />
+        <category term="Leaderboard" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
+        <category term="Community" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
         
         <summary type="text">Our community leaderboard has been updated with new top-performing players who exemplify positive gaming behavior and excellent teamwork.</summary>
         
@@ -56,7 +56,7 @@
             
             <p><strong>Join our mission:</strong> We believe that gaming should be fun, inclusive, and supportive for everyone. Rate players based on their positive contributions, not just their skill level.</p>
             
-            <p><a href="https://dota-player-rating.netlify.app">View Latest Rankings →</a></p>
+            <p><a href="https://hendkai.github.io/dota-player-rating">View Latest Rankings →</a></p>
             
             <hr>
             <p><small>Follow us on the Fediverse: <a href="https://mastodon.social/@dotarating">@dotarating@mastodon.social</a></small></p>
@@ -65,19 +65,19 @@
     
     <entry>
         <title type="html">🌍 Fediverse Integration - Connect with Our Community</title>
-        <id>https://dota-player-rating.netlify.app/updates/fediverse-integration-2025-12-23</id>
+        <id>https://hendkai.github.io/dota-player-rating/updates/fediverse-integration-2025-12-23</id>
         <updated>2025-12-23T10:00:00Z</updated>
         <published>2025-12-23T10:00:00Z</published>
-        <link href="https://dota-player-rating.netlify.app" rel="alternate" type="text/html"/>
+        <link href="https://hendkai.github.io/dota-player-rating" rel="alternate" type="text/html"/>
         
         <author>
             <name>Development Team</name>
             <email>bitsofmuschi@gmail.com</email>
         </author>
         
-        <category term="Fediverse" scheme="https://dota-player-rating.netlify.app/categories/" />
-        <category term="Integration" scheme="https://dota-player-rating.netlify.app/categories/" />
-        <category term="Community" scheme="https://dota-player-rating.netlify.app/categories/" />
+        <category term="Fediverse" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
+        <category term="Integration" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
+        <category term="Community" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
         
         <summary type="text">We've integrated with the Fediverse! Share your achievements and connect with other positive players across decentralized social networks.</summary>
         
@@ -112,25 +112,25 @@
             
             <p><strong>Follow us:</strong> <a href="https://mastodon.social/@dotarating">@dotarating@mastodon.social</a></p>
             
-            <p><a href="https://dota-player-rating.netlify.app">Join the Community →</a></p>
+            <p><a href="https://hendkai.github.io/dota-player-rating">Join the Community →</a></p>
         ]]></content>
     </entry>
     
     <entry>
         <title type="html">📊 Community Honor Code - Building Better Gaming</title>
-        <id>https://dota-player-rating.netlify.app/updates/honor-code-2025-12-22</id>
+        <id>https://hendkai.github.io/dota-player-rating/updates/honor-code-2025-12-22</id>
         <updated>2025-12-22T18:00:00Z</updated>
         <published>2025-12-22T18:00:00Z</published>
-        <link href="https://dota-player-rating.netlify.app" rel="alternate" type="text/html"/>
+        <link href="https://hendkai.github.io/dota-player-rating" rel="alternate" type="text/html"/>
         
         <author>
             <name>Community Team</name>
             <email>bitsofmuschi@gmail.com</email>
         </author>
         
-        <category term="Honor Code" scheme="https://dota-player-rating.netlify.app/categories/" />
-        <category term="Guidelines" scheme="https://dota-player-rating.netlify.app/categories/" />
-        <category term="Community" scheme="https://dota-player-rating.netlify.app/categories/" />
+        <category term="Honor Code" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
+        <category term="Guidelines" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
+        <category term="Community" scheme="https://hendkai.github.io/dota-player-rating/categories/" />
         
         <summary type="text">Our Community Honor Code promotes positive gaming behavior through four core principles: Focus on Growth, Constructive Feedback, Recognize Good Play, and Build Community.</summary>
         
@@ -165,7 +165,7 @@
             
             <p><strong>Join the movement:</strong> Rate with purpose, review with kindness, and build community with every interaction.</p>
             
-            <p><a href="https://dota-player-rating.netlify.app">Read Full Honor Code →</a></p>
+            <p><a href="https://hendkai.github.io/dota-player-rating">Read Full Honor Code →</a></p>
         ]]></content>
     </entry>
     
