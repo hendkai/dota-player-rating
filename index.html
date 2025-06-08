@@ -1277,7 +1277,10 @@ Building positive gaming communities together.
 
         // Load Main App Content After Login
         globalThis.loadMainAppContent = function() {
-            const mainAppHTML = `
+            console.log('🏗️ loadMainAppContent started');
+            
+            try {
+                const mainAppHTML = `
                 <!-- Dashboard -->
                 <div class="card">
                     <h2>📊 Community Dashboard</h2>
@@ -1541,6 +1544,13 @@ Building positive gaming communities together.
             // Initialize components
             initializeTabs();
             loadRecentSearches();
+            
+            console.log('✅ loadMainAppContent completed');
+            
+            } catch (error) {
+                console.error('❌ Error in loadMainAppContent:', error);
+                console.error('Error details:', error.message, error.stack);
+            }
         };
 
         // Admin Security - Only authorized email addresses
@@ -4046,7 +4056,7 @@ Building positive gaming communities together.
         }
 
         // Tab System
-        function initializeTabs() {
+        globalThis.initializeTabs = function() {
             // Add click handlers for tabs
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', function() {
@@ -4628,7 +4638,7 @@ Building positive gaming communities together.
         };
 
         // Load Recent Searches
-        function loadRecentSearches() {
+        globalThis.loadRecentSearches = function() {
             // Just ensure the array is initialized
             if (!recentSearches) {
                 recentSearches = [];
@@ -4674,23 +4684,50 @@ Building positive gaming communities together.
         };
 
         globalThis.showMainApp = function() {
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('user-menu').classList.remove('hidden');
+            console.log('🚀 showMainApp called');
             
-            // Load main app content
-            loadMainAppContent();
-            loadReviews();
-            
-            // Show admin tab if user is admin
-            if (currentUser && isAdmin(currentUser.email)) {
-                showAdminTab();
-                // Load admin stats after a short delay to ensure DOM is ready
-                setTimeout(() => {
-                    updateAdminStats();
-                }, 500);
-            } else {
-                hideAdminTab();
+            try {
+                const authSection = document.getElementById('auth-section');
+                const mainApp = document.getElementById('main-app');
+                const userMenu = document.getElementById('user-menu');
+                
+                console.log('Elements found:', {
+                    authSection: !!authSection,
+                    mainApp: !!mainApp,
+                    userMenu: !!userMenu
+                });
+                
+                if (authSection) authSection.classList.add('hidden');
+                if (mainApp) mainApp.classList.remove('hidden');
+                if (userMenu) userMenu.classList.remove('hidden');
+                
+                console.log('✅ UI elements updated');
+                
+                // Load main app content
+                console.log('📱 Loading main app content...');
+                loadMainAppContent();
+                
+                console.log('💬 Loading reviews...');
+                loadReviews();
+                
+                // Show admin tab if user is admin
+                if (currentUser && isAdmin(currentUser.email)) {
+                    console.log('🛡️ User is admin, showing admin features');
+                    showAdminTab();
+                    // Load admin stats after a short delay to ensure DOM is ready
+                    setTimeout(() => {
+                        updateAdminStats();
+                    }, 500);
+                } else {
+                    console.log('👤 Regular user, hiding admin features');
+                    hideAdminTab();
+                }
+                
+                console.log('🎉 showMainApp completed successfully');
+                
+            } catch (error) {
+                console.error('❌ Error in showMainApp:', error);
+                console.error('Error details:', error.message, error.stack);
             }
         };
 
