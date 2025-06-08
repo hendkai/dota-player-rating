@@ -1,187 +1,187 @@
-# 🤖 Mastodon Community-Bot Setup Guide
+# �� Mastodon Community Bot Setup Guide
 
-## 🎯 **Was ist der Community-Bot?**
+## 🎯 **What is the Community Bot?**
 
-Der **Dota Player Rating Community-Bot** postet automatisch:
-- **📊 Tägliche Updates** (Community-Statistiken, Top-Spieler)
-- **🌟 Wöchentliche Highlights** (MVP der Woche, beste Reviews)
-- **🎉 Meilenstein-Posts** (100, 500, 1000+ Reviews erreicht)
-- **🔥 Besondere Ereignisse** (Außergewöhnliche 5-Sterne Reviews)
+The **Dota Player Rating Community Bot** automatically posts:
+- **📊 Daily updates** (community stats, top players)
+- **🌟 Weekly highlights** (MVP of the week, best reviews)
+- **🎉 Milestone posts** (100, 500, 1000+ reviews reached)
+- **🔥 Special events** (exceptional 5-star reviews)
 
-## 🚀 **Schritt 1: Mastodon Access Token erstellen**
+## 🚀 **Step 1: Create a Mastodon Access Token**
 
-### **Option A: Mastodon.social (Empfohlen)**
-1. Gehe zu: https://mastodon.social/settings/applications
-2. Klicke auf **"New application"**
+### **Option A: Mastodon.social (Recommended)**
+1. Go to: https://mastodon.social/settings/applications
+2. Click **"New application"**
 3. **Application name**: `Dota Player Rating Bot`
 4. **Application website**: `https://hendkai.github.io/dota-player-rating/`
 5. **Redirect URI**: `urn:ietf:wg:oauth:2.0:oob`
-6. **Scopes**: Wähle `write:statuses` aus
-7. Klicke **"Submit"**
-8. **Kopiere den Access Token** (beginnt mit `mastodon_...`)
+6. **Scopes**: Select `write:statuses`
+7. Click **"Submit"**
+8. **Copy the access token** (starts with `mastodon_...`)
 
-### **Option B: Eigene Mastodon-Instanz**
-1. Melde dich bei deiner bevorzugten Mastodon-Instanz an
-2. Gehe zu **Settings → Development → New Application**
-3. Folge den gleichen Schritten wie oben
-4. Notiere dir deine **Instanz-URL** (z.B. `mastodon.world`)
+### **Option B: Your Own Mastodon Instance**
+1. Log in to your preferred Mastodon instance
+2. Go to **Settings → Development → New Application**
+3. Follow the same steps as above
+4. Note your **instance URL** (e.g. `mastodon.world`)
 
-## ⚙️ **Schritt 2: Bot im Admin-Panel konfigurieren**
+## ⚙️ **Step 2: Configure the Bot in the Admin Panel**
 
-1. **Logge dich als Admin ein** in die Dota Player Rating App
-2. Klicke auf **🛡️ Admin Panel**
-3. Scroll zum **🤖 Mastodon Community-Bot** Bereich
-4. **Konfiguration eingeben:**
-   - **Mastodon-Instanz**: `mastodon.social` (oder deine Instanz)
-   - **Access Token**: Dein kopierter Token
-5. Klicke **💾 Konfiguration speichern**
+1. **Log in as admin** in the Dota Player Rating app
+2. Click **🛡️ Admin Panel**
+3. Scroll to the **🤖 Mastodon Community Bot** section
+4. **Enter configuration:**
+   - **Mastodon instance**: `mastodon.social` (or your instance)
+   - **Access token**: Your copied token
+5. Click **💾 Save configuration**
 
-## 🧪 **Schritt 3: Bot testen**
+## 🧪 **Step 3: Test the Bot**
 
-### **Test-Post senden**
-1. Klicke **🧪 Test-Post** im Admin-Panel
-2. Du solltest eine Bestätigung sehen: ✅ "Test-Post erfolgreich gesendet!"
-3. Prüfe deinen Mastodon-Feed für den Test-Post
+### **Send a test post**
+1. Click **🧪 Test Post** in the admin panel
+2. You should see a confirmation: ✅ "Test post sent successfully!"
+3. Check your Mastodon feed for the test post
 
-### **Content-Vorschau erstellen**
-1. Klicke **👁️ Content-Vorschau**
-2. Du siehst Beispiele für alle Post-Typen
-3. Mit **📤 Diesen Content posten** kannst du direkt posten
+### **Create content preview**
+1. Click **👁️ Content Preview**
+2. You will see examples for all post types
+3. With **📤 Post this content** you can post directly
 
-## 🤖 **Automatisierung und Zeitpläne**
+## 🤖 **Automation and Schedules**
 
-### **Tägliche Posts** 📊
-- **Zeit**: 20:00 Uhr täglich
-- **Inhalt**: 
-  - Neue Reviews des Tages
-  - Community-Statistiken
-  - Top-Spieler Highlights
-  - Positive Gaming Encouragement
+### **Daily posts** 📊
+- **Time**: 20:00 (8:00 PM) daily
+- **Content:**
+  - New reviews of the day
+  - Community statistics
+  - Top player highlights
+  - Positive gaming encouragement
 
-### **Wöchentliche Posts** 🌟
-- **Zeit**: Sonntags 12:00 Uhr
-- **Inhalt**:
-  - Wochen-MVP (Spieler mit besten Reviews)
-  - Review der Woche
-  - Anzahl 5⭐ Bewertungen
-  - Community-Wachstum
+### **Weekly posts** 🌟
+- **Time**: Sundays 12:00 PM
+- **Content:**
+  - Week's MVP (player with best reviews)
+  - Review of the week
+  - Number of 5⭐ reviews
+  - Community growth
 
-### **Meilenstein-Posts** 🎉
-- **Automatisch bei erreichen von**:
-  - 100, 500, 1000, 2500, 5000, 10000 Reviews
-- **Inhalt**: Feier der Community-Erfolge
+### **Milestone posts** 🎉
+- **Automatically at:**
+  - 100, 500, 1000, 2500, 5000, 10000 reviews
+- **Content:** Celebrate community achievements
 
-## 📊 **Bot-Status überwachen**
+## 📊 **Monitor Bot Status**
 
-Das Admin-Panel zeigt:
-- **Letzter täglicher Post**: Zeitstempel des letzten Daily-Updates
-- **Letzter wöchentlicher Post**: Zeitstempel der letzten Highlights
-- **Nächster Meilenstein**: Wann der nächste Meilenstein-Post kommt
-- **Automatisierung**: Status der Bot-Automatisierung
+The admin panel shows:
+- **Last daily post**: Timestamp of last daily update
+- **Last weekly post**: Timestamp of last highlights
+- **Next milestone**: When the next milestone post will happen
+- **Automation**: Status of bot automation
 
-## 📤 **Manuelle Posts**
+## 📤 **Manual Posts**
 
-Du kannst jederzeit manuell posten:
-- **📊 Täglicher Update**: Sofortiger Community-Update
-- **🌟 Wöchentliche Highlights**: Aktuelle Wochen-Highlights
-- **🧪 Test-Post**: Einfacher Test der Integration
+You can post manually at any time:
+- **📊 Daily update**: Immediate community update
+- **🌟 Weekly highlights**: Current week's highlights
+- **🧪 Test post**: Simple integration test
 
-## 🛠️ **Fehlerbehebung**
+## 🛠️ **Troubleshooting**
 
-### **"No access token" Fehler**
-- Prüfe ob der Access Token korrekt eingegeben wurde
-- Token darf keine Leerzeichen enthalten
-- Stelle sicher, dass der Token `write:statuses` Berechtigung hat
+### **"No access token" error**
+- Check if the access token is entered correctly
+- Token must not contain spaces
+- Make sure the token has `write:statuses` permission
 
-### **"Post failed" Fehler**
-- Prüfe die Mastodon-Instanz URL (ohne `https://`)
-- Stelle sicher, dass der Account nicht gesperrt ist
-- Rate-Limits: Warte 5-10 Minuten zwischen Posts
+### **"Post failed" error**
+- Check the Mastodon instance URL (without `https://`)
+- Make sure the account is not suspended
+- Rate limits: Wait 5-10 minutes between posts
 
-### **Keine automatischen Posts**
-- Automatisierung funktioniert nur für eingeloggte Admins
-- Browser-Tab muss geöffnet bleiben für Timer
-- Für 24/7 Automatisierung: Server-basierte Lösung implementieren
+### **No automatic posts**
+- Automation only works for logged-in admins
+- Browser tab must remain open for timer
+- For 24/7 automation: implement a server-based solution
 
-## 🌐 **Beispiel-Posts**
+## 🌐 **Example Posts**
 
-### **Täglicher Update**
+### **Daily update**
 ```
-🎮 Täglicher Community-Update!
+🎮 Daily Community Update!
 
-📊 Heute: 15 neue Reviews
-🌟 Gesamt: 1,247 Reviews (⭐4.6 Durchschnitt)
-💚 89% positive Bewertungen
+📊 Today: 15 new reviews
+🌟 Total: 1,247 reviews (⭐4.6 average)
+💚 89% positive ratings
 
-🏆 Top Spieler: ProGamer123 (⭐4.9)
+🏆 Top player: ProGamer123 (⭐4.9)
 
 #Dota2 #Gaming #Community #PositiveGaming
 🔗 https://hendkai.github.io/dota-player-rating/
 ```
 
-### **Wöchentliche Highlights**
+### **Weekly highlights**
 ```
-🌟 Wöchentliche Community-Highlights!
+🌟 Weekly Community Highlights!
 
-📊 Diese Woche:
-• 87 neue Reviews
-• 34 perfekte 5⭐ Bewertungen
+📊 This week:
+• 87 new reviews
+• 34 perfect 5⭐ reviews
 
-🏆 Wochen-MVP: TeamPlayer42
-   ⭐ 4.8 Durchschnitt (12 Reviews)
+🏆 Week's MVP: TeamPlayer42
+   ⭐ 4.8 average (12 reviews)
 
-💬 Review der Woche:
-"Fantastischer Teammate! Immer positiv und hilfsbereit..."
-   - über SupportMaster
+💬 Review of the week:
+"Fantastic teammate! Always positive and helpful..."
+   - about SupportMaster
 
-🎮 Macht mit bei der freundlichsten Dota 2 Community!
+🎮 Join the friendliest Dota 2 community!
 #Dota2 #Gaming #Community #PositiveGaming
 🔗 https://hendkai.github.io/dota-player-rating/
 ```
 
-### **Meilenstein-Post**
+### **Milestone post**
 ```
-🎉 MEILENSTEIN! 1000 Reviews!
+🎉 MILESTONE! 1000 Reviews!
 
-Unsere Dota 2 Community wächst stetig!
+Our Dota 2 community keeps growing!
 
-🤝 Zusammen bauen wir eine positivere Gaming-Welt
-⭐ Jeden Tag werden großartige Spieler entdeckt
-🎮 Toxizität war gestern - Teamwork ist heute!
+🤝 Together we build a more positive gaming world
+⭐ Every day, great players are discovered
+🎮 Toxicity is a thing of the past - teamwork is today!
 
-Danke an alle, die mitmachen! 💚
+Thanks to everyone who participates! 💚
 
 #Dota2 #Gaming #Community #PositiveGaming
 🔗 https://hendkai.github.io/dota-player-rating/
 ```
 
-## 🔧 **Erweiterte Konfiguration**
+## 🔧 **Advanced Configuration**
 
-### **Post-Zeiten anpassen**
-Im Code (index.html) findest du:
+### **Adjust post times**
+In the code (index.html) you will find:
 ```javascript
 postSchedule: {
-    daily: { hour: 20, minute: 0 }, // 20:00 täglich
-    weekly: { day: 0, hour: 12, minute: 0 }, // Sonntag 12:00
+    daily: { hour: 20, minute: 0 }, // 20:00 daily
+    weekly: { day: 0, hour: 12, minute: 0 }, // Sunday 12:00
 }
 ```
 
-### **Hashtags anpassen**
+### **Adjust hashtags**
 ```javascript
 defaultHashtags: '#Dota2 #Gaming #Community #PositiveGaming'
 ```
 
-### **Content-Templates erweitern**
-Die `generateDailyPost()` und `generateWeeklyPost()` Funktionen enthalten verschiedene Template-Varianten für Abwechslung.
+### **Expand content templates**
+The `generateDailyPost()` and `generateWeeklyPost()` functions contain various template variants for variety.
 
 ---
 
-## 🎯 **Community-Impact**
+## 🎯 **Community Impact**
 
-Der Bot hilft dabei:
-- **🚀 Community-Wachstum** durch regelmäßige Sichtbarkeit
-- **💬 Engagement fördern** durch Highlights positiver Spieler
-- **🌟 Positive Gaming** durch Betonung guter Erfahrungen
-- **📊 Transparenz** durch offene Community-Statistiken
+The bot helps to:
+- **🚀 Grow the community** through regular visibility
+- **💬 Foster engagement** by highlighting positive players
+- **🌟 Positive gaming** by emphasizing good experiences
+- **📊 Transparency** through open community stats
 
-**Der Bot macht eure Community lebendig und zeigt der Welt, dass positives Gaming möglich ist!** 🎮✨ 
+**The bot brings your community to life and shows the world that positive gaming is possible!** 🎮✨ 
