@@ -1708,8 +1708,8 @@ Building positive gaming communities together.
                             <div style="margin-bottom: 24px;">
                                 <h4 style="color: var(--text-primary); margin-bottom: 16px;">Manuelle Posts</h4>
                                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                    <button onclick="testMastodonPost()" style="background: var(--secondary-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
-                                        🧪 Test-Post
+                                                            <button onclick="testMastodonPost()" style="background: var(--secondary-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
+                            🧪 Test Post
                                     </button>
                                     <button onclick="postDailyUpdate()" style="background: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">
                                         📊 Täglicher Update
@@ -1728,11 +1728,11 @@ Building positive gaming communities together.
                                 <h4 style="color: var(--text-primary); margin-bottom: 16px;">Bot-Status</h4>
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                                     <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px;">
-                                        <div style="color: var(--text-muted); font-size: 0.9rem;">Letzter täglicher Post:</div>
+                                        <div style="color: var(--text-muted); font-size: 0.9rem;">Last daily post:</div>
                                         <div id="last-daily-post" style="color: var(--text-primary); font-weight: 600;">Noch nie</div>
                                     </div>
                                     <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px;">
-                                        <div style="color: var(--text-muted); font-size: 0.9rem;">Letzter wöchentlicher Post:</div>
+                                        <div style="color: var(--text-muted); font-size: 0.9rem;">Last weekly post:</div>
                                         <div id="last-weekly-post" style="color: var(--text-primary); font-weight: 600;">Noch nie</div>
                                     </div>
                                     <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px;">
@@ -5821,13 +5821,20 @@ Building positive gaming communities together.
         // Bot Configuration
         const MASTODON_BOT_CONFIG = {
             instance: 'mastodon.social', // Default instance
-            defaultHashtags: '#Dota2 #Gaming #Community #PositiveGaming',
+            defaultHashtags: '#Dota2 #Gaming #Community #PositiveGaming #gaming',
             postSchedule: {
                 daily: { hour: 20, minute: 0 }, // 20:00 daily
                 weekly: { day: 0, hour: 12, minute: 0 }, // Sunday 12:00
                 monthly: { day: 1, hour: 10, minute: 0 } // 1st of month 10:00
             }
         };
+
+        // Newsmast Gaming Channel Footer
+        const NEWSMAST_FOOTER = `
+
+🎮 Join Newsmast Gaming Channel for more gaming content!
+👉 https://newsmast.social/@newsmast
+📖 Learn more: https://newsmast.social/@newsmast/1119`;
 
         // Mastodon API Integration
         globalThis.MastodonBot = {
@@ -5851,7 +5858,7 @@ Building positive gaming communities together.
                         body: JSON.stringify({
                             status: content,
                             visibility: 'public',
-                            language: 'de'
+                            language: 'en'
                         })
                     });
 
@@ -6022,37 +6029,37 @@ Building positive gaming communities together.
                 if (!stats) return null;
 
                 const templates = [
-                    `🎮 Täglicher Community-Update!
+                    `🎮 Daily Community Update!
 
-📊 Heute: ${stats.dailyReviews} neue Reviews
-🌟 Gesamt: ${stats.totalReviews} Reviews (⭐${stats.avgRating} Durchschnitt)
-💚 ${stats.positiveRate}% positive Bewertungen
+📊 Today: ${stats.dailyReviews} new reviews
+🌟 Total: ${stats.totalReviews} reviews (⭐${stats.avgRating} average)
+💚 ${stats.positiveRate}% positive ratings
 
-${stats.topPlayer ? `🏆 Top Spieler: ${stats.topPlayer.name} (⭐${stats.topPlayer.avgRating})` : '🎯 Werdet Teil unserer positiven Gaming-Community!'}
+${stats.topPlayer ? `🏆 Top Player: ${stats.topPlayer.name} (⭐${stats.topPlayer.avgRating})` : '🎯 Join our positive gaming community!'}
 
 ${MASTODON_BOT_CONFIG.defaultHashtags}
-🔗 https://hendkai.github.io/dota-player-rating/`,
+🔗 https://hendkai.github.io/dota-player-rating/${NEWSMAST_FOOTER}`,
 
-                    `🚀 Community wächst weiter!
+                    `🚀 Community keeps growing!
 
-📈 ${stats.dailyReviews} Reviews heute
-🌟 ${stats.positiveReviews} positive Bewertungen gesamt
-⭐ Durchschnittsbewertung: ${stats.avgRating}/5
+📈 ${stats.dailyReviews} reviews today
+🌟 ${stats.positiveReviews} positive ratings total
+⭐ Average rating: ${stats.avgRating}/5
 
-${stats.topPlayer ? `🥇 Highlight: ${stats.topPlayer.name} mit ${stats.topPlayer.reviewCount} tollen Reviews!` : '💫 Danke an alle, die positive Gaming-Erfahrungen teilen!'}
+${stats.topPlayer ? `🥇 Highlight: ${stats.topPlayer.name} with ${stats.topPlayer.reviewCount} great reviews!` : '💫 Thanks to everyone sharing positive gaming experiences!'}
 
-${MASTODON_BOT_CONFIG.defaultHashtags}`,
+${MASTODON_BOT_CONFIG.defaultHashtags}${NEWSMAST_FOOTER}`,
 
                     `🎯 Positive Gaming Community Update!
 
-🔥 ${stats.totalReviews} Spieler bereits bewertet
-📊 ${stats.positiveRate}% positive Erfahrungen
-⭐ Community-Rating: ${stats.avgRating}/5
+🔥 ${stats.totalReviews} players already rated
+📊 ${stats.positiveRate}% positive experiences
+⭐ Community rating: ${stats.avgRating}/5
 
-${stats.dailyReviews > 0 ? `🆕 ${stats.dailyReviews} neue Reviews heute` : '🌟 Teilt eure positiven Gaming-Erfahrungen!'}
+${stats.dailyReviews > 0 ? `🆕 ${stats.dailyReviews} new reviews today` : '🌟 Share your positive gaming experiences!'}
 
-🎮 Findet großartige Teammates!
-${MASTODON_BOT_CONFIG.defaultHashtags}`
+🎮 Find amazing teammates!
+${MASTODON_BOT_CONFIG.defaultHashtags}${NEWSMAST_FOOTER}`
                 ];
 
                 return templates[Math.floor(Math.random() * templates.length)];
@@ -6064,52 +6071,53 @@ ${MASTODON_BOT_CONFIG.defaultHashtags}`
                 const emojis = ['🌟', '🚀', '🎉', '🏆', '💫', '🔥'];
                 const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
 
-                let post = `${randomEmoji} Wöchentliche Community-Highlights!\n\n`;
-                post += `📊 Diese Woche:\n`;
-                post += `• ${highlights.weeklyReviews} neue Reviews\n`;
-                post += `• ${highlights.exceptional5Stars} perfekte 5⭐ Bewertungen\n\n`;
+                let post = `${randomEmoji} Weekly Community Highlights!\n\n`;
+                post += `📊 This week:\n`;
+                post += `• ${highlights.weeklyReviews} new reviews\n`;
+                post += `• ${highlights.exceptional5Stars} perfect 5⭐ ratings\n\n`;
 
                 if (highlights.weeklyMVP) {
-                    post += `🏆 Wochen-MVP: ${highlights.weeklyMVP.name}\n`;
-                    post += `   ⭐ ${highlights.weeklyMVP.avgRating} Durchschnitt (${highlights.weeklyMVP.reviewCount} Reviews)\n\n`;
+                    post += `🏆 Weekly MVP: ${highlights.weeklyMVP.name}\n`;
+                    post += `   ⭐ ${highlights.weeklyMVP.avgRating} average (${highlights.weeklyMVP.reviewCount} reviews)\n\n`;
                 }
 
                 if (highlights.bestComment) {
-                    post += `💬 Review der Woche:\n`;
+                    post += `💬 Review of the week:\n`;
                     post += `"${highlights.bestComment.comment.substring(0, 100)}${highlights.bestComment.comment.length > 100 ? '...' : ''}"\n`;
-                    post += `   - über ${highlights.bestComment.playerName}\n\n`;
+                    post += `   - about ${highlights.bestComment.playerName}\n\n`;
                 }
 
-                post += `🎮 Macht mit bei der freundlichsten Dota 2 Community!\n`;
+                post += `🎮 Join the friendliest Dota 2 community!\n`;
                 post += `${MASTODON_BOT_CONFIG.defaultHashtags}\n`;
                 post += `🔗 https://hendkai.github.io/dota-player-rating/`;
+                post += NEWSMAST_FOOTER;
 
                 return post;
             },
 
             generateMilestonePost(milestone) {
                 const milestones = {
-                    100: "💯 Wow! 100 Reviews erreicht!",
-                    500: "🚀 Unglaublich! 500 Reviews!",
-                    1000: "🎉 MEILENSTEIN! 1000 Reviews!",
-                    2500: "🔥 Wahnsinn! 2500 Reviews!",
-                    5000: "🌟 LEGENDÄR! 5000 Reviews!"
+                    100: "💯 Wow! 100 reviews reached!",
+                    500: "🚀 Incredible! 500 reviews!",
+                    1000: "🎉 MILESTONE! 1000 reviews!",
+                    2500: "🔥 Amazing! 2500 reviews!",
+                    5000: "🌟 LEGENDARY! 5000 reviews!"
                 };
 
-                const celebration = milestones[milestone] || `🎯 ${milestone} Reviews erreicht!`;
+                const celebration = milestones[milestone] || `🎯 ${milestone} reviews reached!`;
                 
                 return `${celebration}
 
-Unsere Dota 2 Community wächst stetig!
+Our Dota 2 community keeps growing!
 
-🤝 Zusammen bauen wir eine positivere Gaming-Welt
-⭐ Jeden Tag werden großartige Spieler entdeckt
-🎮 Toxizität war gestern - Teamwork ist heute!
+🤝 Together we're building a more positive gaming world
+⭐ Every day amazing players are discovered
+🎮 Toxicity is yesterday - teamwork is today!
 
-Danke an alle, die mitmachen! 💚
+Thanks to everyone participating! 💚
 
 ${MASTODON_BOT_CONFIG.defaultHashtags}
-🔗 https://hendkai.github.io/dota-player-rating/`;
+🔗 https://hendkai.github.io/dota-player-rating/${NEWSMAST_FOOTER}`;
             },
 
             // Automated posting scheduler
@@ -6156,7 +6164,7 @@ ${MASTODON_BOT_CONFIG.defaultHashtags}
                         const result = await this.postToMastodon(content);
                         if (result.success) {
                             console.log('✅ Daily Mastodon post successful');
-                            showToast('Täglicher Mastodon-Post erfolgreich gesendet!', 'success');
+                            showToast('Daily Mastodon post sent successfully!', 'success');
                         }
                         return result;
                     }
@@ -6172,7 +6180,7 @@ ${MASTODON_BOT_CONFIG.defaultHashtags}
                         const result = await this.postToMastodon(content);
                         if (result.success) {
                             console.log('✅ Weekly Mastodon post successful');
-                            showToast('Wöchentlicher Mastodon-Post erfolgreich gesendet!', 'success');
+                            showToast('Weekly Mastodon post sent successfully!', 'success');
                         }
                         return result;
                     }
@@ -6194,7 +6202,7 @@ ${MASTODON_BOT_CONFIG.defaultHashtags}
                             if (result.success) {
                                 localStorage.setItem('last_milestone', milestone.toString());
                                 console.log(`✅ Milestone post for ${milestone} reviews successful`);
-                                showToast(`Meilenstein-Post für ${milestone} Reviews gesendet!`, 'success');
+                                showToast(`Milestone post for ${milestone} reviews sent!`, 'success');
                             }
                             break; // Post only one milestone at a time
                         }
@@ -6219,18 +6227,18 @@ ${MASTODON_BOT_CONFIG.defaultHashtags}
         globalThis.testMastodonPost = async function() {
             if (!checkAdminAccess()) return;
             
-            const testContent = `🧪 Test-Post vom Dota Player Rating Bot!
+            const testContent = `🧪 Test post from Dota Player Rating Bot!
 
-Dieser Post testet die Mastodon-Integration.
-Zeitstempel: ${new Date().toLocaleString('de-DE')}
+This post tests the Mastodon integration.
+Timestamp: ${new Date().toLocaleString('en-US')}
 
-${MASTODON_BOT_CONFIG.defaultHashtags}`;
+${MASTODON_BOT_CONFIG.defaultHashtags}${NEWSMAST_FOOTER}`;
 
             const result = await MastodonBot.postToMastodon(testContent);
             if (result.success) {
-                showToast('Test-Post erfolgreich gesendet!', 'success');
+                showToast('Test post sent successfully!', 'success');
             } else {
-                showToast(`Test-Post fehlgeschlagen: ${result.error}`, 'error');
+                showToast(`Test post failed: ${result.error}`, 'error');
             }
             return result;
         };
@@ -6455,7 +6463,7 @@ ${MASTODON_BOT_CONFIG.defaultHashtags}`;
             
             const result = await originalTestPost();
             if (result && result.success) {
-                addToPostHistory('Test-Post', result.url);
+                addToPostHistory('Test Post', result.url);
             }
             return result;
         };
