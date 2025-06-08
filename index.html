@@ -1343,12 +1343,52 @@
                     document.querySelector('[data-player-reviews]').scrollIntoView({ behavior: 'smooth' });
                 }, 100);
                 
-                const q = query(
-                    collection(db, 'ratings'), 
-                    where('playerId', '==', playerId),
-                    orderBy('timestamp', 'desc')
-                );
-                const querySnapshot = await getDocs(q);
+                let querySnapshot;
+                try {
+                    // Try with orderBy first
+                    const q = query(
+                        collection(db, 'ratings'), 
+                        where('playerId', '==', playerId),
+                        orderBy('timestamp', 'desc')
+                    );
+                    querySnapshot = await getDocs(q);
+                } catch (indexError) {
+                    console.log('OrderBy index not available, falling back to simple query:', indexError);
+                    
+                    // Fallback: simple query without orderBy
+                    const simpleQ = query(
+                        collection(db, 'ratings'), 
+                        where('playerId', '==', playerId)
+                    );
+                    querySnapshot = await getDocs(simpleQ);
+                    
+                    // Sort manually in JavaScript
+                    const docs = [];
+                    querySnapshot.forEach((doc) => {
+                        docs.push({ id: doc.id, data: doc.data() });
+                    });
+                    
+                    // Sort by timestamp manually
+                    docs.sort((a, b) => {
+                        const timestampA = a.data.timestamp?.toDate?.() || new Date(0);
+                        const timestampB = b.data.timestamp?.toDate?.() || new Date(0);
+                        return timestampB - timestampA; // desc order
+                    });
+                    
+                    // Create a mock QuerySnapshot-like object
+                    querySnapshot = {
+                        empty: docs.length === 0,
+                        size: docs.length,
+                        forEach: (callback) => {
+                            docs.forEach((docData) => {
+                                callback({
+                                    id: docData.id,
+                                    data: () => docData.data
+                                });
+                            });
+                        }
+                    };
+                }
                 
                 let reviewsHtml = `
                     <div data-player-reviews="true" style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
@@ -1451,18 +1491,44 @@
                 
             } catch (error) {
                 console.error('Error loading player reviews:', error);
-                showToast('Failed to load reviews: ' + error.message, 'error');
+                console.error('Error code:', error.code);
+                console.error('Error details:', error);
+                
+                let errorMessage = 'Failed to load reviews. Please try again.';
+                
+                // Provide specific error messages
+                if (error.code === 'failed-precondition') {
+                    errorMessage = 'Database index required. Creating reviews manually...';
+                    console.log('Firestore index required for orderBy query');
+                } else if (error.code === 'permission-denied') {
+                    errorMessage = 'Permission denied. Please sign in again.';
+                } else if (error.code === 'unavailable') {
+                    errorMessage = 'Service temporarily unavailable. Please try again.';
+                }
+                
+                showToast(errorMessage, 'error');
                 
                 // Remove loading state and show error
                 const loadingDiv = document.querySelector('[data-player-reviews]');
                 if (loadingDiv) {
                     loadingDiv.outerHTML = `
                         <div data-player-reviews="true" style="background: var(--glass-bg); border-radius: 16px; padding: 24px; margin: 16px 0; border: 1px solid var(--border-color);">
-                            <h3 style="color: var(--text-primary); margin-bottom: 16px;">💬 Player Reviews</h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3 style="color: var(--text-primary); margin: 0;">💬 Player Reviews</h3>
+                                <button style="background: none; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; color: var(--text-secondary); cursor: pointer;" onclick="closePlayerReviews()">✖️ Close</button>
+                            </div>
                             <div style="text-align: center; padding: 40px 0;">
                                 <div style="font-size: 2rem; margin-bottom: 16px; color: var(--error-color);">⚠️</div>
-                                <p style="color: var(--error-color);">Failed to load reviews. Please try again.</p>
-                                <button class="btn btn-secondary" onclick="closePlayerReviews()" style="margin-top: 16px;">Close</button>
+                                <h4 style="color: var(--error-color); margin-bottom: 8px;">Error Loading Reviews</h4>
+                                <p style="color: var(--text-muted); margin-bottom: 16px;">${errorMessage}</p>
+                                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                                    <button class="btn btn-secondary" onclick="closePlayerReviews()">Close</button>
+                                    <button class="btn" onclick="viewPlayerReviews('${playerId}')">🔄 Retry</button>
+                                </div>
+                                <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 16px;">
+                                    Error Code: ${error.code || 'unknown'}<br>
+                                    If this persists, please contact support.
+                                </p>
                             </div>
                         </div>
                     `;
@@ -2406,23 +2472,74 @@
         // Load Reviews
         async function loadReviews() {
             try {
-                let q = query(
-                    collection(db, 'ratings'), 
-                    orderBy('timestamp', 'desc'),
-                    limit(20)
-                );
+                let querySnapshot;
                 
-                // Apply filters if any
-                if (currentFilter !== 'all') {
-                    q = query(
+                try {
+                    // Try with orderBy first
+                    let q = query(
                         collection(db, 'ratings'), 
-                        where('rating', '==', parseInt(currentFilter)),
                         orderBy('timestamp', 'desc'),
                         limit(20)
                     );
+                    
+                    // Apply filters if any
+                    if (currentFilter !== 'all') {
+                        q = query(
+                            collection(db, 'ratings'), 
+                            where('rating', '==', parseInt(currentFilter)),
+                            orderBy('timestamp', 'desc'),
+                            limit(20)
+                        );
+                    }
+                    
+                    querySnapshot = await getDocs(q);
+                } catch (indexError) {
+                    console.log('OrderBy index not available for reviews, falling back to simple query:', indexError);
+                    
+                    // Fallback: simple query without orderBy
+                    let simpleQ = query(
+                        collection(db, 'ratings'), 
+                        limit(20)
+                    );
+                    
+                    // Apply filters if any (without orderBy)
+                    if (currentFilter !== 'all') {
+                        simpleQ = query(
+                            collection(db, 'ratings'), 
+                            where('rating', '==', parseInt(currentFilter)),
+                            limit(20)
+                        );
+                    }
+                    
+                    querySnapshot = await getDocs(simpleQ);
+                    
+                    // Sort manually in JavaScript
+                    const docs = [];
+                    querySnapshot.forEach((doc) => {
+                        docs.push({ id: doc.id, data: doc.data() });
+                    });
+                    
+                    // Sort by timestamp manually
+                    docs.sort((a, b) => {
+                        const timestampA = a.data.timestamp?.toDate?.() || new Date(0);
+                        const timestampB = b.data.timestamp?.toDate?.() || new Date(0);
+                        return timestampB - timestampA; // desc order
+                    });
+                    
+                    // Create a mock QuerySnapshot-like object
+                    querySnapshot = {
+                        empty: docs.length === 0,
+                        size: docs.length,
+                        forEach: (callback) => {
+                            docs.forEach((docData) => {
+                                callback({
+                                    id: docData.id,
+                                    data: () => docData.data
+                                });
+                            });
+                        }
+                    };
                 }
-                
-                const querySnapshot = await getDocs(q);
                 let reviewsHtml = '';
                 
                 querySnapshot.forEach((doc) => {
