@@ -718,6 +718,7 @@
                         <button class="tab" onclick="switchToTab('leaderboard')" id="tab-leaderboard">🏆 Leaderboard</button>
                         <button class="tab" onclick="switchToTab('recent')" id="tab-recent">💬 Recent Reviews</button>
                         <button class="tab" onclick="switchToTab('analytics')" id="tab-analytics">📈 Analytics</button>
+                        <button class="tab hidden" onclick="switchToTab('admin')" id="tab-admin">🛡️ Admin Panel</button>
                     </div>
 
                     <!-- Search Tab -->
@@ -817,6 +818,104 @@
                             <div id="category-analysis"></div>
                         </div>
                     </div>
+
+                    <!-- Admin Panel Tab -->
+                    <div id="admin-content" class="tab-content">
+                        <div style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1)); border: 2px solid var(--error-color); border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+                            <h2 style="color: var(--error-color); margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+                                🛡️ Admin Control Panel
+                                <span style="background: var(--error-color); color: white; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600;">RESTRICTED ACCESS</span>
+                            </h2>
+                            <p style="color: var(--text-secondary); margin-bottom: 0; font-size: 0.9rem;">
+                                <strong>⚠️ Warning:</strong> This area contains sensitive moderation tools. Only authorized administrators have access to these functions.
+                            </p>
+                        </div>
+
+                        <!-- Admin Stats -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color);">
+                                <div style="font-size: 1.8rem; font-weight: 700; color: var(--error-color); margin-bottom: 8px;" id="admin-total-reports">-</div>
+                                <div style="color: var(--text-secondary); font-size: 0.85rem;">🚩 Total Reports</div>
+                            </div>
+                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color);">
+                                <div style="font-size: 1.8rem; font-weight: 700; color: var(--warning-color); margin-bottom: 8px;" id="admin-pending-reports">-</div>
+                                <div style="color: var(--text-secondary); font-size: 0.85rem;">⏳ Pending Reports</div>
+                            </div>
+                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color);">
+                                <div style="font-size: 1.8rem; font-weight: 700; color: var(--primary-color); margin-bottom: 8px;" id="admin-total-users">-</div>
+                                <div style="color: var(--text-secondary); font-size: 0.85rem;">👥 Total Users</div>
+                            </div>
+                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; text-align: center; border: 1px solid var(--border-color);">
+                                <div style="font-size: 1.8rem; font-weight: 700; color: var(--success-color); margin-bottom: 8px;" id="admin-total-reviews">-</div>
+                                <div style="color: var(--text-secondary); font-size: 0.85rem;">💬 All Reviews</div>
+                            </div>
+                        </div>
+
+                        <!-- Admin Actions -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                            <!-- Reports Management -->
+                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color);">
+                                <h3 style="color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                    🚩 Reports Management
+                                </h3>
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <button class="btn btn-danger" onclick="loadReports()" style="font-size: 0.9rem;">
+                                        📋 View All Reports
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="loadPendingReports()" style="font-size: 0.9rem;">
+                                        ⏳ Pending Reports Only
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="exportReports()" style="font-size: 0.9rem;">
+                                        📥 Export Reports
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- User Management -->
+                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color);">
+                                <h3 style="color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                    👥 User Management
+                                </h3>
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <button class="btn" onclick="loadUserStats()" style="font-size: 0.9rem;">
+                                        📊 User Statistics
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="loadProblemUsers()" style="font-size: 0.9rem;">
+                                        ⚠️ Flagged Users
+                                    </button>
+                                    <input type="email" id="admin-user-search" placeholder="Search user by email..." style="padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--glass-bg); color: var(--text-primary); font-size: 0.9rem;">
+                                    <button class="btn btn-secondary" onclick="searchUser()" style="font-size: 0.9rem;">
+                                        🔍 Search User
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Review Management -->
+                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border-color);">
+                                <h3 style="color: var(--text-primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                    💬 Review Management
+                                </h3>
+                                <div style="display: flex; flex-direction: column; gap: 12px;">
+                                    <button class="btn" onclick="loadFlaggedReviews()" style="font-size: 0.9rem;">
+                                        🚩 Flagged Reviews
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="loadRecentReviews()" style="font-size: 0.9rem;">
+                                        📝 Recent Reviews
+                                    </button>
+                                    <button class="btn btn-danger" onclick="cleanupDatabase()" style="font-size: 0.9rem;">
+                                        🧹 Database Cleanup
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Admin Content Area -->
+                        <div id="admin-results" style="background: var(--glass-bg); border-radius: 12px; padding: 24px; border: 1px solid var(--border-color);">
+                            <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">
+                                Select an admin action above to get started.
+                            </p>
+                        </div>
+                    </div>
                 </div>
             `;
 
@@ -826,6 +925,607 @@
             initializeTabs();
             loadRecentSearches();
         }
+
+        // Admin Security - Only authorized email addresses
+        const ADMIN_EMAILS = [
+            'hendkai@gmail.com', // Your actual admin email - CHANGE THIS TO YOUR REAL EMAIL!
+            'admin@dota-rating.com' // Add more admin emails here if needed
+        ];
+
+        function isAdmin(userEmail) {
+            return ADMIN_EMAILS.includes(userEmail?.toLowerCase());
+        }
+
+        function checkAdminAccess() {
+            if (!currentUser || !isAdmin(currentUser.email)) {
+                showToast('Access denied. Admin privileges required.', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        function showAdminTab() {
+            const adminTab = document.getElementById('tab-admin');
+            if (adminTab && isAdmin(currentUser?.email)) {
+                adminTab.classList.remove('hidden');
+            }
+        }
+
+        function hideAdminTab() {
+            const adminTab = document.getElementById('tab-admin');
+            if (adminTab) {
+                adminTab.classList.add('hidden');
+            }
+        }
+
+        // Admin Functions
+        globalThis.loadReports = async function() {
+            if (!checkAdminAccess()) return;
+            
+            try {
+                const adminResults = document.getElementById('admin-results');
+                adminResults.innerHTML = '<div style="text-align: center; padding: 20px;"><span class="loading-spinner"></span> Loading reports...</div>';
+                
+                const reportsQuery = query(
+                    collection(db, 'reports'),
+                    orderBy('timestamp', 'desc'),
+                    limit(50)
+                );
+                
+                const snapshot = await getDocs(reportsQuery);
+                let reportsHtml = '<h3 style="color: var(--text-primary); margin-bottom: 20px;">🚩 All Reports</h3>';
+                
+                if (snapshot.empty) {
+                    reportsHtml += '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No reports found.</p>';
+                } else {
+                    snapshot.forEach((doc) => {
+                        const report = doc.data();
+                        const date = report.timestamp?.toDate?.().toLocaleDateString() || 'Unknown';
+                        const status = report.status || 'pending';
+                        const statusColor = status === 'resolved' ? 'var(--success-color)' : 
+                                          status === 'rejected' ? 'var(--error-color)' : 'var(--warning-color)';
+                        
+                        reportsHtml += `
+                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; margin: 16px 0; border-left: 4px solid ${statusColor};">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
+                                    <div>
+                                        <strong style="color: var(--text-primary);">Report #${doc.id.slice(-6)}</strong>
+                                        <span style="background: ${statusColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; margin-left: 8px;">${status.toUpperCase()}</span>
+                                    </div>
+                                    <div style="color: var(--text-muted); font-size: 0.85rem;">${date}</div>
+                                </div>
+                                
+                                <div style="margin-bottom: 12px;">
+                                    <strong style="color: var(--text-primary);">Reason:</strong> 
+                                    <span style="color: var(--text-secondary);">${report.reason || 'Not specified'}</span>
+                                </div>
+                                
+                                <div style="margin-bottom: 12px;">
+                                    <strong style="color: var(--text-primary);">Reported by:</strong> 
+                                    <span style="color: var(--text-secondary);">${report.reporterName || report.reporterEmail}</span>
+                                </div>
+                                
+                                <div style="margin-bottom: 12px;">
+                                    <strong style="color: var(--text-primary);">Reported reviewer:</strong> 
+                                    <span style="color: var(--text-secondary);">${report.reportedReviewerName}</span>
+                                </div>
+                                
+                                ${report.details ? `
+                                    <div style="margin-bottom: 12px;">
+                                        <strong style="color: var(--text-primary);">Details:</strong><br>
+                                        <span style="color: var(--text-secondary); font-style: italic;">${report.details}</span>
+                                    </div>
+                                ` : ''}
+                                
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <button class="btn btn-small" onclick="viewReportedReview('${report.reviewId}')" style="font-size: 0.8rem;">
+                                        👁️ View Review
+                                    </button>
+                                    ${status === 'pending' ? `
+                                        <button class="btn btn-small btn-success" onclick="resolveReport('${doc.id}', 'resolved')" style="font-size: 0.8rem;">
+                                            ✅ Resolve
+                                        </button>
+                                        <button class="btn btn-small btn-danger" onclick="resolveReport('${doc.id}', 'rejected')" style="font-size: 0.8rem;">
+                                            ❌ Reject
+                                        </button>
+                                        <button class="btn btn-small btn-danger" onclick="deleteReportedReview('${report.reviewId}', '${doc.id}')" style="font-size: 0.8rem;">
+                                            🗑️ Delete Review
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                adminResults.innerHTML = reportsHtml;
+                updateAdminStats();
+                
+            } catch (error) {
+                console.error('Error loading reports:', error);
+                document.getElementById('admin-results').innerHTML = 
+                    '<p style="color: var(--error-color); text-align: center; padding: 40px 0;">Failed to load reports</p>';
+            }
+        };
+
+        globalThis.loadPendingReports = async function() {
+            if (!checkAdminAccess()) return;
+            
+            try {
+                const reportsQuery = query(
+                    collection(db, 'reports'),
+                    where('status', '==', 'pending'),
+                    orderBy('timestamp', 'desc')
+                );
+                
+                const snapshot = await getDocs(reportsQuery);
+                // Similar logic as loadReports but filtered for pending only
+                loadReports(); // For now, just call loadReports and filter UI-side
+                
+            } catch (error) {
+                console.error('Error loading pending reports:', error);
+            }
+        };
+
+        globalThis.resolveReport = async function(reportId, newStatus) {
+            if (!checkAdminAccess()) return;
+            
+            try {
+                const reportRef = doc(db, 'reports', reportId);
+                await updateDoc(reportRef, {
+                    status: newStatus,
+                    resolvedBy: currentUser.email,
+                    resolvedAt: new Date()
+                });
+                
+                showToast(`Report ${newStatus} successfully!`, 'success');
+                loadReports(); // Reload reports
+                
+            } catch (error) {
+                console.error('Error resolving report:', error);
+                showToast('Failed to resolve report', 'error');
+            }
+        };
+
+        globalThis.deleteReportedReview = async function(reviewId, reportId) {
+            if (!checkAdminAccess()) return;
+            
+            if (!confirm('⚠️ Are you sure you want to permanently delete this review? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                // Delete the review
+                await deleteDoc(doc(db, 'ratings', reviewId));
+                
+                // Update report status
+                await updateDoc(doc(db, 'reports', reportId), {
+                    status: 'resolved',
+                    action: 'review_deleted',
+                    resolvedBy: currentUser.email,
+                    resolvedAt: new Date()
+                });
+                
+                showToast('Review deleted successfully!', 'success');
+                loadReports(); // Reload reports
+                
+            } catch (error) {
+                console.error('Error deleting review:', error);
+                showToast('Failed to delete review', 'error');
+            }
+        };
+
+        globalThis.loadUserStats = async function() {
+            if (!checkAdminAccess()) return;
+            
+            try {
+                const adminResults = document.getElementById('admin-results');
+                adminResults.innerHTML = '<div style="text-align: center; padding: 20px;"><span class="loading-spinner"></span> Loading user statistics...</div>';
+                
+                // Get unique users from reviews
+                const reviewsSnapshot = await getDocs(collection(db, 'ratings'));
+                const userEmails = new Set();
+                const userStats = {};
+                
+                reviewsSnapshot.forEach((doc) => {
+                    const review = doc.data();
+                    const email = review.reviewerEmail;
+                    if (email) {
+                        userEmails.add(email);
+                        if (!userStats[email]) {
+                            userStats[email] = {
+                                email: email,
+                                name: review.reviewerName || email.split('@')[0],
+                                reviewCount: 0,
+                                avgTrustScore: 0,
+                                reportCount: 0
+                            };
+                        }
+                        userStats[email].reviewCount++;
+                    }
+                });
+
+                // Sort by review count
+                const sortedUsers = Object.values(userStats).sort((a, b) => b.reviewCount - a.reviewCount);
+                
+                let statsHtml = '<h3 style="color: var(--text-primary); margin-bottom: 20px;">👥 User Statistics</h3>';
+                statsHtml += `<p style="color: var(--text-secondary); margin-bottom: 20px;">Total registered users: ${userEmails.size}</p>`;
+                
+                sortedUsers.forEach((user, index) => {
+                    statsHtml += `
+                        <div style="background: var(--glass-bg); border-radius: 12px; padding: 16px; margin: 12px 0; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="color: var(--text-primary);">${user.name}</strong>
+                                <div style="color: var(--text-muted); font-size: 0.8rem;">${user.email}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--primary-color); font-weight: 600;">${user.reviewCount} reviews</div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem;">Rank #${index + 1}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                adminResults.innerHTML = statsHtml;
+                
+            } catch (error) {
+                console.error('Error loading user stats:', error);
+                document.getElementById('admin-results').innerHTML = 
+                    '<p style="color: var(--error-color); text-align: center; padding: 40px 0;">Failed to load user statistics</p>';
+            }
+        };
+
+        globalThis.loadFlaggedReviews = async function() {
+            if (!checkAdminAccess()) return;
+            
+            try {
+                const adminResults = document.getElementById('admin-results');
+                adminResults.innerHTML = '<div style="text-align: center; padding: 20px;"><span class="loading-spinner"></span> Loading flagged reviews...</div>';
+                
+                const flaggedQuery = query(
+                    collection(db, 'ratings'),
+                    where('reported', '==', true),
+                    orderBy('timestamp', 'desc')
+                );
+                
+                const snapshot = await getDocs(flaggedQuery);
+                let flaggedHtml = '<h3 style="color: var(--text-primary); margin-bottom: 20px;">🚩 Flagged Reviews</h3>';
+                
+                if (snapshot.empty) {
+                    flaggedHtml += '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No flagged reviews found.</p>';
+                } else {
+                    snapshot.forEach((doc) => {
+                        const review = doc.data();
+                        const date = review.timestamp?.toDate?.().toLocaleDateString() || 'Unknown';
+                        const reportCount = review.reportCount || 0;
+                        const stars = '⭐'.repeat(review.rating || 0);
+                        
+                        flaggedHtml += `
+                            <div style="background: var(--glass-bg); border-radius: 12px; padding: 20px; margin: 16px 0; border-left: 4px solid var(--error-color);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px;">
+                                    <div>
+                                        <strong style="color: var(--text-primary);">Review by ${review.reviewerName || review.reviewerEmail}</strong>
+                                        <div style="color: var(--text-muted); font-size: 0.8rem;">For: ${review.playerName}</div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="color: #fbbf24; font-size: 1.1rem;">${stars}</div>
+                                        <div style="color: var(--error-color); font-size: 0.8rem; font-weight: 600;">${reportCount} reports</div>
+                                    </div>
+                                </div>
+                                
+                                <div style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px; padding: 12px; background: rgba(0,0,0,0.1); border-radius: 8px;">
+                                    "${review.comment}"
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                    <div style="font-size: 0.85rem; color: var(--text-muted);">${date}</div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="btn btn-small btn-danger" onclick="deleteReview('${doc.id}')" style="font-size: 0.8rem;">
+                                            🗑️ Delete
+                                        </button>
+                                        <button class="btn btn-small" onclick="unflagReview('${doc.id}')" style="font-size: 0.8rem;">
+                                            ✅ Clear Flag
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                
+                adminResults.innerHTML = flaggedHtml;
+                
+            } catch (error) {
+                console.error('Error loading flagged reviews:', error);
+                document.getElementById('admin-results').innerHTML = 
+                    '<p style="color: var(--error-color); text-align: center; padding: 40px 0;">Failed to load flagged reviews</p>';
+            }
+        };
+
+        globalThis.deleteReview = async function(reviewId) {
+            if (!checkAdminAccess()) return;
+            
+            if (!confirm('⚠️ Are you sure you want to permanently delete this review?')) {
+                return;
+            }
+            
+            try {
+                await deleteDoc(doc(db, 'ratings', reviewId));
+                showToast('Review deleted successfully!', 'success');
+                loadFlaggedReviews(); // Reload flagged reviews
+                
+            } catch (error) {
+                console.error('Error deleting review:', error);
+                showToast('Failed to delete review', 'error');
+            }
+        };
+
+        globalThis.unflagReview = async function(reviewId) {
+            if (!checkAdminAccess()) return;
+            
+            try {
+                await updateDoc(doc(db, 'ratings', reviewId), {
+                    reported: false,
+                    reportCount: 0
+                });
+                
+                showToast('Review flag cleared!', 'success');
+                loadFlaggedReviews(); // Reload flagged reviews
+                
+            } catch (error) {
+                console.error('Error clearing flag:', error);
+                showToast('Failed to clear flag', 'error');
+            }
+        };
+
+                 async function updateAdminStats() {
+             if (!isAdmin(currentUser?.email)) return;
+             
+             try {
+                 // Total reports
+                 const reportsSnapshot = await getDocs(collection(db, 'reports'));
+                 document.getElementById('admin-total-reports').textContent = reportsSnapshot.size;
+                 
+                 // Pending reports
+                 const pendingQuery = query(collection(db, 'reports'), where('status', '==', 'pending'));
+                 const pendingSnapshot = await getDocs(pendingQuery);
+                 document.getElementById('admin-pending-reports').textContent = pendingSnapshot.size;
+                 
+                 // Total reviews
+                 const reviewsSnapshot = await getDocs(collection(db, 'ratings'));
+                 document.getElementById('admin-total-reviews').textContent = reviewsSnapshot.size;
+                 
+                 // Unique users
+                 const userEmails = new Set();
+                 reviewsSnapshot.forEach((doc) => {
+                     const email = doc.data().reviewerEmail;
+                     if (email) userEmails.add(email);
+                 });
+                 document.getElementById('admin-total-users').textContent = userEmails.size;
+                 
+             } catch (error) {
+                 console.error('Error updating admin stats:', error);
+             }
+         }
+
+         // Additional Admin Functions
+         globalThis.loadRecentReviews = async function() {
+             if (!checkAdminAccess()) return;
+             loadReviews(); // Use existing function
+         };
+
+         globalThis.loadProblemUsers = async function() {
+             if (!checkAdminAccess()) return;
+             
+             try {
+                 const adminResults = document.getElementById('admin-results');
+                 adminResults.innerHTML = '<div style="text-align: center; padding: 20px;"><span class="loading-spinner"></span> Loading problem users...</div>';
+                 
+                 // Get users with reported reviews
+                 const reportedQuery = query(
+                     collection(db, 'ratings'),
+                     where('reported', '==', true)
+                 );
+                 
+                 const snapshot = await getDocs(reportedQuery);
+                 const problemUsers = {};
+                 
+                 snapshot.forEach((doc) => {
+                     const review = doc.data();
+                     const email = review.reviewerEmail;
+                     if (email) {
+                         if (!problemUsers[email]) {
+                             problemUsers[email] = {
+                                 email: email,
+                                 name: review.reviewerName || email.split('@')[0],
+                                 reportedReviews: 0,
+                                 totalReports: 0
+                             };
+                         }
+                         problemUsers[email].reportedReviews++;
+                         problemUsers[email].totalReports += (review.reportCount || 0);
+                     }
+                 });
+
+                 const sortedProblemUsers = Object.values(problemUsers).sort((a, b) => b.totalReports - a.totalReports);
+                 
+                 let problemHtml = '<h3 style="color: var(--text-primary); margin-bottom: 20px;">⚠️ Flagged Users</h3>';
+                 
+                 if (sortedProblemUsers.length === 0) {
+                     problemHtml += '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No problem users found.</p>';
+                 } else {
+                     sortedProblemUsers.forEach((user) => {
+                         problemHtml += `
+                             <div style="background: var(--glass-bg); border-radius: 12px; padding: 16px; margin: 12px 0; border-left: 4px solid var(--error-color);">
+                                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                     <div>
+                                         <strong style="color: var(--text-primary);">${user.name}</strong>
+                                         <div style="color: var(--text-muted); font-size: 0.8rem;">${user.email}</div>
+                                     </div>
+                                     <div style="text-align: right;">
+                                         <div style="color: var(--error-color); font-weight: 600;">${user.totalReports} total reports</div>
+                                         <div style="color: var(--text-muted); font-size: 0.8rem;">${user.reportedReviews} flagged reviews</div>
+                                     </div>
+                                 </div>
+                                 <div style="display: flex; gap: 8px; margin-top: 12px;">
+                                     <button class="btn btn-small" onclick="viewUserReviews('${user.email}')" style="font-size: 0.8rem;">
+                                         👁️ View Reviews
+                                     </button>
+                                     <button class="btn btn-small btn-danger" onclick="suspendUser('${user.email}')" style="font-size: 0.8rem;">
+                                         🚫 Suspend User
+                                     </button>
+                                 </div>
+                             </div>
+                         `;
+                     });
+                 }
+                 
+                 adminResults.innerHTML = problemHtml;
+                 
+             } catch (error) {
+                 console.error('Error loading problem users:', error);
+                 document.getElementById('admin-results').innerHTML = 
+                     '<p style="color: var(--error-color); text-align: center; padding: 40px 0;">Failed to load problem users</p>';
+             }
+         };
+
+         globalThis.searchUser = async function() {
+             if (!checkAdminAccess()) return;
+             
+             const email = document.getElementById('admin-user-search').value.trim();
+             if (!email) {
+                 showToast('Please enter an email address', 'error');
+                 return;
+             }
+             
+             try {
+                 const adminResults = document.getElementById('admin-results');
+                 adminResults.innerHTML = '<div style="text-align: center; padding: 20px;"><span class="loading-spinner"></span> Searching user...</div>';
+                 
+                 // Search for reviews by this user
+                 const userQuery = query(
+                     collection(db, 'ratings'),
+                     where('reviewerEmail', '==', email)
+                 );
+                 
+                 const snapshot = await getDocs(userQuery);
+                 
+                 let userHtml = `<h3 style="color: var(--text-primary); margin-bottom: 20px;">🔍 User: ${email}</h3>`;
+                 
+                 if (snapshot.empty) {
+                     userHtml += '<p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No reviews found for this user.</p>';
+                 } else {
+                     userHtml += `<p style="color: var(--text-secondary); margin-bottom: 20px;">Found ${snapshot.size} reviews by this user:</p>`;
+                     
+                     snapshot.forEach((doc) => {
+                         const review = doc.data();
+                         const date = review.timestamp?.toDate?.().toLocaleDateString() || 'Unknown';
+                         const stars = '⭐'.repeat(review.rating || 0);
+                         const isReported = review.reported ? 'var(--error-color)' : 'var(--border-color)';
+                         
+                         userHtml += `
+                             <div style="background: var(--glass-bg); border-radius: 12px; padding: 16px; margin: 12px 0; border-left: 4px solid ${isReported};">
+                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                     <div>
+                                         <strong style="color: var(--text-primary);">Review for: ${review.playerName}</strong>
+                                         ${review.reported ? '<span style="background: var(--error-color); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 8px;">REPORTED</span>' : ''}
+                                     </div>
+                                     <div style="color: #fbbf24;">${stars}</div>
+                                 </div>
+                                 <div style="color: var(--text-secondary); margin-bottom: 8px;">"${review.comment}"</div>
+                                 <div style="display: flex; justify-content: space-between; align-items: center;">
+                                     <div style="color: var(--text-muted); font-size: 0.8rem;">${date}</div>
+                                     <div style="display: flex; gap: 8px;">
+                                         ${review.reported ? `
+                                             <button class="btn btn-small btn-danger" onclick="deleteReview('${doc.id}')" style="font-size: 0.8rem;">
+                                                 🗑️ Delete
+                                             </button>
+                                         ` : ''}
+                                     </div>
+                                 </div>
+                             </div>
+                         `;
+                     });
+                 }
+                 
+                 adminResults.innerHTML = userHtml;
+                 
+             } catch (error) {
+                 console.error('Error searching user:', error);
+                 document.getElementById('admin-results').innerHTML = 
+                     '<p style="color: var(--error-color); text-align: center; padding: 40px 0;">Failed to search user</p>';
+             }
+         };
+
+         globalThis.exportReports = async function() {
+             if (!checkAdminAccess()) return;
+             
+             try {
+                 const reportsSnapshot = await getDocs(collection(db, 'reports'));
+                 const reports = [];
+                 
+                 reportsSnapshot.forEach((doc) => {
+                     reports.push({
+                         id: doc.id,
+                         ...doc.data(),
+                         timestamp: doc.data().timestamp?.toDate?.().toISOString() || null
+                     });
+                 });
+                 
+                 const csvContent = "data:text/csv;charset=utf-8," 
+                     + "ID,Reporter Email,Reporter Name,Reported Reviewer,Reason,Details,Status,Timestamp\n"
+                     + reports.map(r => `"${r.id}","${r.reporterEmail}","${r.reporterName}","${r.reportedReviewerName}","${r.reason}","${r.details || ''}","${r.status}","${r.timestamp}"`).join("\n");
+                 
+                 const encodedUri = encodeURI(csvContent);
+                 const link = document.createElement("a");
+                 link.setAttribute("href", encodedUri);
+                 link.setAttribute("download", `dota-reports-${new Date().toISOString().split('T')[0]}.csv`);
+                 document.body.appendChild(link);
+                 link.click();
+                 document.body.removeChild(link);
+                 
+                 showToast('Reports exported successfully!', 'success');
+                 
+             } catch (error) {
+                 console.error('Error exporting reports:', error);
+                 showToast('Failed to export reports', 'error');
+             }
+         };
+
+         globalThis.cleanupDatabase = async function() {
+             if (!checkAdminAccess()) return;
+             
+             if (!confirm('⚠️ This will permanently delete all resolved reports and old data. Are you sure?')) {
+                 return;
+             }
+             
+             try {
+                 // Delete resolved reports older than 30 days
+                 const thirtyDaysAgo = new Date();
+                 thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                 
+                 const oldReportsQuery = query(
+                     collection(db, 'reports'),
+                     where('status', '==', 'resolved'),
+                     where('resolvedAt', '<', thirtyDaysAgo)
+                 );
+                 
+                 const snapshot = await getDocs(oldReportsQuery);
+                 let deletedCount = 0;
+                 
+                 for (const docSnap of snapshot.docs) {
+                     await deleteDoc(doc(db, 'reports', docSnap.id));
+                     deletedCount++;
+                 }
+                 
+                 showToast(`Database cleanup completed. Deleted ${deletedCount} old reports.`, 'success');
+                 updateAdminStats();
+                 
+             } catch (error) {
+                 console.error('Error cleaning database:', error);
+                 showToast('Failed to cleanup database', 'error');
+             }
+         };
 
         // Make ALL search and app functions global
         globalThis.handleSearchInput = function() {
@@ -2560,7 +3260,7 @@
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 12px;">
                                     <div style="color: #fbbf24; font-size: 1.2rem;">${stars}</div>
-                                    <button onclick="showReportModal('${doc.id}')" style="background: rgba(239, 68, 68, 0.1); color: var(--error-color); border: none; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" title="Report inappropriate content">🚩 Report</button>
+                                    <button onclick="reportReview('${doc.id}', '${reviewerName}')" style="background: rgba(239, 68, 68, 0.1); color: var(--error-color); border: none; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s ease;" title="Report inappropriate content">🚩 Report</button>
                                 </div>
                             </div>
                             <div style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">${review.comment}</div>
@@ -2639,6 +3339,14 @@
             // Load main app content
             loadMainAppContent();
             loadReviews();
+            
+            // Show admin tab if user is admin
+            if (currentUser && isAdmin(currentUser.email)) {
+                showAdminTab();
+                updateAdminStats();
+            } else {
+                hideAdminTab();
+            }
         }
 
         function showMessage(elementId, message, type) {
