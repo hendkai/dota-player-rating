@@ -696,6 +696,9 @@
                         <span itemprop="name">Dota Player Rating</span> - 
                         <span itemprop="description">Professional Dota 2 player rating and community platform</span>
                     </span>
+                    <br>
+                    <a href="#" onclick="showImprint()" style="color: var(--primary-color); text-decoration: none; margin-right: 16px;">Legal Notice</a>
+                    <a href="#" onclick="showDataProtection()" style="color: var(--primary-color); text-decoration: none;">Privacy Policy</a>
                 </p>
             </div>
         </footer>
@@ -905,6 +908,128 @@
             showToast('E-Mail-Adresse angezeigt!', 'success');
         };
 
+        // Show Data Protection Modal
+        globalThis.showDataProtection = function() {
+            const modalHTML = `
+                <div id="data-protection-modal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px;">
+                    <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; max-width: 600px; max-height: 80vh; overflow-y: auto; width: 100%; border: 1px solid var(--border-color); backdrop-filter: blur(20px);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="color: var(--text-primary); margin: 0;">🛡️ Privacy Policy</h3>
+                            <button onclick="closeDataProtectionModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem;">&times;</button>
+                        </div>
+                        
+                        <div style="color: var(--text-secondary); line-height: 1.6;">
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">1. Controller</h4>
+                            <p>Hendrik Kaiser<br>
+                            E-Mail: <span onclick="showEmail()" style="cursor: pointer; color: var(--primary-color);">Click to reveal email</span></p>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">2. Data Processing</h4>
+                            <p>We only process necessary data:</p>
+                            <ul>
+                                <li>Email address (for authentication)</li>
+                                <li>Player name (for rating purposes)</li>
+                                <li>Reviews and comments</li>
+                                <li>Technical data (IP address, browser information)</li>
+                            </ul>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">3. Legal Basis</h4>
+                            <p>Art. 6 (1) lit. a GDPR (consent) and lit. f GDPR (legitimate interest)</p>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">4. Data Protection & Processing</h4>
+                            <h5 style="color: var(--secondary-color); margin: 12px 0 6px 0;">Firebase (Google)</h5>
+                            <p>Authentication and data storage through Google Firebase.</p>
+                            <p>Firebase may process IP addresses and technical data. Privacy Policy: <a href="https://policies.google.com/privacy" target="_blank" style="color: var(--primary-color);">https://policies.google.com/privacy</a></p>
+                            
+                            <h5 style="color: var(--secondary-color); margin: 12px 0 6px 0;">External APIs</h5>
+                            <p>The website uses OpenDota API (opendota.com) for player data. IP addresses may be transmitted in this process.</p>
+                            
+                            <h5 style="color: var(--secondary-color); margin: 12px 0 6px 0;">Your Rights</h5>
+                            <p>You have the right to access, rectification, erasure, and portability of your data, as well as the right to object to processing. Contact information above.</p>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">Player Rating Notice</h4>
+                            <p>The player rating function serves purely for private and playful assessment within the context of the game "Dota 2".<br>
+                            No personal data is published.<br>
+                            Ratings are subjective and do not constitute public or legally binding statements.</p>
+                            
+                            <p style="margin-top: 24px; font-size: 0.9rem; color: var(--text-muted);">
+                                <strong>Last updated:</strong> December 12, 2024 (expanded with privacy details)
+                            </p>
+                        </div>
+                        
+                        <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+                            <button onclick="closeDataProtectionModal()" class="btn btn-secondary">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        };
+
+        globalThis.closeDataProtectionModal = function() {
+            const modal = document.getElementById('data-protection-modal');
+            if (modal) modal.remove();
+        };
+
+        // Show Imprint Modal
+        globalThis.showImprint = function() {
+            const modalHTML = `
+                <div id="imprint-modal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px;">
+                    <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; max-width: 600px; max-height: 80vh; overflow-y: auto; width: 100%; border: 1px solid var(--border-color); backdrop-filter: blur(20px);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="color: var(--text-primary); margin: 0;">📄 Legal Notice / Imprint</h3>
+                            <button onclick="closeImprintModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem;">&times;</button>
+                        </div>
+                        
+                        <div style="color: var(--text-secondary); line-height: 1.6;">
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">Information according to § 5 TMG</h4>
+                            <p>
+                                Hendrik Kaiser<br>
+                                Private individual<br>
+                                Germany
+                            </p>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">Contact</h4>
+                            <p>E-Mail: <span onclick="showEmail()" style="cursor: pointer; color: var(--primary-color);">Click to reveal email</span></p>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">Editorial Responsibility</h4>
+                            <p>Hendrik Kaiser (Address as above)</p>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">Disclaimer</h4>
+                            <h5 style="color: var(--secondary-color); margin: 12px 0 6px 0;">Liability for Content</h5>
+                            <p>As a service provider, we are responsible for our own content on these pages according to general laws. However, we are not obligated to monitor transmitted or stored third-party information or to investigate circumstances that indicate illegal activity.</p>
+                            
+                            <h5 style="color: var(--secondary-color); margin: 12px 0 6px 0;">Liability for Links</h5>
+                            <p>Our website contains links to external third-party websites over whose content we have no influence. Therefore, we cannot assume any liability for this external content. The respective provider or operator of the pages is always responsible for the content of the linked pages.</p>
+                            
+                            <h5 style="color: var(--secondary-color); margin: 12px 0 6px 0;">Copyright</h5>
+                            <p>The content and works created by the site operators on these pages are subject to German copyright law. Duplication, processing, distribution, and any form of commercialization of such material beyond the scope of copyright requires written consent from its respective author or creator.</p>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">Player Rating Disclaimer</h4>
+                            <p>The player rating function serves purely for private and playful assessment within the context of the game "Dota 2".<br>
+                            No personal data is published.<br>
+                            Ratings are subjective and do not constitute public or legally binding statements.</p>
+                            
+                            <p style="margin-top: 24px; font-size: 0.9rem; color: var(--text-muted);">
+                                <strong>Last updated:</strong> December 12, 2024
+                            </p>
+                        </div>
+                        
+                        <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+                            <button onclick="closeImprintModal()" class="btn btn-secondary">Close</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        };
+
+        globalThis.closeImprintModal = function() {
+            const modal = document.getElementById('imprint-modal');
+            if (modal) modal.remove();
+        };
+
         // Fediverse Integration Functions
         globalThis.shareToFediverse = function(playerName, score, rank) {
             const text = `🎮 Check out ${playerName} - Rank #${rank} on Dota Player Rating with ${score} community score! 
@@ -1045,10 +1170,14 @@
 Building positive gaming communities together.
 
 #Dota2 #Gaming #Community #Fediverse #PositiveGaming
+```
+</script>
+</body>
+</html>
 
 🌍 Join us: ${window.location.origin}`;
              
-             showFediverseShareModal(text);
+              showFediverseShareModal(text);
          };
          
                  // Initialize Fediverse features when page loads
@@ -1408,7 +1537,7 @@ Building positive gaming communities together.
                         <button class="tab" onclick="switchToTab('leaderboard')" id="tab-leaderboard">🏆 Leaderboard</button>
                         <button class="tab" onclick="switchToTab('recent')" id="tab-recent">💬 Recent Reviews</button>
                         <button class="tab" onclick="switchToTab('analytics')" id="tab-analytics">📈 Analytics</button>
-                        <button class="tab" onclick="switchToTab('impressum')" id="tab-impressum">⚖️ Impressum</button>
+
                         <button class="tab hidden" onclick="switchToTab('admin')" id="tab-admin">🛡️ Admin Panel</button>
                     </div>
 
@@ -1509,6 +1638,8 @@ Building positive gaming communities together.
                             <div id="category-analysis"></div>
                         </div>
                     </div>
+
+
 
                     <!-- Admin Panel Tab -->
                     <div id="admin-content" class="tab-content">
@@ -2403,7 +2534,7 @@ Building positive gaming communities together.
             }
         };
 
-                         globalThis.updateAdminStats = async function() {
+        globalThis.updateAdminStats = async function() {
             if (!isAdmin(currentUser?.email)) return;
             
             try {
@@ -6141,6 +6272,10 @@ ${MASTODON_BOT_CONFIG.defaultHashtags}
 
 This post tests the Mastodon integration.
 Timestamp: ${new Date().toLocaleString('en-US')}
+```
+</script>
+</body>
+</html>
 
 ${MASTODON_BOT_CONFIG.defaultHashtags}`;
 
