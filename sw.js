@@ -78,6 +78,11 @@ self.addEventListener('fetch', (event) => {
         return;
     }
     
+    // Skip chrome-extension and other unsupported protocols
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        return;
+    }
+    
     // Handle different types of requests
     if (isStaticResource(request)) {
         // Cache first for static resources
@@ -144,6 +149,12 @@ async function cacheFirst(request) {
 // Network First Strategy
 async function networkFirst(request) {
     try {
+        const url = new URL(request.url);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            // Nicht unterstütztes Protokoll, nicht cachen
+            return fetch(request);
+        }
+        
         const networkResponse = await fetch(request);
         
         if (networkResponse.ok) {
