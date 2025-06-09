@@ -4588,17 +4588,20 @@ Building positive gaming communities together.
                     
                     const stats = playerStats[rating.playerId];
                     stats.totalRatings++;
-                    stats.overallSum += rating.overall || 0;
-                    stats.skillSum += rating.skill || 0;
-                    stats.teamworkSum += rating.teamwork || 0;
-                    stats.communicationSum += rating.communication || 0;
-                    stats.behaviorSum += rating.behavior || 0;
-                    stats.leadershipSum += rating.leadership || 0;
+                    stats.overallSum += rating.overallRating || rating.overall || 0;
+                    stats.skillSum += rating.skillRating || rating.skill || 0;
+                    stats.teamworkSum += rating.teamworkRating || rating.teamwork || 0;
+                    stats.communicationSum += rating.communicationRating || rating.communication || 0;
+                    stats.behaviorSum += rating.behaviorRating || rating.behavior || 0;
+                    stats.leadershipSum += rating.leadershipRating || rating.leadership || 0;
                     
                     // Count positive feedback types
-                    if (rating.overall >= 4) stats.positiveReviews++;
+                    const overallRating = rating.overallRating || rating.overall || 0;
+                    if (overallRating >= 4) stats.positiveReviews++;
                     if (rating.comment && rating.comment.length > 50) stats.constructiveReviews++;
-                    if (rating.behavior >= 4 && rating.communication >= 4) stats.helpfulReviews++;
+                    const behaviorRating = rating.behaviorRating || rating.behavior || 0;
+                    const communicationRating = rating.communicationRating || rating.communication || 0;
+                    if (behaviorRating >= 4 && communicationRating >= 4) stats.helpfulReviews++;
                     
                     // Update last active time
                     if (rating.timestamp > stats.lastActive) {
