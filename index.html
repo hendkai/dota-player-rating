@@ -889,39 +889,117 @@ Building positive gaming communities together.
         }
      </script>
 
-    <!-- Modular JavaScript -->
-    <script type="module" src="assets/js/firebase-config.js"></script>
-    <script type="module" src="assets/js/ui.js"></script>
-    <script type="module" src="assets/js/auth.js"></script>
-    <script type="module" src="assets/js/search.js"></script>
-    <script type="module" src="assets/js/ratings.js"></script>
-    <script type="module" src="assets/js/database.js"></script>
-    <script type="module" src="assets/js/analytics.js"></script>
-    <script type="module" src="assets/js/app.js"></script>
-    
-    <!-- Main App Initialization -->
+    <!-- Firebase SDK -->
     <script type="module">
-        // Initialize the app when modules are loaded
-        import { initializeApp } from './assets/js/app.js';
-        import { initializeTheme } from './assets/js/ui.js';
+        // Import Firebase modules
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, where, limit, doc, getDoc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJEjyJFqyWrHaUcbnfdKe6wK68OJxh7v8",
+            authDomain: "dota-player-rating.firebaseapp.com",
+            projectId: "dota-player-rating",
+            storageBucket: "dota-player-rating.firebasestorage.app",
+            messagingSenderId: "954918119341",
+            appId: "1:954918119341:web:6b489bc72855fd9f2f6324"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global Variables
+        let currentUser = null;
+        globalThis.currentUser = null; // Make currentUser globally accessible
+
+        // Auth Providers
+        const googleProvider = new GoogleAuthProvider();
+
+        // OpenDota API Configuration for Free Tier
+        const OPENDOTA_BASE_URL = 'https://api.opendota.com/api';
+        let lastRequestTime = 0;
+        const MIN_REQUEST_INTERVAL = 1000; // 1 second between requests
         
-        // Wait for DOM to be ready
+        // Rate limiting for reports - prevent spam reporting
+        let lastReportTime = 0;
+        const MIN_REPORT_INTERVAL = 30000; // 30 seconds between reports
+
+        // Theme Management - GLOBAL SCOPE
+        globalThis.toggleTheme = function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.getElementById('theme-icon').textContent = newTheme === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('theme', newTheme);
+            
+            showToast(`Switched to ${newTheme} mode`, 'success');
+        };
+
+        // Initialize theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        document.getElementById('theme-icon').textContent = savedTheme === 'light' ? '🌙' : '☀️';
+
+        // Google Sign In - GLOBAL SCOPE with Enhanced Extension Detection
+        globalThis.signInWithGoogle = async function() {
+            try {
+                console.log('Attempting Google sign in...');
+                
+                // Enhanced browser extension detection and handling
+                const hasLockdown = typeof lockdown !== 'undefined';
+                const hasSES = window.location.href.includes('SES') || 
+                              document.documentElement.innerHTML.includes('SES') ||
+                              (window.console && window.console._isVirtualConsole);
+                
+                if (hasLockdown || hasSES) {
+                    console.warn('⚠️ Browser extension detected (SES/Lockdown) - attempting compatibility mode');
+                    showToast('Browser extension detected. If sign-in fails, try incognito mode or disable security extensions.', 'warning');
+                }
+                
+                const result = await signInWithPopup(auth, googleProvider);
+                console.log('✅ Google sign in successful:', result.user.email);
+                showToast('Successfully signed in with Google!', 'success');
+            } catch (error) {
+                console.error('❌ Google sign in error:', error);
+                let errorMessage = 'Google sign-in failed!';
+                
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = 'Sign-in was cancelled.';
+                } else if (error.code === 'auth/popup-blocked') {
+                    errorMessage = 'Pop-up was blocked. Please allow pop-ups and try again.';
+                } else if (error.code === 'auth/network-request-failed') {
+                    errorMessage = 'Network error. Please check your connection and try again.';
+                } else if (error.code === 'auth/internal-error') {
+                    errorMessage = 'Internal error. Please try again later.';
+                } else if (error.message && (
+                    error.message.includes('lockdown') || 
+                    error.message.includes('SES') ||
+                    error.message.includes('hardened') ||
+                    error.message.includes('intrinsic')
+                )) {
+                    errorMessage = 'Browser extension conflict detected. Please try:\n• Disable security/privacy extensions temporarily\n• Use incognito/private mode\n• Try email/password login instead';
+                }
+                
+                showMessage('auth-message', errorMessage, 'error');
+                console.log('Full error details:', error);
+            }
+        };
+
+        // Event Listeners - DOM Ready Handler
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🎯 Setting up event listeners...');
             
-            // Initialize theme
-            initializeTheme();
-            
-            // Initialize the app
-            initializeApp();
-            
             // Google Sign In Button
             const googleBtn = document.getElementById('google-signin-btn');
-            if (googleBtn && typeof globalThis.signInWithGoogle === 'function') {
+            if (googleBtn) {
                 googleBtn.addEventListener('click', globalThis.signInWithGoogle);
                 console.log('✅ Google sign-in button event listener attached');
             } else {
-                console.warn('⚠️ Google sign-in button not found or function not available');
+                console.warn('⚠️ Google sign-in button not found');
             }
         });
 
