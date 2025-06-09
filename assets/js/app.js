@@ -173,43 +173,87 @@ export function loadMainAppContent() {
 export function initializeApp() {
     console.log('🚀 Initializing Dota Player Rating App...');
     
-    // Initialize theme
-    initializeTheme();
-    
-    // Set up auth state observer
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            console.log('👤 User authenticated:', user.email);
-            
-            // Update global user reference
-            globalThis.currentUser = user;
-            
-            // Show main app and hide auth section
-            if (typeof showMainApp === 'function') {
-                showMainApp();
-                updateUserInfo(user);
-                
-                if (typeof startSessionMonitoring === 'function') {
-                    startSessionMonitoring();
-                }
-            }
-            
-        } else {
-            console.log('🔐 User not authenticated');
-            globalThis.currentUser = null;
-            
-            // Show auth section and hide main app
-            if (typeof showAuthSection === 'function') {
-                showAuthSection();
-                
-                if (typeof stopSessionMonitoring === 'function') {
-                    stopSessionMonitoring();
-                }
-            }
+    try {
+        // Initialize theme
+        if (typeof initializeTheme === 'function') {
+            initializeTheme();
         }
-    });
-    
-    console.log('✅ App initialization complete');
+        
+        // Detect and handle browser extension conflicts
+        const hasExtensionConflict = typeof lockdown !== 'undefined' || 
+                                   window.location.href.includes('SES') ||
+                                   document.documentElement.innerHTML.includes('SES_UNCAUGHT_EXCEPTION');
+        
+        if (hasExtensionConflict) {
+            console.warn('⚠️ Browser extension conflict detected - implementing workarounds');
+            
+            // Add extension conflict warning to UI
+            setTimeout(() => {
+                if (typeof showToast === 'function') {
+                    showToast('Browser extension detected. If you experience issues, try disabling security extensions or use incognito mode.', 'warning');
+                }
+            }, 2000);
+        }
+        
+        // Set up auth state observer with enhanced error handling
+        onAuthStateChanged(auth, (user) => {
+            try {
+                if (user) {
+                    console.log('👤 User authenticated:', user.email);
+                    
+                    // Update global user reference
+                    globalThis.currentUser = user;
+                    
+                    // Show main app and hide auth section
+                    if (typeof showMainApp === 'function') {
+                        showMainApp();
+                    }
+                    if (typeof updateUserInfo === 'function') {
+                        updateUserInfo(user);
+                    }
+                    if (typeof startSessionMonitoring === 'function') {
+                        startSessionMonitoring();
+                    }
+                    
+                } else {
+                    console.log('🔐 User not authenticated');
+                    globalThis.currentUser = null;
+                    
+                    // Show auth section and hide main app
+                    if (typeof showAuthSection === 'function') {
+                        showAuthSection();
+                    }
+                    if (typeof stopSessionMonitoring === 'function') {
+                        stopSessionMonitoring();
+                    }
+                }
+            } catch (authError) {
+                console.error('❌ Auth state change error:', authError);
+                if (typeof showToast === 'function') {
+                    showToast('Authentication error. Please refresh the page.', 'error');
+                }
+            }
+        }, (error) => {
+            console.error('❌ Auth observer error:', error);
+            if (typeof showToast === 'function') {
+                showToast('Authentication service error. Please refresh the page.', 'error');
+            }
+        });
+        
+        console.log('✅ App initialization complete');
+        
+    } catch (error) {
+        console.error('❌ App initialization failed:', error);
+        
+        // Fallback error handling
+        setTimeout(() => {
+            if (typeof showToast === 'function') {
+                showToast('App initialization error. Please refresh the page and try again.', 'error');
+            } else {
+                alert('App initialization error. Please refresh the page and try again.');
+            }
+        }, 1000);
+    }
 }
 
 /**

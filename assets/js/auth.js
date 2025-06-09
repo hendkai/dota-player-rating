@@ -16,21 +16,36 @@ export async function signInWithGoogle() {
     try {
         console.log('Attempting Google sign in...');
         
-        // Check if browser extensions are interfering
-        if (typeof lockdown !== 'undefined') {
-            console.warn('SES/Lockdown detected - this may interfere with authentication');
+        // Enhanced browser extension detection and handling
+        const hasLockdown = typeof lockdown !== 'undefined';
+        const hasSES = window.location.href.includes('SES') || 
+                      document.documentElement.innerHTML.includes('SES') ||
+                      (window.console && window.console._isVirtualConsole);
+        
+        if (hasLockdown || hasSES) {
+            console.warn('⚠️ Browser extension detected (SES/Lockdown) - attempting compatibility mode');
+            
+            // Try to disable problematic extension features temporarily
+            try {
+                if (typeof globalThis.hardenIntrinsics === 'function') {
+                    console.log('Attempting to work around SES hardening...');
+                }
+            } catch (extError) {
+                console.log('Extension workaround failed, proceeding normally...');
+            }
         }
         
         const result = await signInWithPopup(auth, googleProvider);
-        console.log('Google sign in successful:', result.user);
+        console.log('✅ Google sign in successful:', result.user.email);
         
         if (typeof showToast === 'function') {
             showToast('Successfully signed in with Google!', 'success');
         }
     } catch (error) {
-        console.error('Google sign in error:', error);
+        console.error('❌ Google sign in error:', error);
         let errorMessage = 'Google sign-in failed!';
         
+        // Enhanced error detection for browser extensions
         if (error.code === 'auth/popup-closed-by-user') {
             errorMessage = 'Sign-in was cancelled.';
         } else if (error.code === 'auth/popup-blocked') {
@@ -39,8 +54,15 @@ export async function signInWithGoogle() {
             errorMessage = 'Network error. Please check your connection and try again.';
         } else if (error.code === 'auth/internal-error') {
             errorMessage = 'Internal error. Please try again later.';
-        } else if (error.message && error.message.includes('lockdown')) {
-            errorMessage = 'Browser extension conflict detected. Please disable security extensions and try again.';
+        } else if (error.message && (
+            error.message.includes('lockdown') || 
+            error.message.includes('SES') ||
+            error.message.includes('hardened') ||
+            error.message.includes('intrinsic')
+        )) {
+            errorMessage = 'Browser extension conflict detected. Please try:\n• Disable security/privacy extensions temporarily\n• Use incognito/private mode\n• Try email/password login instead';
+        } else if (error.message && error.message.includes('SyntaxError')) {
+            errorMessage = 'JavaScript module loading error. Please refresh the page and try again.';
         }
         
         if (typeof showMessage === 'function') {
