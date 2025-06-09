@@ -117,17 +117,20 @@ function isNavigationRequest(request) {
 // Cache First Strategy
 async function cacheFirst(request) {
     try {
+        const url = new URL(request.url);
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            // Nicht unterstütztes Protokoll, nicht cachen
+            return fetch(request);
+        }
         const cachedResponse = await caches.match(request);
         if (cachedResponse) {
             return cachedResponse;
         }
-        
         const networkResponse = await fetch(request);
         if (networkResponse.ok) {
             const cache = await caches.open(STATIC_CACHE_NAME);
             cache.put(request, networkResponse.clone());
         }
-        
         return networkResponse;
     } catch (error) {
         console.error('Cache First failed:', error);
