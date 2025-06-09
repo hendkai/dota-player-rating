@@ -29,11 +29,44 @@ A **Progressive Web App (PWA)** for rating and discovering amazing Dota 2 player
   - 😊 **Behavior** - Attitude and sportsmanship
   - 👑 **Leadership** - Shot-calling and leadership qualities
 
+- **🏆 Smart Community Score System:**
+  - Goes beyond simple averages (max 6.0 points possible)
+  - **+0.5 Bonus** for positive reviews (≥4⭐)
+  - **+0.3 Bonus** for constructive feedback (detailed comments)
+  - **+0.2 Bonus** for excellent behavior & communication
+  - **Rewards quality community contributions** over just skill
+
 ### 🔍 **Player Discovery**
 - **OpenDota Integration** - Automatic player data
 - **Steam ID Support** - Various ID formats
 - **Search History** - Recently searched players
 - **Detailed Profiles** - Match history and statistics
+
+### 🏆 **Community Score System**
+> **Intelligent scoring that rewards positive community behavior!**
+
+The **Community Score** goes beyond simple rating averages to encourage positive gaming experiences:
+
+#### **📈 How it Works:**
+```
+Community Score = Base Score + Bonus Points
+```
+
+- **🎯 Base Score**: Average of overall ratings (0-5⭐)
+- **🌟 Positive Bonus**: +0.5 for high ratio of positive reviews (≥4⭐)
+- **💬 Constructive Bonus**: +0.3 for detailed, helpful comments (>50 chars)
+- **🤝 Helpful Bonus**: +0.2 for excellent behavior AND communication (≥4⭐)
+
+#### **💡 Examples:**
+- **Player with 5.0⭐ average + 100% positive + constructive reviews = 5.8 Community Score**
+- **Player with 4.5⭐ average + mixed feedback = 4.7 Community Score**
+- **Maximum possible**: 6.0 (5.0 base + 1.0 bonus)
+
+#### **🎯 Why This System?**
+- **Rewards quality contributors** to the community
+- **Encourages constructive feedback** over simple ratings
+- **Promotes positive behavior** in gaming
+- **Balances skill and attitude** for better teammate discovery
 
 ### 📊 **Advanced Analytics**
 - **📈 Rating Distribution** - Visualization of all ratings
