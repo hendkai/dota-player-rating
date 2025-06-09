@@ -555,6 +555,9 @@
     <div class="container">
         <header class="header" role="banner">
             <div class="header-controls">
+                <button class="theme-toggle" onclick="openDiscord()" title="Join Discord Community" aria-label="Join our Discord community" style="margin-right: 12px;">
+                    <span style="font-size: 18px;">💬</span>
+                </button>
                 <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme" aria-label="Toggle dark/light theme">
                     <span id="theme-icon">🌙</span>
                 </button>
@@ -687,6 +690,12 @@
                     <span style="color: var(--text-secondary); font-size: 0.8rem;">#Esports</span>
                     <span style="color: var(--text-secondary); font-size: 0.8rem;">#GamingCommunity</span>
                     <span style="color: var(--text-secondary); font-size: 0.8rem;">#Steam</span>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                    <button onclick="openDiscord()" class="btn" style="padding: 8px 16px; font-size: 0.9rem; margin: 0 auto; display: inline-flex; align-items: center; gap: 8px;">
+                        💬 Join Discord Community
+                    </button>
                 </div>
                 
                 <p style="color: var(--text-muted); font-size: 0.8rem; margin: 0;">
@@ -888,6 +897,12 @@
             }
         }
         
+        // Discord Community Function
+        globalThis.openDiscord = function() {
+            window.open('https://discord.gg/gDXytxM7gP', '_blank', 'noopener,noreferrer');
+            showToast('Discord Community wird geöffnet... 💬', 'success');
+        };
+
         // Email Display Function (Anti-Scraping Protection)
         globalThis.showEmail = function() {
             const emailParts = ['hendrikkaiser', '@', 'posteo', '.', 'de'];
