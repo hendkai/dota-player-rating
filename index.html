@@ -696,6 +696,9 @@
                         <span itemprop="name">Dota Player Rating</span> - 
                         <span itemprop="description">Professional Dota 2 player rating and community platform</span>
                     </span>
+                    <br>
+                    <a href="#" onclick="showImprint()" style="color: var(--primary-color); text-decoration: none; margin-right: 16px;">Impressum</a>
+                    <a href="#" onclick="showDataProtection()" style="color: var(--primary-color); text-decoration: none;">Datenschutz</a>
                 </p>
             </div>
         </footer>
@@ -903,6 +906,69 @@
             });
             
             showToast('E-Mail-Adresse angezeigt!', 'success');
+        };
+
+        // Show Data Protection Modal
+        globalThis.showDataProtection = function() {
+            const modalHTML = `
+                <div id="data-protection-modal" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px;">
+                    <div style="background: var(--glass-bg); border-radius: 16px; padding: 24px; max-width: 600px; max-height: 80vh; overflow-y: auto; width: 100%; border: 1px solid var(--border-color); backdrop-filter: blur(20px);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="color: var(--text-primary); margin: 0;">🛡️ Datenschutzerklärung</h3>
+                            <button onclick="closeDataProtectionModal()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.5rem;">&times;</button>
+                        </div>
+                        
+                        <div style="color: var(--text-secondary); line-height: 1.6;">
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">1. Verantwortlicher</h4>
+                            <p>Hendrik Kaiser<br>
+                            E-Mail: <span onclick="showEmail()" style="cursor: pointer; color: var(--primary-color);">E-Mail anzeigen</span></p>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">2. Datenverarbeitung</h4>
+                            <p>Wir verarbeiten nur notwendige Daten:</p>
+                            <ul>
+                                <li>E-Mail-Adresse (zur Authentifizierung)</li>
+                                <li>Spielername (zur Bewertung)</li>
+                                <li>Bewertungen und Kommentare</li>
+                                <li>Technische Daten (IP-Adresse, Browser)</li>
+                            </ul>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">3. Rechtsgrundlage</h4>
+                            <p>Art. 6 Abs. 1 lit. a DSGVO (Einwilligung) und lit. f DSGVO (berechtigtes Interesse)</p>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">4. Datenschutz & Datenverarbeitung</h4>
+                            <h5 style="color: var(--secondary-color); margin: 12px 0 6px 0;">Firebase (Google)</h5>
+                            <p>Authentifizierung und Datenspeicherung durch Google Firebase.</p>
+                            <p>Firebase kann IP-Adressen und technische Daten verarbeiten. Datenschutzerklärung: <a href="https://policies.google.com/privacy" target="_blank" style="color: var(--primary-color);">https://policies.google.com/privacy</a></p>
+                            
+                            <h5 style="color: var(--secondary-color); margin: 12px 0 6px 0;">Externe APIs</h5>
+                            <p>Die Website nutzt OpenDota API (opendota.com) für Spielerdaten. Dabei können IP-Adressen übertragen werden.</p>
+                            
+                            <h5 style="color: var(--secondary-color); margin: 12px 0 6px 0;">Ihre Rechte</h5>
+                            <p>Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Übertragbarkeit Ihrer Daten sowie Widerspruch gegen die Verarbeitung. Kontakt siehe oben.</p>
+                            
+                            <h4 style="color: var(--text-primary); margin: 16px 0 8px 0;">Hinweis zur Player-Bewertung</h4>
+                            <p>Die Bewertungsfunktion dient rein der privaten und spielerischen Einschätzung im Rahmen des Spiels "Dota 2".<br>
+                            Es werden keine personenbezogenen Daten veröffentlicht.<br>
+                            Bewertungen sind subjektiv und stellen keine öffentliche oder rechtlich bindende Aussage dar.</p>
+                            
+                            <p style="margin-top: 24px; font-size: 0.9rem; color: var(--text-muted);">
+                                <strong>Stand:</strong> 12. Dezember 2024 (erweitert um Datenschutz-Details)
+                            </p>
+                        </div>
+                        
+                        <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+                            <button onclick="closeDataProtectionModal()" class="btn btn-secondary">Schließen</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
+        };
+
+        globalThis.closeDataProtectionModal = function() {
+            const modal = document.getElementById('data-protection-modal');
+            if (modal) modal.remove();
         };
 
         // Fediverse Integration Functions
